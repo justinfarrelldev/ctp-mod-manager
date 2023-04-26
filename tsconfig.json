@@ -1,4 +1,4 @@
-{ 
+{
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
@@ -8,8 +8,9 @@
     "experimentalDecorators": true,
     "removeComments": false,
     "noImplicitAny": false,
-    "suppressImplicitAnyIndexErrors": true, 
-    "jsx": "react"
+    "suppressImplicitAnyIndexErrors": true,
+    "jsx": "react",
+    "esModuleInterop": true
   },
-  "exclude": [ "node_modules" ] 
+  "exclude": ["node_modules"]
 }

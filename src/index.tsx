@@ -1,12 +1,12 @@
-import { Typography } from '@mui/material';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { App } from './App';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Typography variant="h3">Call to Power Mod Manager</Typography>,
+    element: <App />,
   },
 ]);
 

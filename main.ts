@@ -16,9 +16,7 @@ function createWindow() {
   // and load the index.html of the app.
   // win.loadFile("index.html");
   win.loadURL(
-    isDev
-      ? 'http://localhost:3300'
-      : `file://${path.join(__dirname, '../build/index.html')}`
+    isDev ? 'http://localhost:3300' : `file://${path.join(__dirname, '../build/index.html')}`
   );
   // Open the DevTools.
   if (isDev) {
@@ -45,4 +43,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-

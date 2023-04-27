@@ -1,5 +1,19 @@
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
-export const App: FC = (): React.ReactElement => (
-  <Typography variant="h3">Call to Power Mod Manager</Typography>
-);
+
+const { ipcRenderer } = window.require('electron');
+
+export const App: FC = (): React.ReactElement => {
+  const [loaded, setLoaded] = useState<boolean>();
+
+  const load = (): void => {
+    ipcRenderer.send('GET_CTP2_INSTALL_DIR');
+    setLoaded(true);
+  };
+
+  useEffect(() => {
+    if (!loaded) load();
+  }, []);
+
+  return <Typography variant="h3">Call to Power Mod Manager</Typography>;
+};

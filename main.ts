@@ -2,15 +2,16 @@ const path = require('path');
 
 const { app, BrowserWindow, ipcMain } = require('electron');
 const isDev = require('electron-is-dev');
-
+let win;
 function createWindow() {
   // Create the browser window.
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
+      preload: path.join(__dirname, 'preload.ts'),
+      contextIsolation: true,
       nodeIntegration: true,
-      contextIsolation: false,
     },
   });
 
@@ -45,6 +46,6 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.on('GET_CTP2_INSTALL_DIR', (event, arg) => {
-  console.log('it got the thing!!!');
+ipcMain.on('SEND_CTP2_INSTALL_DIR', (event, args) => {
+  console.log('Hello world!!!');
 });

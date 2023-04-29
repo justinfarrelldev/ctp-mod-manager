@@ -2,6 +2,8 @@ const path = require('path');
 
 const { app, BrowserWindow, ipcMain } = require('electron');
 const isDev = require('electron-is-dev');
+const fs = require('fs');
+const os = require('os');
 let win;
 function createWindow() {
   // Create the browser window.
@@ -47,5 +49,23 @@ app.on('activate', () => {
 });
 
 ipcMain.on('SEND_CTP2_INSTALL_DIR', (event, args) => {
-  console.log('Hello world!!!');
+  // C:\Program Files (x86)\Steam\steamapps\common\Call to Power II
+  let installationType = null;
+  console.log('PROCESS PLATFORM: ', process.platform);
+  if (process.platform === 'win32') {
+    console.log(
+      'fs existssync: ',
+      fs.existsSync('C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II')
+    );
+    if (fs.existsSync('C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II')) {
+      installationType = 'steam';
+    }
+  }
+  // WSL
+  if (process.platform === 'linux' && os.release().toLowerCase().includes('microsoft')) {
+    if (fs.existsSync('/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II')) {
+      installationType = 'steam';
+    }
+  }
+  console.log('installation type: ', installationType);
 });

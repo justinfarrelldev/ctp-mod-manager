@@ -1,12 +1,13 @@
 import React, { FC, useState, useEffect } from 'react';
 import { Typography, Box } from '@mui/material';
 import { Modal } from './components/Modal';
+import { Button } from './components/Button';
 
 export const App: FC = (): React.ReactElement => {
   const [loaded, setLoaded] = useState<boolean>();
   const [installDirModalOpen, setInstallDirModalOpen] = useState<boolean>(true);
 
-  const load = (): void => {
+  const findInstallDirs = (): void => {
     console.log('Sending the message');
     // TODO define this type such that the types are shared between
     // Electron and React
@@ -17,10 +18,6 @@ export const App: FC = (): React.ReactElement => {
   const handleInstallDirModalClose = (): void => {
     setInstallDirModalOpen(false);
   };
-
-  useEffect(() => {
-    if (!loaded) load();
-  }, []);
 
   return (
     <>
@@ -33,6 +30,9 @@ export const App: FC = (): React.ReactElement => {
             Civilization: Call to Power and Call to Power II. This will NOT install any mods on
             either of them. Is this okay?
           </Typography>
+          <Button onClick={() => findInstallDirs()} variant="outlined">
+            Yes
+          </Button>
         </Box>
       </Modal>
     </>

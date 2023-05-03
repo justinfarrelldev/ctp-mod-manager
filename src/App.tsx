@@ -1,5 +1,6 @@
 import React, { FC, useState, useEffect } from 'react';
-import { Modal, Typography, Box } from '@mui/material';
+import { Typography, Box } from '@mui/material';
+import { Modal } from './components/Modal';
 
 export const App: FC = (): React.ReactElement => {
   const [loaded, setLoaded] = useState<boolean>();
@@ -25,9 +26,9 @@ export const App: FC = (): React.ReactElement => {
     <>
       <Typography variant="h3">Call to Power Mod Manager</Typography>
 
-      <Modal open={installDirModalOpen} onClose={handleInstallDirModalClose}>
+      <Modal width="50%" open={installDirModalOpen} onClose={handleInstallDirModalClose}>
         <Box>
-          <Typography>
+          <Typography variant="h4">
             Call to Power Mod Manager would like to auto-detect current installations of
             Civilization: Call to Power and Call to Power II. This will NOT install any mods on
             either of them. Is this okay?

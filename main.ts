@@ -13,12 +13,9 @@ let win;
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.ts'),
       contextIsolation: true,
-      nodeIntegration: true,
     },
   });
 

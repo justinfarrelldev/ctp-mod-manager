@@ -4,7 +4,12 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
 const os = require('os');
+
+const DEFAULT_WINDOWS_DIR = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II';
+const DEFAULT_WSL2_DIR = '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';
+
 let win;
+
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
@@ -28,10 +33,45 @@ function createWindow() {
   }
 }
 
+const getInstallDirectories = () => {
+  let installInfos = [];
+  let installInfo = {
+    installationType: '',
+    os: '',
+    directory: '',
+  };
+  // C:\Program Files (x86)\Steam\steamapps\common\Call to Power II
+  if (process.platform === 'win32') {
+    if (fs.existsSync(DEFAULT_WINDOWS_DIR)) {
+      installInfos.push({
+        installationType: 'steam',
+        os: process.platform,
+        directory: DEFAULT_WINDOWS_DIR,
+      });
+    }
+  }
+  // WSL
+  if (process.platform === 'linux' && os.release().toLowerCase().includes('microsoft')) {
+    if (fs.existsSync(DEFAULT_WSL2_DIR)) {
+      installInfos.push({
+        installationType: 'steam',
+        os: process.platform,
+        directory: DEFAULT_WSL2_DIR,
+      });
+    }
+  }
+
+  console.log('returning install info: ', installInfos);
+  return installInfos;
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  ipcMain.handle('load:getCtp2InstallDir', getInstallDirectories);
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -46,26 +86,4 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
-});
-
-ipcMain.on('SEND_CTP2_INSTALL_DIR', (event, args) => {
-  // C:\Program Files (x86)\Steam\steamapps\common\Call to Power II
-  let installationType = null;
-  console.log('PROCESS PLATFORM: ', process.platform);
-  if (process.platform === 'win32') {
-    console.log(
-      'fs existssync: ',
-      fs.existsSync('C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II')
-    );
-    if (fs.existsSync('C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II')) {
-      installationType = 'steam';
-    }
-  }
-  // WSL
-  if (process.platform === 'linux' && os.release().toLowerCase().includes('microsoft')) {
-    if (fs.existsSync('/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II')) {
-      installationType = 'steam';
-    }
-  }
-  console.log('installation type: ', installationType);
 });

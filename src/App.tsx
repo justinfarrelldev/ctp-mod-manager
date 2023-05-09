@@ -7,12 +7,11 @@ export const App: FC = (): React.ReactElement => {
   const [loaded, setLoaded] = useState<boolean>();
   const [installDirModalOpen, setInstallDirModalOpen] = useState<boolean>(true);
 
-  const findInstallDirs = (): void => {
+  const findInstallDirs = async (): Promise<void> => {
     console.log('Sending the message');
-    // TODO define this type such that the types are shared between
-    // Electron and React
-    window.api.send('SEND_CTP2_INSTALL_DIR');
+    const dirs = window.api.getCtp2InstallDir();
     setLoaded(true);
+    return dirs;
   };
 
   const handleInstallDirModalClose = (): void => {
@@ -30,7 +29,13 @@ export const App: FC = (): React.ReactElement => {
             Civilization: Call to Power and Call to Power II. This will NOT install any mods on
             either of them. Is this okay?
           </Typography>
-          <Button onClick={() => findInstallDirs()} variant="outlined">
+          <Button
+            onClick={async () => {
+              const dirs = await findInstallDirs();
+              console.log('dirs found: ', dirs);
+            }}
+            variant="outlined"
+          >
             Yes
           </Button>
         </Box>

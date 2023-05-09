@@ -1,6 +1,6 @@
 const path = require('path');
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
 const os = require('os');
@@ -61,8 +61,12 @@ const getInstallDirectories = () => {
     }
   }
 
-  console.log('returning install info: ', installInfos);
   return installInfos;
+};
+
+const openInstallDir = (dir) => {
+  console.log('trying to open install dir: ', dir);
+  shell.openPath(dir);
 };
 
 // This method will be called when Electron has finished
@@ -70,6 +74,7 @@ const getInstallDirectories = () => {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   ipcMain.handle('load:getCtp2InstallDir', getInstallDirectories);
+  // ipcMain.handle('file:openInstallDir', openInstallDir);
   createWindow();
 });
 
@@ -87,3 +92,5 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+ipcMain.on('file:openInstallDir', (event, dir) => openInstallDir(dir));

@@ -1,5 +1,5 @@
 import React, { FC, useState, useEffect } from 'react';
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, Grid } from '@mui/material';
 import { Modal } from './components/Modal';
 import { Button } from './components/Button';
 
@@ -24,20 +24,36 @@ export const App: FC = (): React.ReactElement => {
 
       <Modal width="50%" open={installDirModalOpen} onClose={handleInstallDirModalClose}>
         <Box>
-          <Typography variant="h4">
-            Call to Power Mod Manager would like to auto-detect current installations of
-            Civilization: Call to Power and Call to Power II. This will NOT install any mods on
-            either of them. Is this okay?
-          </Typography>
-          <Button
-            onClick={async () => {
-              const dirs = await findInstallDirs();
-              console.log('dirs found: ', dirs);
-            }}
-            variant="outlined"
-          >
-            Yes
-          </Button>
+          <Grid container rowSpacing="1rem">
+            <Grid item xs={12}>
+              <Typography variant="h4" textAlign="center">
+                Call to Power Mod Manager would like to auto-detect current installations of
+                Civilization: Call to Power and Call to Power II. This will NOT install any mods on
+                either of them. Is this okay?
+              </Typography>
+            </Grid>
+            <Grid item xs={6} textAlign="center">
+              <Button
+                onClick={async () => {
+                  const dirs = await findInstallDirs();
+                  console.log('dirs found: ', dirs);
+                }}
+                variant="outlined"
+              >
+                Yes
+              </Button>
+            </Grid>
+            <Grid item xs={6} textAlign="center">
+              <Button
+                onClick={() => {
+                  handleInstallDirModalClose();
+                }}
+                variant="outlined"
+              >
+                No
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Modal>
     </>

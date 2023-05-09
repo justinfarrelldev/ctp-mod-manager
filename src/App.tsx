@@ -1,17 +1,27 @@
 import React, { FC, useState, useEffect } from 'react';
-import { Typography, Box, Grid } from '@mui/material';
+import { Typography, Box, Grid, CircularProgress as Loader } from '@mui/material';
 import { Modal } from './components/Modal';
 import { Button } from './components/Button';
 
+type InstallDirectory = {
+  os: string;
+  directory: string;
+  installationType: 'steam' | 'gog';
+};
+
 export const App: FC = (): React.ReactElement => {
   const [loaded, setLoaded] = useState<boolean>();
+  const [loadingDirs, setLoadingDirs] = useState<boolean>();
   const [installDirModalOpen, setInstallDirModalOpen] = useState<boolean>(true);
+  const [installDirs, setInstallDirs] = useState<InstallDirectory[]>([]);
 
   const findInstallDirs = async (): Promise<void> => {
-    console.log('Sending the message');
-    const dirs = window.api.getCtp2InstallDir();
+    setLoadingDirs(true);
+    const dirs = await window.api.getCtp2InstallDir();
+
     setLoaded(true);
-    return dirs;
+    setInstallDirs(dirs);
+    setLoadingDirs(false);
   };
 
   const handleInstallDirModalClose = (): void => {
@@ -21,6 +31,14 @@ export const App: FC = (): React.ReactElement => {
   return (
     <>
       <Typography variant="h3">Call to Power Mod Manager</Typography>
+      {loadingDirs && <Loader />}
+      {installDirs.length && <Typography variant="h4">Call to Power 2 Installations</Typography>}
+      {installDirs.map((dir) => (
+        <Typography
+          key={`${dir.os}${dir.installationType}${dir.directory}`}
+          sx={{ color: 'green' }}
+        >{`[${dir.installationType.toUpperCase()}] ${dir.directory}`}</Typography>
+      ))}
 
       <Modal width="50%" open={installDirModalOpen} onClose={handleInstallDirModalClose}>
         <Box>
@@ -34,9 +52,9 @@ export const App: FC = (): React.ReactElement => {
             </Grid>
             <Grid item xs={6} textAlign="center">
               <Button
-                onClick={async () => {
-                  const dirs = await findInstallDirs();
-                  console.log('dirs found: ', dirs);
+                onClick={() => {
+                  findInstallDirs();
+                  handleInstallDirModalClose();
                 }}
                 variant="outlined"
               >

@@ -1,8 +1,24 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState } from 'react';
 import { Typography, Box, Grid, CircularProgress as Loader } from '@mui/material';
 import { Folder } from '@mui/icons-material';
 import { Modal } from './components/Modal';
 import { Button } from './components/Button';
+
+type ElectronWindow = Window &
+  typeof globalThis & {
+    api: {
+      getCtp2InstallDir: () => Promise<
+        [
+          {
+            directory: string;
+            installationType: 'steam' | 'gog';
+            os: string;
+          }
+        ]
+      >;
+      openInstallDir: (ipcCommand: string, dir: string) => void;
+    };
+  };
 
 type InstallDirectory = {
   os: string;
@@ -11,23 +27,21 @@ type InstallDirectory = {
 };
 
 export const App: FC = (): React.ReactElement => {
-  const [loaded, setLoaded] = useState<boolean>();
   const [loadingDirs, setLoadingDirs] = useState<boolean>();
   const [installDirModalOpen, setInstallDirModalOpen] = useState<boolean>(true);
   const [installDirs, setInstallDirs] = useState<InstallDirectory[]>([]);
 
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
-    const dirs = await window.api.getCtp2InstallDir();
+    const dirs = await (window as ElectronWindow).api.getCtp2InstallDir();
 
-    setLoaded(true);
     setInstallDirs(dirs);
     setLoadingDirs(false);
   };
 
   const openInstallDir = (dir: string): void => {
     console.log('opening install dir: ', dir);
-    window.api.openInstallDir('file:openInstallDir', dir);
+    (window as ElectronWindow).api.openInstallDir('file:openInstallDir', dir);
   };
 
   const handleInstallDirModalClose = (): void => {

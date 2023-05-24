@@ -2,8 +2,7 @@
   "name": "ctp-mod-manager",
   "version": "1.0.0",
   "description": "",
-  "main": "main.ts",
-  "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "test": "jest",
     "start": "env-cmd -f .env.development vite --port 3300",

@@ -16,7 +16,7 @@ function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
     webPreferences: {
-      preload: path.join(__dirname, 'preload.ts'),
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
     },
   });

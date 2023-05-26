@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
-import { Typography, Box, Grid, CircularProgress as Loader } from '@mui/material';
-import { Folder } from '@mui/icons-material';
+import { Typography, Box, Grid, CircularProgress as Loader, Tooltip } from '@mui/material';
+import { Folder, BuildCircle } from '@mui/icons-material';
 import { Modal } from './components/Modal';
 import { Button } from './components/Button';
 
@@ -58,14 +58,25 @@ export const App: FC = (): React.ReactElement => {
         installDirs.map((dir) => (
           <Grid container key={`${dir.os}${dir.installationType}${dir.directory}`}>
             <Grid item xs={6}>
-              <Button onClick={() => openInstallDir(dir.directory)}>
-                <Folder />
-              </Button>
+              <Tooltip title="View files">
+                <span>
+                  <Button onClick={() => openInstallDir(dir.directory)}>
+                    <Folder />
+                  </Button>
+                </span>
+              </Tooltip>
+              <Tooltip title="Modify game">
+                <span>
+                  <Button onClick={() => alert('Clicked me')}>
+                    <BuildCircle />
+                  </Button>
+                </span>
+              </Tooltip>
             </Grid>
+
             <Grid item xs={6}>
-              <Typography sx={{ color: 'green' }}>{`[${dir.installationType.toUpperCase()}] ${
-                dir.directory
-              }`}</Typography>
+              <Typography sx={{ color: 'green' }}>{`[${dir.installationType.toUpperCase()}] ${dir.directory
+                }`}</Typography>
             </Grid>
           </Grid>
         ))

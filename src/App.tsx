@@ -105,7 +105,21 @@ export const App: FC = (): React.ReactElement => {
           <Grid container>
             <Grid item xs={6}>
               <Grid container>
-                <Typography variant="h6">Mod List</Typography>
+                <Grid item xs={12}>
+                  <Typography variant="h6">Mod List</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Tooltip title="Add a mod to the mod list (this simply adds the mod to your mod storage directory)">
+                    <div>
+                      <input accept=".zip" id="add-mod-button" type="file" hidden />
+                      <label htmlFor="add-mod-button">
+                        <Button variant="raised" component="span">
+                          Add a Mod
+                        </Button>
+                      </label>
+                    </div>
+                  </Tooltip>
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={6}>

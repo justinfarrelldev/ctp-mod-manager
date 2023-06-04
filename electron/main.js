@@ -79,6 +79,10 @@ const openInstallDir = (dir) => {
   shell.openPath(dir);
 };
 
+const copyFiles = (fileDir, fileDest) => {
+  console.log('trying to copy files');
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -106,3 +110,5 @@ app.on('activate', () => {
 ipcMain.on('file:openInstallDir', (event, dir) => openInstallDir(dir));
 
 ipcMain.on('process:goToRoute', (event, route) => goToRoute(route));
+
+ipcMain.on('file:copy', (event, fileDir, fileDest) => copyFiles(fileDir, fileDest));

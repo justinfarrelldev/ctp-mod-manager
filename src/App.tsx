@@ -57,6 +57,7 @@ export const App: FC = (): React.ReactElement => {
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const files = Array.from(e.target.files);
     console.log('files:', files);
+    (window as ElectronWindow).api.copyFiles('file:copy', files[0].path, '/test');
   };
 
   return (

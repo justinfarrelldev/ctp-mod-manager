@@ -54,6 +54,11 @@ export const App: FC = (): React.ReactElement => {
     setInstallDirModalOpen(false);
   };
 
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const files = Array.from(e.target.files);
+    console.log('files:', files);
+  };
+
   return (
     <>
       <Typography variant="h3">Call to Power Mod Manager</Typography>
@@ -111,7 +116,13 @@ export const App: FC = (): React.ReactElement => {
                 <Grid item xs={12}>
                   <Tooltip title="Add a mod to the mod list (this simply adds the mod to your mod storage directory)">
                     <div>
-                      <input accept=".zip" id="add-mod-button" type="file" hidden />
+                      <input
+                        onChange={handleFileSelected}
+                        accept=".zip"
+                        id="add-mod-button"
+                        type="file"
+                        hidden
+                      />
                       <label htmlFor="add-mod-button">
                         <Button variant="raised" component="span">
                           Add a Mod

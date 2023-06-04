@@ -30,6 +30,7 @@ export const App: FC = (): React.ReactElement => {
   const [loadingDirs, setLoadingDirs] = useState<boolean>();
   const [installDirModalOpen, setInstallDirModalOpen] = useState<boolean>(true);
   const [installDirs, setInstallDirs] = useState<InstallDirectory[]>([]);
+  const [dirBeingModified, setDirBeingModified] = useState<string>('');
 
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
@@ -74,7 +75,7 @@ export const App: FC = (): React.ReactElement => {
                 <span>
                   <Button
                     onClick={() => {
-                      alert('would pop up modify screen');
+                      setDirBeingModified(dir.directory);
                     }}
                   >
                     <BuildCircle />
@@ -93,6 +94,33 @@ export const App: FC = (): React.ReactElement => {
       ) : (
         <Typography>No installation directories have been added yet. Add one now?</Typography>
       )}
+      <Modal
+        open={dirBeingModified !== ''}
+        onClose={() => {
+          setDirBeingModified('');
+        }}
+      >
+        <Box>
+          <Typography variant="h4">{`Modify ${dirBeingModified}`}</Typography>
+          <Grid container>
+            <Grid item xs={6}>
+              <Grid container>
+                <Typography variant="h6">Mod List</Typography>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container>
+                <Typography variant="h6">Mods Applied</Typography>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container>
+                <Typography variant="h6">Files Changed by Mods</Typography>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Box>
+      </Modal>
       <Modal width="50%" open={installDirModalOpen} onClose={handleInstallDirModalClose}>
         <Box>
           <Grid container rowSpacing="1rem">

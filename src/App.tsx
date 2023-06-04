@@ -20,7 +20,7 @@ type ElectronWindow = Window &
     };
   };
 
-type InstallDirectory = {
+export type InstallDirectory = {
   os: string;
   directory: string;
   installationType: 'steam' | 'gog';
@@ -42,6 +42,11 @@ export const App: FC = (): React.ReactElement => {
   const openInstallDir = (dir: string): void => {
     console.log('opening install dir: ', dir);
     (window as ElectronWindow).api.openInstallDir('file:openInstallDir', dir);
+  };
+
+  const goToRoute = (route: string): void => {
+    console.log('going to a route: ', route);
+    (window as ElectronWindow).api.goToRoute('process:goToRoute', route);
   };
 
   const handleInstallDirModalClose = (): void => {
@@ -67,7 +72,11 @@ export const App: FC = (): React.ReactElement => {
               </Tooltip>
               <Tooltip title="Modify game">
                 <span>
-                  <Button onClick={() => alert('Clicked me')}>
+                  <Button
+                    onClick={() => {
+                      alert('would pop up modify screen');
+                    }}
+                  >
                     <BuildCircle />
                   </Button>
                 </span>
@@ -75,8 +84,9 @@ export const App: FC = (): React.ReactElement => {
             </Grid>
 
             <Grid item xs={6}>
-              <Typography sx={{ color: 'green' }}>{`[${dir.installationType.toUpperCase()}] ${dir.directory
-                }`}</Typography>
+              <Typography sx={{ color: 'green' }}>{`[${dir.installationType.toUpperCase()}] ${
+                dir.directory
+              }`}</Typography>
             </Grid>
           </Grid>
         ))

@@ -32,6 +32,22 @@ function createWindow() {
   }
 }
 
+// Goes to the provided route.
+const goToRoute = (route) => {
+  let path = '';
+  if (route.startsWith('/')) {
+    path = route.slice(1).replaceAll(' ', '_');
+  } else {
+    path = route.replaceAll(' ', '_');
+  }
+  // TODO fix this for production
+  win.loadURL(
+    isDev
+      ? `http://localhost:3300/${path}`
+      : `file://${path.join(__dirname, '../build/index.html')}`
+  );
+};
+
 const getInstallDirectories = () => {
   const installInfos = [];
   // C:\Program Files (x86)\Steam\steamapps\common\Call to Power II
@@ -88,3 +104,5 @@ app.on('activate', () => {
 });
 
 ipcMain.on('file:openInstallDir', (event, dir) => openInstallDir(dir));
+
+ipcMain.on('process:goToRoute', (event, route) => goToRoute(route));

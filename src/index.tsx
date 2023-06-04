@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { App } from './App';
-import { ModificationScreen } from './ModificationScreen';
+import { ModificationScreen } from './ModInterface';
 
 const router = createBrowserRouter([
   {

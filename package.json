@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "start": "env-cmd -f .env.development vite --port 3300",
-    "dev": "env-cmd -f .env.development concurrently -k \"pnpm start\" \"pnpm electron\"",
+    "dev": "env-cmd -f .env.development concurrently -k \"npm start\" \"npm run electron\"",
     "electron": "wait-on tcp:3300 && electron .",
     "lint": "eslint ."
   },

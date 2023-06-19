@@ -1,8 +1,7 @@
 import React, { FC, useState } from 'react';
-import { Typography, Box, Grid, CircularProgress as Loader, Tooltip } from '@mui/material';
+import { Typography, Box, Grid, CircularProgress as Loader, Tooltip, Button } from '@mui/material';
 import { Folder, BuildCircle } from '@mui/icons-material';
 import { Modal } from './components/Modal';
-import { Button } from './components/Button';
 
 type ElectronWindow = Window &
   typeof globalThis & {
@@ -17,6 +16,8 @@ type ElectronWindow = Window &
         ]
       >;
       openInstallDir: (ipcCommand: string, dir: string) => void;
+      copyFiles: (ipcCommand: string, fileDir: string, fileDest: string) => void;
+      goToRoute: (ipcCommand: string, route: string) => void;
     };
   };
 
@@ -57,7 +58,11 @@ export const App: FC = (): React.ReactElement => {
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const files = Array.from(e.target.files);
     console.log('files:', files);
-    (window as ElectronWindow).api.copyFiles('file:copy', files[0].path, '/test');
+    (window as ElectronWindow).api.copyFiles(
+      'file:copy',
+      (files[0] as File & { path: string }).path,
+      '/test'
+    );
   };
 
   return (
@@ -105,6 +110,7 @@ export const App: FC = (): React.ReactElement => {
         onClose={() => {
           setDirBeingModified('');
         }}
+        width="50%"
       >
         <Box>
           <Typography variant="h4">{`Modify ${dirBeingModified}`}</Typography>
@@ -125,9 +131,7 @@ export const App: FC = (): React.ReactElement => {
                         hidden
                       />
                       <label htmlFor="add-mod-button">
-                        <Button variant="raised" component="span">
-                          Add a Mod
-                        </Button>
+                        <Button component="span">Add a Mod</Button>
                       </label>
                     </div>
                   </Tooltip>

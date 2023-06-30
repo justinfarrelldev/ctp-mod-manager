@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { Typography, Box, Grid, CircularProgress as Loader, Tooltip, Button } from '@mui/material';
-import { Folder, BuildCircle } from '@mui/icons-material';
+import { Folder, BuildCircle, Settings } from '@mui/icons-material';
 import { Modal } from './components/Modal';
 
 type ElectronWindow = Window &
@@ -67,7 +67,16 @@ export const App: FC = (): React.ReactElement => {
 
   return (
     <>
-      <Typography variant="h3">Call to Power Mod Manager</Typography>
+      <Grid container>
+        <Grid item xs={6}>
+          <Box display="flex">
+            <Typography variant="h3">Call to Power Mod Manager</Typography>
+          </Box>
+        </Grid>
+        <Grid item xs={6} textAlign="right">
+          <Settings />
+        </Grid>
+      </Grid>
       <Typography variant="h4">Call to Power 2 Installations</Typography>
 
       {loadingDirs && <Loader />}

@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react';
 import { Typography, Box, Grid, CircularProgress as Loader, Tooltip, Button } from '@mui/material';
 import { Folder, BuildCircle, Settings } from '@mui/icons-material';
+import { Settings as SettingsMenu } from './components/Settings';
 import { Modal } from './components/Modal';
 
 type ElectronWindow = Window &
@@ -32,6 +33,7 @@ export const App: FC = (): React.ReactElement => {
   const [installDirModalOpen, setInstallDirModalOpen] = useState<boolean>(true);
   const [installDirs, setInstallDirs] = useState<InstallDirectory[]>([]);
   const [dirBeingModified, setDirBeingModified] = useState<string>('');
+  const [settingsOpen, setSettingsOpen] = useState<boolean>();
 
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
@@ -74,12 +76,17 @@ export const App: FC = (): React.ReactElement => {
           </Box>
         </Grid>
         <Grid item xs={6} textAlign="right">
-          <Settings />
+          <Settings onClick={() => setSettingsOpen(true)} />
         </Grid>
       </Grid>
       <Typography variant="h4">Call to Power 2 Installations</Typography>
 
       {loadingDirs && <Loader />}
+      {settingsOpen && (
+        <Modal width="50%" open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+          <SettingsMenu />
+        </Modal>
+      )}
       {installDirs.length ? (
         installDirs.map((dir) => (
           <Grid container key={`${dir.os}${dir.installationType}${dir.directory}`}>

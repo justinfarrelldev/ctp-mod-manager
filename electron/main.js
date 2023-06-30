@@ -1,5 +1,4 @@
 // Since this is an Electron file, we must use require
-/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 
 const { app, BrowserWindow, ipcMain, shell } = require('electron');

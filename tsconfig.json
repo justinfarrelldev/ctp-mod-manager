@@ -9,7 +9,8 @@
     "removeComments": false,
     "noImplicitAny": false,
     "jsx": "react",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowJs": false
   },
   "exclude": ["node_modules"]
 }

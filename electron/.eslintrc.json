@@ -8,6 +8,30 @@
   "rules": {
     "@typescript-eslint/no-var-requires": "off",
     "prefer-arrow-callback": "error",
-    "no-restricted-syntax": ["error", "FunctionExpression", "FunctionDeclaration"]
+    "no-restricted-syntax": ["error", "FunctionExpression", "FunctionDeclaration"],
+    "no-alert": "error",
+    "no-await-in-loop": "error",
+    "no-duplicate-imports": "error",
+    "no-promise-executor-return": "error",
+    "default-case": "error",
+    "default-case-last": "error",
+    "eqeqeq": "error",
+    "max-lines": ["error", { "max": 300 }],
+    "max-depth": [
+      "error",
+      {
+        "max": 4
+      }
+    ],
+    "max-nested-callbacks": [
+      "error",
+      {
+        "max": 4
+      }
+    ],
+    "max-params": "error",
+    "no-eval": "error",
+    "no-extend-native": "error",
+    "no-extra-label": "error"
   }
 }

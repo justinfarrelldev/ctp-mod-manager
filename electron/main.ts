@@ -33,17 +33,17 @@ const createWindow = () => {
 
 // Goes to the provided route.
 const goToRoute = (route) => {
-  let path = '';
+  let pathInUrl = '';
   if (route.startsWith('/')) {
-    path = route.slice(1).replaceAll(' ', '_');
+    pathInUrl = route.slice(1).replaceAll(' ', '_');
   } else {
-    path = route.replaceAll(' ', '_');
+    pathInUrl = route.replaceAll(' ', '_');
   }
   // TODO fix this for production
   win.loadURL(
     // isDev
     // ?
-    `http://localhost:3300/${path}`
+    `http://localhost:3300/${pathInUrl}`
     // : `file://${path.join(__dirname, '../build/index.html')}`
   );
 };

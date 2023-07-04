@@ -50,7 +50,10 @@
     "max-params": "error",
     "no-eval": "error",
     "no-extend-native": "error",
-    "no-extra-label": "error"
-    //    "no-magic-numbers": "error"
+    "no-extra-label": "error",
+    "no-proto": "error",
+    "no-shadow": "error",
+    "no-var": "error",
+    "prefer-const": "error"
   }
 }

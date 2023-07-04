@@ -5,6 +5,7 @@ import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
 import os from 'os';
+import { DEFAULT_MOD_DIR } from './constants';
 
 const DEFAULT_WINDOWS_DIR = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II';
 const DEFAULT_WSL2_DIR = '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';
@@ -79,8 +80,10 @@ const openInstallDir = (dir) => {
   shell.openPath(dir);
 };
 
-const copyFileToModDir = (fileDir) => {
-  console.log('copying files: ', fileDir);
+const copyFileToModDir = (fileDir: string) => {
+  const split = fileDir.split('\\');
+  const fileName = split[split.length - 1];
+  console.log(`Would copy ${fileDir} to ${DEFAULT_MOD_DIR}\\${fileName}`);
 };
 
 // This method will be called when Electron has finished

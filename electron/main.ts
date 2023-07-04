@@ -1,15 +1,15 @@
 // Since this is an Electron file, we must use require
-const path = require('path');
+import path from 'path';
 
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
-const isDev = require('electron-is-dev');
-const fs = require('fs');
-const os = require('os');
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import isDev from 'electron-is-dev';
+import fs from 'fs';
+import os from 'os';
 
 const DEFAULT_WINDOWS_DIR = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II';
 const DEFAULT_WSL2_DIR = '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';
 
-let win;
+let win: BrowserWindow;
 
 const createWindow = () => {
   // Create the browser window.
@@ -80,7 +80,7 @@ const openInstallDir = (dir) => {
 };
 
 const copyFiles = (/* fileDir, fileDest */) => {
-  console.log('trying to copy files');
+  console.log('copying files');
 };
 
 // This method will be called when Electron has finished

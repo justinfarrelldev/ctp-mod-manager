@@ -1,4 +1,4 @@
-const { ipcRenderer, contextBridge } = require('electron');
+import { ipcRenderer, contextBridge } from 'electron';
 
 // load:getCtp2InstallDir
 

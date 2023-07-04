@@ -17,7 +17,7 @@ type ElectronWindow = Window &
         ]
       >;
       openInstallDir: (ipcCommand: string, dir: string) => void;
-      copyFiles: (ipcCommand: string, fileDir: string, fileDest: string) => void;
+      copyFileToModDir: (ipcCommand: string, fileDir: string) => void;
       goToRoute: (ipcCommand: string, route: string) => void;
     };
   };
@@ -60,10 +60,9 @@ export const App: FC = (): React.ReactElement => {
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const files = Array.from(e.target.files);
     console.log('files:', files);
-    (window as ElectronWindow).api.copyFiles(
+    (window as ElectronWindow).api.copyFileToModDir(
       'file:copy',
-      (files[0] as File & { path: string }).path,
-      '/test'
+      (files[0] as File & { path: string }).path
     );
   };
 

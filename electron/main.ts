@@ -79,8 +79,8 @@ const openInstallDir = (dir) => {
   shell.openPath(dir);
 };
 
-const copyFiles = (/* fileDir, fileDest */) => {
-  console.log('copying files');
+const copyFileToModDir = (fileDir) => {
+  console.log('copying files: ', fileDir);
 };
 
 // This method will be called when Electron has finished
@@ -111,4 +111,4 @@ ipcMain.on('file:openInstallDir', (event, dir) => openInstallDir(dir));
 
 ipcMain.on('process:goToRoute', (event, route) => goToRoute(route));
 
-ipcMain.on('file:copy', (/* event, fileDir, fileDest */) => copyFiles(/* fileDir, fileDest */));
+ipcMain.on('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));

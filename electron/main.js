@@ -11,7 +11,7 @@ const DEFAULT_WSL2_DIR = '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call
 
 let win;
 
-function createWindow() {
+const createWindow = () => {
   // Create the browser window.
   win = new BrowserWindow({
     webPreferences: {
@@ -29,7 +29,7 @@ function createWindow() {
   if (isDev) {
     win.webContents.openDevTools({ mode: 'detach' });
   }
-}
+};
 
 // Goes to the provided route.
 const goToRoute = (route) => {

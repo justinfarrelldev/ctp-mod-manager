@@ -6,8 +6,9 @@
   "scripts": {
     "test": "jest",
     "start": "env-cmd -f .env.development vite --port 3300",
+    "build-ts": "env-cmd -f .env.development tsc --outDir dist",
     "dev": "env-cmd -f .env.development concurrently -k \"npm start\" \"npm run electron\"",
-    "electron": "wait-on tcp:3300 && electron .",
+    "electron": "npm run build-ts && wait-on tcp:3300 && electron ./dist/electron/main.js",
     "lint": "eslint ."
   },
   "keywords": [],

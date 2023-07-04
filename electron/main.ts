@@ -41,9 +41,10 @@ const goToRoute = (route) => {
   }
   // TODO fix this for production
   win.loadURL(
-    isDev
-      ? `http://localhost:3300/${path}`
-      : `file://${path.join(__dirname, '../build/index.html')}`
+    // isDev
+    // ?
+    `http://localhost:3300/${path}`
+    // : `file://${path.join(__dirname, '../build/index.html')}`
   );
 };
 
@@ -78,7 +79,7 @@ const openInstallDir = (dir) => {
   shell.openPath(dir);
 };
 
-const copyFiles = (fileDir, fileDest) => {
+const copyFiles = (/* fileDir, fileDest */) => {
   console.log('trying to copy files');
 };
 
@@ -110,4 +111,4 @@ ipcMain.on('file:openInstallDir', (event, dir) => openInstallDir(dir));
 
 ipcMain.on('process:goToRoute', (event, route) => goToRoute(route));
 
-ipcMain.on('file:copy', (event, fileDir, fileDest) => copyFiles(fileDir, fileDest));
+ipcMain.on('file:copy', (/* event, fileDir, fileDest */) => copyFiles(/* fileDir, fileDest */));

@@ -147,7 +147,7 @@ export const App: FC = (): React.ReactElement => {
                         hidden
                       />
                       <label htmlFor="add-mod-button">
-                        <Button component="span">Add a Mod</Button>
+                        <Button component="span">Add a Mod (Zip File)</Button>
                       </label>
                     </div>
                   </Tooltip>

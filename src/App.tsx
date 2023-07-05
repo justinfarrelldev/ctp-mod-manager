@@ -159,7 +159,7 @@ export const App: FC = (): React.ReactElement => {
                             </Grid>
                             <Grid item>
                               <Button onClick={() => console.log('Would add mod to setup')}>
-                                Apply
+                                Add To This Installation
                               </Button>
                             </Grid>
                           </Grid>

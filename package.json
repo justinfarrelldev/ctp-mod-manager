@@ -16,6 +16,8 @@
   "license": "ISC",
   "devDependencies": {
     "@electron-internal/eslint-config": "^1.0.1",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
     "@types/jest": "^29.5.1",
     "@types/node": "^18.16.1",
     "@typescript-eslint/eslint-plugin": "^5.59.1",
@@ -31,6 +33,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.2",
     "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.6.0",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",

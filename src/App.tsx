@@ -3,6 +3,7 @@ import { Typography, Box, Grid, CircularProgress as Loader, Tooltip, Button } fr
 import { Folder, BuildCircle, Settings } from '@mui/icons-material';
 import { Settings as SettingsMenu } from './components/Settings';
 import { Modal } from './components/Modal';
+import { AUTO_DETECT_INSTALL_TEXT } from './constants';
 
 type ElectronWindow = Window &
   typeof globalThis & {
@@ -171,9 +172,7 @@ export const App: FC = (): React.ReactElement => {
           <Grid container rowSpacing="1rem">
             <Grid item xs={12}>
               <Typography variant="h4" textAlign="center">
-                Call to Power Mod Manager would like to auto-detect current installations of
-                Civilization: Call to Power and Call to Power II. This will NOT install any mods on
-                either of them. Is this okay?
+                {AUTO_DETECT_INSTALL_TEXT}
               </Typography>
             </Grid>
             <Grid item xs={6} textAlign="center">

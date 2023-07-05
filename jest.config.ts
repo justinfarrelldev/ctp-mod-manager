@@ -4,4 +4,5 @@ module.exports = {
   testEnvironment: 'jsdom',
   testPathIgnorePatterns: ['<rootDir>/node_modules', '<rootDir>/dist'],
   setupFilesAfterEnv: ['<rootDir>/src/setup-tests.ts'],
+  runner: 'groups',
 };

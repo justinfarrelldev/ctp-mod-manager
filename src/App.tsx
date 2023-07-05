@@ -36,14 +36,16 @@ export const App: FC = (): React.ReactElement => {
   const [installDirs, setInstallDirs] = useState<InstallDirectory[]>([]);
   const [dirBeingModified, setDirBeingModified] = useState<string>('');
   const [settingsOpen, setSettingsOpen] = useState<boolean>();
+  const [modNamesAdded, setModNamesAdded] = useState<string[] | undefined>(undefined);
 
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
     const dirs = await (window as ElectronWindow).api.getCtp2InstallDir();
-
-    console.log('mod names: ', await (window as ElectronWindow).api.loadMods());
-
     setInstallDirs(dirs);
+
+    // Should extract this to its own loader eventually
+    setModNamesAdded(await (window as ElectronWindow).api.loadMods());
+
     setLoadingDirs(false);
   };
 
@@ -149,6 +151,19 @@ export const App: FC = (): React.ReactElement => {
                         type="file"
                         hidden
                       />
+                      {modNamesAdded !== undefined &&
+                        modNamesAdded.map((modName) => (
+                          <Grid container key={modName}>
+                            <Grid item>
+                              <Typography>{modName}</Typography>
+                            </Grid>
+                            <Grid item>
+                              <Button onClick={() => console.log('Would add mod to setup')}>
+                                Apply
+                              </Button>
+                            </Grid>
+                          </Grid>
+                        ))}
                       <label htmlFor="add-mod-button">
                         <Button component="span">Add a Mod (Zip File)</Button>
                       </label>

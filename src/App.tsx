@@ -20,6 +20,7 @@ type ElectronWindow = Window &
       openInstallDir: (ipcCommand: string, dir: string) => void;
       copyFileToModDir: (ipcCommand: string, fileDir: string) => void;
       goToRoute: (ipcCommand: string, route: string) => void;
+      loadMods: () => Promise<string[]>;
     };
   };
 
@@ -39,6 +40,8 @@ export const App: FC = (): React.ReactElement => {
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
     const dirs = await (window as ElectronWindow).api.getCtp2InstallDir();
+
+    console.log('mod names: ', await (window as ElectronWindow).api.loadMods());
 
     setInstallDirs(dirs);
     setLoadingDirs(false);

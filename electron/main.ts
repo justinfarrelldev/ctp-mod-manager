@@ -122,6 +122,17 @@ const copyFileToModDir = async (fileDir: string) => {
   });
 };
 
+const loadMods = (): string[] => {
+  try {
+    const filenames = fs.readdirSync(DEFAULT_MOD_DIR);
+    return filenames;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(`An error occurred while reading the files at ${DEFAULT_MOD_DIR}: ${err}`);
+    throw err;
+  }
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -151,3 +162,5 @@ ipcMain.on('file:openInstallDir', (event, dir) => openInstallDir(dir));
 ipcMain.on('process:goToRoute', (event, route) => goToRoute(route));
 
 ipcMain.on('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));
+
+ipcMain.handle('file:loadMods', () => loadMods());

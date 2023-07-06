@@ -134,7 +134,8 @@ export const App: FC = (): React.ReactElement => {
         width="50%"
       >
         <Box>
-          <Typography variant="h4">{`Modify ${dirBeingModified}`}</Typography>
+          <Typography variant="h4">Modify</Typography>
+          <Typography>{`${dirBeingModified}`}</Typography>
           <Grid container>
             <Grid item xs={6}>
               <Grid container>

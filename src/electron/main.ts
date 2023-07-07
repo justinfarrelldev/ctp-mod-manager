@@ -7,6 +7,7 @@ import fs from 'fs';
 import os from 'os';
 import { DEFAULT_MOD_DIR } from './constants';
 import { copyFileToModDir } from './file/copyFileToModDir';
+import { goToRoute } from './file/goToRoute';
 
 const DEFAULT_WINDOWS_DIR = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II';
 const DEFAULT_WSL2_DIR = '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';
@@ -31,23 +32,6 @@ const createWindow = () => {
   if (isDev) {
     win.webContents.openDevTools({ mode: 'detach' });
   }
-};
-
-// Goes to the provided route.
-const goToRoute = (route) => {
-  let pathInUrl = '';
-  if (route.startsWith('/')) {
-    pathInUrl = route.slice(1).replaceAll(' ', '_');
-  } else {
-    pathInUrl = route.replaceAll(' ', '_');
-  }
-  // TODO fix this for production
-  win.loadURL(
-    // isDev
-    // ?
-    `http://localhost:3300/${pathInUrl}`
-    // : `file://${path.join(__dirname, '../build/index.html')}`
-  );
 };
 
 const getInstallDirectories = () => {
@@ -117,7 +101,7 @@ app.on('activate', () => {
 
 ipcMain.on('file:openInstallDir', (event, dir) => openInstallDir(dir));
 
-ipcMain.on('process:goToRoute', (event, route) => goToRoute(route));
+ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
 
 ipcMain.on('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));
 

@@ -18,6 +18,7 @@ Cons of .zip within the mods folder:
 
 - Takes more time to apply mods
 - Would require that all users add mods as .zip files (or that we zip it before adding it - adding complexity)
+- Need to unzip at some time to view the change comparisons... temp files??
 
 # Mod Tracking
 

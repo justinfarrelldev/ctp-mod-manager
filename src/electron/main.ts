@@ -4,13 +4,10 @@ import path from 'path';
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
-import os from 'os';
 import { DEFAULT_MOD_DIR } from './constants';
 import { copyFileToModDir } from './file/copyFileToModDir';
 import { goToRoute } from './process/goToRoute';
-
-const DEFAULT_WINDOWS_DIR = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II';
-const DEFAULT_WSL2_DIR = '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';
+import { getInstallDirectories } from './getInstallDirectories';
 
 let win: BrowserWindow;
 
@@ -32,32 +29,6 @@ const createWindow = () => {
   if (isDev) {
     win.webContents.openDevTools({ mode: 'detach' });
   }
-};
-
-const getInstallDirectories = () => {
-  const installInfos = [];
-  // C:\Program Files (x86)\Steam\steamapps\common\Call to Power II
-  if (process.platform === 'win32') {
-    if (fs.existsSync(DEFAULT_WINDOWS_DIR)) {
-      installInfos.push({
-        installationType: 'steam',
-        os: process.platform,
-        directory: DEFAULT_WINDOWS_DIR,
-      });
-    }
-  }
-  // WSL
-  if (process.platform === 'linux' && os.release().toLowerCase().includes('microsoft')) {
-    if (fs.existsSync(DEFAULT_WSL2_DIR)) {
-      installInfos.push({
-        installationType: 'steam',
-        os: process.platform,
-        directory: DEFAULT_WSL2_DIR,
-      });
-    }
-  }
-
-  return installInfos;
 };
 
 const loadMods = (): string[] => {

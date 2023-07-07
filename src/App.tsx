@@ -139,10 +139,10 @@ export const App: FC = (): React.ReactElement => {
           <Grid container>
             <Grid item xs={6}>
               <Grid container>
-                <Grid item xs={12}>
+                <Grid item>
                   <Typography variant="h6">Mod List</Typography>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item>
                   <Tooltip title="Add a mod to the mod list (this simply adds the mod to your mod storage directory)">
                     <div>
                       <input
@@ -154,16 +154,13 @@ export const App: FC = (): React.ReactElement => {
                       />
                       {modNamesAdded !== undefined &&
                         modNamesAdded.map((modName) => (
-                          <Grid container key={modName}>
-                            <Grid item>
-                              <Typography>{modName}</Typography>
-                            </Grid>
-                            <Grid item>
-                              <Button onClick={() => console.log('Would add mod to setup')}>
-                                Add To This Installation
-                              </Button>
-                            </Grid>
-                          </Grid>
+                          <Button
+                            variant="outlined"
+                            key={modName}
+                            onClick={() => console.log('Would add mod to setup')}
+                          >
+                            {modName}
+                          </Button>
                         ))}
                       <label htmlFor="add-mod-button">
                         <Button component="span">Add a Mod (Zip File)</Button>
@@ -175,7 +172,7 @@ export const App: FC = (): React.ReactElement => {
             </Grid>
             <Grid item xs={6}>
               <Grid container>
-                <Typography variant="h6">Mods Applied</Typography>
+                <Typography variant="h6">Mods To Be Applied</Typography>
               </Grid>
             </Grid>
             <Grid item xs={6}>

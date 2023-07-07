@@ -60,10 +60,6 @@ const getInstallDirectories = () => {
   return installInfos;
 };
 
-const openInstallDir = (dir) => {
-  shell.openPath(dir);
-};
-
 const loadMods = (): string[] => {
   try {
     const filenames = fs.readdirSync(DEFAULT_MOD_DIR);
@@ -99,7 +95,7 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.on('file:openInstallDir', (event, dir) => openInstallDir(dir));
+ipcMain.on('file:openInstallDir', (event, dir) => shell.openPath(dir));
 
 ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
 

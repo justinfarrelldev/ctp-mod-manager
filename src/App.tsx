@@ -193,6 +193,15 @@ export const App: FC = (): React.ReactElement => {
                 </Grid>
               </Grid>
             </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => alert('would apply mods')}
+                disabled={!modNamesQueued.length}
+              >
+                Apply Mods
+              </Button>
+            </Grid>
             <Grid item xs={6}>
               <Grid container>
                 <Typography variant="h6">Files Changed by Mods</Typography>

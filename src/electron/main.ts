@@ -7,7 +7,7 @@ import fs from 'fs';
 import os from 'os';
 import { DEFAULT_MOD_DIR } from './constants';
 import { copyFileToModDir } from './file/copyFileToModDir';
-import { goToRoute } from './file/goToRoute';
+import { goToRoute } from './process/goToRoute';
 
 const DEFAULT_WINDOWS_DIR = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II';
 const DEFAULT_WSL2_DIR = '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';

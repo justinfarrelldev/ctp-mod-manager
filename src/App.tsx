@@ -181,9 +181,7 @@ export const App: FC = (): React.ReactElement => {
         <Box>
           <Grid container rowSpacing="1rem">
             <Grid item xs={12}>
-              <Typography variant="h4" textAlign="center">
-                {AUTO_DETECT_INSTALL_TEXT}
-              </Typography>
+              <Typography textAlign="center">{AUTO_DETECT_INSTALL_TEXT}</Typography>
             </Grid>
             <Grid item xs={6} textAlign="center">
               <Button

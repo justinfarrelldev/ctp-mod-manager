@@ -37,6 +37,7 @@ export const App: FC = (): React.ReactElement => {
   const [dirBeingModified, setDirBeingModified] = useState<string>('');
   const [settingsOpen, setSettingsOpen] = useState<boolean>();
   const [modNamesAdded, setModNamesAdded] = useState<string[] | undefined>(undefined);
+  const [modNamesQueued, setModNamesQueued] = useState<string[]>([]);
 
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
@@ -153,11 +154,14 @@ export const App: FC = (): React.ReactElement => {
                         hidden
                       />
                       {modNamesAdded !== undefined &&
-                        modNamesAdded.map((modName) => (
+                        modNamesAdded.map((modName, index) => (
                           <Button
                             variant="outlined"
                             key={modName}
-                            onClick={() => console.log('Would add mod to setup')}
+                            onClick={() => {
+                              setModNamesQueued([...modNamesQueued, modName]);
+                              setModNamesAdded(modNamesAdded.filter((value) => value !== modName));
+                            }}
                           >
                             {modName}
                           </Button>
@@ -173,6 +177,20 @@ export const App: FC = (): React.ReactElement => {
             <Grid item xs={6}>
               <Grid container>
                 <Typography variant="h6">Mods To Be Applied</Typography>
+                <Grid item>
+                  {modNamesQueued.map((modName) => (
+                    <Button
+                      variant="outlined"
+                      key={modName}
+                      onClick={() => {
+                        setModNamesQueued(modNamesQueued.filter((value) => value !== modName));
+                        setModNamesAdded([...modNamesAdded, modName]);
+                      }}
+                    >
+                      {modName}
+                    </Button>
+                  ))}
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={6}>

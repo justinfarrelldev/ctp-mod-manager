@@ -1,11 +1,12 @@
 import React, { FC, useState } from 'react';
 import { Typography, Box, Grid, CircularProgress as Loader, Tooltip, Button } from '@mui/material';
-import { Folder, BuildCircle, Settings } from '@mui/icons-material';
+import { Settings } from '@mui/icons-material';
 import { Settings as SettingsMenu } from './components/Settings';
 import { Modal } from './components/Modal';
 import { AUTO_DETECT_INSTALL_TEXT } from './constants';
+import { InstallDirTable } from './components/InstallDirTable';
 
-type ElectronWindow = Window &
+export type ElectronWindow = Window &
   typeof globalThis & {
     api: {
       getCtp2InstallDir: () => Promise<
@@ -50,11 +51,6 @@ export const App: FC = (): React.ReactElement => {
     setLoadingDirs(false);
   };
 
-  const openInstallDir = (dir: string): void => {
-    console.log('opening install dir: ', dir);
-    (window as ElectronWindow).api.openInstallDir('file:openInstallDir', dir);
-  };
-
   const goToRoute = (route: string): void => {
     console.log('going to a route: ', route);
     (window as ElectronWindow).api.goToRoute('process:goToRoute', route);
@@ -93,40 +89,11 @@ export const App: FC = (): React.ReactElement => {
           <SettingsMenu />
         </Modal>
       )}
-      {installDirs.length ? (
-        installDirs.map((dir) => (
-          <Grid container key={`${dir.os}${dir.installationType}${dir.directory}`}>
-            <Grid item xs={6}>
-              <Tooltip title="View files">
-                <span>
-                  <Button onClick={() => openInstallDir(dir.directory)}>
-                    <Folder />
-                  </Button>
-                </span>
-              </Tooltip>
-              <Tooltip title="Modify game">
-                <span>
-                  <Button
-                    onClick={() => {
-                      setDirBeingModified(dir.directory);
-                    }}
-                  >
-                    <BuildCircle />
-                  </Button>
-                </span>
-              </Tooltip>
-            </Grid>
 
-            <Grid item xs={6}>
-              <Typography sx={{ color: 'green' }}>{`[${dir.installationType.toUpperCase()}] ${
-                dir.directory
-              }`}</Typography>
-            </Grid>
-          </Grid>
-        ))
-      ) : (
-        <Typography>No installation directories have been added yet. Add one now?</Typography>
-      )}
+      <InstallDirTable
+        installDirs={installDirs}
+        onClickModify={(dir) => setDirBeingModified(dir)}
+      />
       <Modal
         open={dirBeingModified !== ''}
         onClose={() => {

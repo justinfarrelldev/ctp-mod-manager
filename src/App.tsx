@@ -19,6 +19,7 @@ export type ElectronWindow = Window &
         ]
       >;
       openInstallDir: (ipcCommand: string, dir: string) => void;
+      openModsDir: (ipcCommand: string) => void;
       copyFileToModDir: (ipcCommand: string, fileDir: string) => void;
       goToRoute: (ipcCommand: string, route: string) => void;
       loadMods: () => Promise<string[]>;
@@ -67,6 +68,11 @@ export const App: FC = (): React.ReactElement => {
       'file:copy',
       (files[0] as File & { path: string }).path
     );
+  };
+
+  const openModsDir = (): void => {
+    console.log('opening mods dir');
+    (window as ElectronWindow).api.openModsDir('file:openModsDir');
   };
 
   return (
@@ -167,6 +173,9 @@ export const App: FC = (): React.ReactElement => {
                 disabled={!modNamesQueued.length}
               >
                 Apply Mods
+              </Button>
+              <Button variant="outlined" onClick={() => openModsDir()}>
+                Open Mods Folder
               </Button>
             </Grid>
             <Grid item xs={6}>

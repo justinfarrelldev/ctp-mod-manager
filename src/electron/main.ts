@@ -8,6 +8,7 @@ import { goToRoute } from './process/goToRoute';
 import { getInstallDirectories } from './getInstallDirectories';
 import { loadMods } from './file/loadMods';
 import { DEFAULT_MOD_DIR } from './constants';
+import { viewFileDirsInZip } from './file/viewFilesInZip';
 
 let win: BrowserWindow;
 
@@ -58,6 +59,8 @@ app.on('activate', () => {
 ipcMain.on('file:openInstallDir', (event, dir) => shell.openPath(dir));
 
 ipcMain.on('file:openModsDir', () => shell.openPath(DEFAULT_MOD_DIR));
+
+ipcMain.handle('file:viewFileDirsInZip', (event, zipFilePath) => viewFileDirsInZip(zipFilePath));
 
 ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
 

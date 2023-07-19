@@ -5,6 +5,7 @@ import { Settings as SettingsMenu } from './components/Settings';
 import { Modal } from './components/Modal';
 import { AUTO_DETECT_INSTALL_TEXT } from './constants';
 import { InstallDirTable } from './components/InstallDirTable';
+import { IZipEntry } from 'adm-zip';
 
 export type ElectronWindow = Window &
   typeof globalThis & {
@@ -21,6 +22,7 @@ export type ElectronWindow = Window &
       openInstallDir: (ipcCommand: string, dir: string) => void;
       openModsDir: (ipcCommand: string) => void;
       copyFileToModDir: (ipcCommand: string, fileDir: string) => void;
+      viewFileDirsInZip: (ipcCommand: string, zipFilePath: string) => Promise<string[]>;
       goToRoute: (ipcCommand: string, route: string) => void;
       loadMods: () => Promise<string[]>;
     };
@@ -73,6 +75,16 @@ export const App: FC = (): React.ReactElement => {
   const openModsDir = (): void => {
     console.log('opening mods dir');
     (window as ElectronWindow).api.openModsDir('file:openModsDir');
+  };
+
+  const viewFileDirsInZip = async (zipFilePath: string): Promise<string[]> => {
+    const contents = await (window as ElectronWindow).api.viewFileDirsInZip(
+      'file:viewFileDirsInZip',
+      zipFilePath
+    );
+
+    console.log('contents: ', contents);
+    return contents;
   };
 
   return (
@@ -134,6 +146,9 @@ export const App: FC = (): React.ReactElement => {
                             onClick={() => {
                               setModNamesQueued([...modNamesQueued, modName]);
                               setModNamesAdded(modNamesAdded.filter((value) => value !== modName));
+                              viewFileDirsInZip(
+                                `C:\\Users\\justin.farrell\\AppData\\Roaming\\Electron\\Mods\\${modName}`
+                              ); // FIXME 100% temporary
                             }}
                           >
                             {modName}

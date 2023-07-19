@@ -67,3 +67,5 @@ ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
 ipcMain.on('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));
 
 ipcMain.handle('file:loadMods', () => loadMods());
+
+ipcMain.handle('file:getModsDir', () => DEFAULT_MOD_DIR);

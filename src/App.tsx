@@ -25,6 +25,7 @@ export type ElectronWindow = Window &
       viewFileDirsInZip: (ipcCommand: string, zipFilePath: string) => Promise<string[]>;
       goToRoute: (ipcCommand: string, route: string) => void;
       loadMods: () => Promise<string[]>;
+      getModsDir: (ipcCommand: string) => Promise<string>;
     };
   };
 
@@ -87,6 +88,10 @@ export const App: FC = (): React.ReactElement => {
     return contents;
   };
 
+  const getModsDir = async (): Promise<string> => {
+    return await (window as ElectronWindow).api.getModsDir('file:getModsDir');
+  };
+
   return (
     <>
       <Grid container>
@@ -143,12 +148,11 @@ export const App: FC = (): React.ReactElement => {
                           <Button
                             variant="outlined"
                             key={modName}
-                            onClick={() => {
+                            onClick={async () => {
                               setModNamesQueued([...modNamesQueued, modName]);
                               setModNamesAdded(modNamesAdded.filter((value) => value !== modName));
-                              viewFileDirsInZip(
-                                `C:\\Users\\justin.farrell\\AppData\\Roaming\\Electron\\Mods\\${modName}`
-                              ); // FIXME 100% temporary
+                              console.log('getModsDir: ', await getModsDir());
+                              viewFileDirsInZip(`${await getModsDir()}\\${modName}`); // FIXME 100% temporary
                             }}
                           >
                             {modName}

@@ -58,6 +58,24 @@ const extract = (zip: AdmZip, targetPath: string): Promise<void> => {
   });
 };
 
+const unzipAllFiles = async (destination: string): Promise<void> => {
+  // Search through every folder for zip files, extracting as it finds them
+  // If it does not find them, it quits with success and moves on to the next step of the process
+  let zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
+
+  while (zipFilesInDirs.length > 0) {
+    const splitFile = zipFilesInDirs.split('\\');
+    const name = splitFile[splitFile.length - 1];
+
+    const zipFile = new AdmZip(zipFilesInDirs);
+    // eslint-disable-next-line no-await-in-loop
+    await extract(zipFile, zipFilesInDirs.replace(name, ''));
+    fs.rmSync(zipFilesInDirs);
+    // eslint-disable-next-line no-await-in-loop
+    zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
+  }
+};
+
 // Copy file to mod dir should:
 // - Extract the files of the zip to the mods folder (preserve original)
 // - Determine if that is a zip (unzip if it is, and repeat until there is not a zip)
@@ -86,21 +104,7 @@ export const copyFileToModDir = async (fileDir: string) => {
   const destination = `${DEFAULT_MOD_DIR}\\${fileName}`;
   await unzipInModDir(fileDir, fileName);
 
-  // Search through every folder for zip files, extracting as it finds them
-  // If it does not find them, it quits with success and moves on to the next step of the process
-  let zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
-
-  while (zipFilesInDirs.length > 0) {
-    const splitFile = zipFilesInDirs.split('\\');
-    const name = splitFile[splitFile.length - 1];
-
-    const zipFile = new AdmZip(zipFilesInDirs);
-    // eslint-disable-next-line no-await-in-loop
-    await extract(zipFile, zipFilesInDirs.replace(name, ''));
-    fs.rmSync(zipFilesInDirs);
-    // eslint-disable-next-line no-await-in-loop
-    zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
-  }
+  await unzipAllFiles(destination);
 
   fs.copyFile(fileDir, destination, (err) => {
     if (err) throw err;

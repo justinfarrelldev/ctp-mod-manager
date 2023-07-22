@@ -10,6 +10,9 @@ import { loadMods } from './file/loadMods';
 import { DEFAULT_MOD_DIR } from './constants';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
 
+declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
+declare const MAIN_WINDOW_VITE_NAME: string;
+
 let win: BrowserWindow;
 
 const createWindow = () => {
@@ -21,11 +24,11 @@ const createWindow = () => {
     },
   });
 
-  // and load the index.html of the app.
-  // win.loadFile("index.html");
-  win.loadURL(
-    isDev ? 'http://localhost:3300' : `file://${path.join(__dirname, '../build/index.html')}`
-  );
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  } else {
+    win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+  }
   // Open the DevTools.
   if (isDev) {
     win.webContents.openDevTools({ mode: 'detach' });

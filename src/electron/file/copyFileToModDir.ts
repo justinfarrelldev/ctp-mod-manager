@@ -25,7 +25,7 @@ const unzipInModDir = async (zipFullPath: string, fileName: string): Promise<voi
 // Finds all zip files in "dir"
 const recurseFindZipFilesInDirectory = async (
   dir: string,
-  callback: (string) => void
+  callback: (arg0: string) => void
 ): Promise<string[]> => {
   if (!fs.existsSync(dir)) {
     console.log('no dir ', dir);
@@ -42,9 +42,19 @@ const recurseFindZipFilesInDirectory = async (
   }
 };
 
-const findZipFilesInDir = async (dir: string): Promise<string[]> => {
-  return new Promise((resolve) => {
+const findZipFilesInDir = async (dir: string): Promise<string> => {
+  return new Promise((resolve: (value: string) => void) => {
     recurseFindZipFilesInDirectory(dir, resolve);
+  });
+};
+
+const extract = (zip: AdmZip, targetPath: string): Promise<void> => {
+  return new Promise((resolve) => {
+    zip.extractAllToAsync(targetPath, false, false, (err) => {
+      if (err) console.error(`An error occurred while extracting to ${targetPath}: ${err}`);
+
+      resolve();
+    });
   });
 };
 
@@ -78,8 +88,19 @@ export const copyFileToModDir = async (fileDir: string) => {
 
   // Search through every folder for zip files, extracting as it finds them
   // If it does not find them, it quits with success and moves on to the next step of the process
-  const zips = await findZipFilesInDir(destination.replace('.zip', ''));
-  console.log(`zip files in ${destination.replace('.zip', '')}: ${zips}`);
+  let zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
+
+  while (zipFilesInDirs.length > 0) {
+    const splitFile = zipFilesInDirs.split('\\');
+    const name = splitFile[splitFile.length - 1];
+
+    const zipFile = new AdmZip(zipFilesInDirs);
+    // eslint-disable-next-line no-await-in-loop
+    await extract(zipFile, zipFilesInDirs.replace(name, ''));
+    fs.rmSync(zipFilesInDirs);
+    // eslint-disable-next-line no-await-in-loop
+    zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
+  }
 
   fs.copyFile(fileDir, destination, (err) => {
     if (err) throw err;

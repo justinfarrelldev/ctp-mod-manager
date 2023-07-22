@@ -2,14 +2,50 @@ import { app } from 'electron';
 import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
 import fs from 'fs';
 import AdmZip from 'adm-zip';
+import path from 'path';
 
-const unzipInModDir = (zipFullPath: string): void => {
-  try {
-    const zip = new AdmZip(zipFullPath);
-    zip.extractAllTo(DEFAULT_MOD_DIR);
-  } catch (err) {
-    console.error(`Failed to unzip: ${err}`);
+const unzipInModDir = async (zipFullPath: string, fileName: string): Promise<void> => {
+  const fileFolder = fileName.replace('.zip', '');
+  return new Promise((resolve) => {
+    try {
+      const zip = new AdmZip(zipFullPath);
+      zip.extractAllToAsync(`${DEFAULT_MOD_DIR}\\${fileFolder}`, false, false, (err) => {
+        if (err) {
+          console.error(`An error occurred while extracting ${zipFullPath}: ${err}`);
+        }
+        resolve();
+      });
+    } catch (err) {
+      console.error(`Failed to unzip: ${err}`);
+      resolve();
+    }
+  });
+};
+
+// Finds all zip files in "dir"
+const recurseFindZipFilesInDirectory = async (
+  dir: string,
+  callback: (string) => void
+): Promise<string[]> => {
+  if (!fs.existsSync(dir)) {
+    console.log('no dir ', dir);
+    return;
   }
+
+  const files = fs.readdirSync(dir);
+  for (let i = 0; i < files.length; i++) {
+    const filename = path.join(dir, files[i]);
+    const stat = fs.lstatSync(filename);
+    if (stat.isDirectory()) {
+      recurseFindZipFilesInDirectory(filename, callback);
+    } else if (/\.zip$/.test(filename)) callback(filename);
+  }
+};
+
+const findZipFilesInDir = async (dir: string): Promise<string[]> => {
+  return new Promise((resolve) => {
+    recurseFindZipFilesInDirectory(dir, resolve);
+  });
 };
 
 // Copy file to mod dir should:
@@ -38,7 +74,13 @@ export const copyFileToModDir = async (fileDir: string) => {
   }
 
   const destination = `${DEFAULT_MOD_DIR}\\${fileName}`;
-  unzipInModDir(fileDir);
+  await unzipInModDir(fileDir, fileName);
+
+  // Search through every folder for zip files, extracting as it finds them
+  // If it does not find them, it quits with success and moves on to the next step of the process
+  const zips = await findZipFilesInDir(destination.replace('.zip', ''));
+  console.log(`zip files in ${destination.replace('.zip', '')}: ${zips}`);
+
   fs.copyFile(fileDir, destination, (err) => {
     if (err) throw err;
     // eslint-disable-next-line no-console

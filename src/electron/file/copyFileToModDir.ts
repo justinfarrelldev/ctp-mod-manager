@@ -93,14 +93,6 @@ export const copyFileToModDir = async (fileDir: string) => {
 
   await unzipAllFiles(destination);
 
-  try {
-    fs.copyFileSync(fileDir, destination);
-  } catch (err) {
-    console.error(
-      `An error occurred while copying a file from ${fileDir} to ${destination}: ${err}`
-    );
-  }
-
   console.log('finished copyFileToModDir');
 };
 

@@ -6,9 +6,6 @@
   "scripts": {
     "test:integration": "jest --group=integration",
     "start": "electron-forge start",
-    "build-ts": "env-cmd -f .env.development tsc --outDir dist",
-    "dev": "env-cmd -f .env.development concurrently -k \"npm start\" \"npm run electron\"",
-    "electron": "npm run build-ts && wait-on tcp:3300 && electron ./dist/src/electron/main.js",
     "lint": "eslint .",
     "package": "electron-forge package",
     "make": "electron-forge make"

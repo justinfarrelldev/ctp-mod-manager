@@ -2,7 +2,7 @@ import { app } from 'electron';
 import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
 import fs from 'fs';
 import AdmZip from 'adm-zip';
-import path from 'path';
+import klawSync from 'klaw-sync';
 
 const unzipInModDir = async (zipFullPath: string, fileName: string): Promise<void> => {
   const fileFolder = fileName.replace('.zip', '');
@@ -22,30 +22,14 @@ const unzipInModDir = async (zipFullPath: string, fileName: string): Promise<voi
   });
 };
 
-// Finds all zip files in "dir"
-const recurseFindZipFilesInDirectory = async (
-  dir: string,
-  callback: (arg0: string) => void
-): Promise<string[]> => {
-  if (!fs.existsSync(dir)) {
-    console.log('no dir ', dir);
-    return;
+const findZipFilesInDir = (dir: string): string[] => {
+  try {
+    return klawSync(dir)
+      .filter((files) => files.path.endsWith('.zip'))
+      .map((item) => item.path);
+  } catch (err) {
+    console.error(`An error occurred while searching for zip files: ${err}`);
   }
-
-  const files = fs.readdirSync(dir);
-  for (let i = 0; i < files.length; i++) {
-    const filename = path.join(dir, files[i]);
-    const stat = fs.lstatSync(filename);
-    if (stat.isDirectory()) {
-      recurseFindZipFilesInDirectory(filename, callback);
-    } else if (/\.zip$/.test(filename)) callback(filename);
-  }
-};
-
-const findZipFilesInDir = async (dir: string): Promise<string> => {
-  return new Promise((resolve: (value: string) => void) => {
-    recurseFindZipFilesInDirectory(dir, resolve);
-  });
 };
 
 const extract = (zip: AdmZip, targetPath: string): Promise<void> => {
@@ -61,18 +45,20 @@ const extract = (zip: AdmZip, targetPath: string): Promise<void> => {
 const unzipAllFiles = async (destination: string): Promise<void> => {
   // Search through every folder for zip files, extracting as it finds them
   // If it does not find them, it quits with success and moves on to the next step of the process
-  let zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
+  let zipFilesInDirs = findZipFilesInDir(destination.replace('.zip', ''));
 
   while (zipFilesInDirs.length > 0) {
-    const splitFile = zipFilesInDirs.split('\\');
-    const name = splitFile[splitFile.length - 1];
+    for (const file of zipFilesInDirs) {
+      const splitFile = file.split('\\');
+      const name = splitFile[splitFile.length - 1];
 
-    const zipFile = new AdmZip(zipFilesInDirs);
-    // eslint-disable-next-line no-await-in-loop
-    await extract(zipFile, zipFilesInDirs.replace(name, ''));
-    fs.rmSync(zipFilesInDirs);
-    // eslint-disable-next-line no-await-in-loop
-    zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
+      const zipFile = new AdmZip(file);
+      // eslint-disable-next-line no-await-in-loop
+      await extract(zipFile, file.replace(name, ''));
+      fs.rmSync(file);
+      // eslint-disable-next-line no-await-in-loop
+      zipFilesInDirs = await findZipFilesInDir(destination.replace('.zip', ''));
+    }
   }
 };
 
@@ -87,6 +73,7 @@ export const copyFileToModDir = async (fileDir: string) => {
   const split = fileDir.split('\\');
   const fileName = split[split.length - 1];
   let stats: fs.Stats | undefined;
+  console.log('trying to copy file to mod dir');
   try {
     stats = fs.statSync(DEFAULT_MOD_DIR);
   } catch (err) {
@@ -94,11 +81,11 @@ export const copyFileToModDir = async (fileDir: string) => {
     console.error(
       `An error occurred while getting the stats for the directory ${DEFAULT_MOD_DIR}: ${err}`
     );
-    createAppDataFolder(DEFAULT_MOD_FOLDER_NAME);
+    await createAppDataFolder(DEFAULT_MOD_FOLDER_NAME);
   }
 
   if (stats) {
-    if (!stats.isDirectory()) createAppDataFolder(DEFAULT_MOD_FOLDER_NAME);
+    if (!stats.isDirectory()) await createAppDataFolder(DEFAULT_MOD_FOLDER_NAME);
   }
 
   const destination = `${DEFAULT_MOD_DIR}\\${fileName}`;
@@ -106,11 +93,15 @@ export const copyFileToModDir = async (fileDir: string) => {
 
   await unzipAllFiles(destination);
 
-  fs.copyFile(fileDir, destination, (err) => {
-    if (err) throw err;
-    // eslint-disable-next-line no-console
-    console.log(`Finished copying file from ${fileDir} to ${destination}`);
-  });
+  try {
+    fs.copyFileSync(fileDir, destination);
+  } catch (err) {
+    console.error(
+      `An error occurred while copying a file from ${fileDir} to ${destination}: ${err}`
+    );
+  }
+
+  console.log('finished copyFileToModDir');
 };
 
 const createAppDataFolder = async (name: string) => {

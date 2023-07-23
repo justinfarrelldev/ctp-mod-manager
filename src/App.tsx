@@ -22,7 +22,7 @@ export type ElectronWindow = Window &
       >;
       openInstallDir: (ipcCommand: string, dir: string) => void;
       openModsDir: (ipcCommand: string) => void;
-      copyFileToModDir: (ipcCommand: string, fileDir: string) => void;
+      copyFileToModDir: (ipcCommand: string, fileDir: string) => Promise<void>;
       viewFileDirsInZip: (ipcCommand: string, zipFilePath: string) => Promise<string[]>;
       goToRoute: (ipcCommand: string, route: string) => void;
       loadMods: () => Promise<string[]>;
@@ -46,18 +46,21 @@ export const App: FC = (): React.ReactElement => {
   const [modNamesQueued, setModNamesQueued] = useState<string[]>([]);
   const [error, setError] = useState<string>();
 
-  const findInstallDirs = async (): Promise<void> => {
-    setLoadingDirs(true);
-    const dirs = await (window as ElectronWindow).api.getCtp2InstallDir();
-    setInstallDirs(dirs);
-
-    // Should extract this to its own loader eventually
+  const loadMods = async (): Promise<void> => {
     try {
       setModNamesAdded(await (window as ElectronWindow).api.loadMods());
     } catch (err) {
       console.error(`An error occurred within App while setting mod names: ${err}`);
       setError(`An error occurred while attempting to load mods: ${err}.`);
     }
+  };
+
+  const findInstallDirs = async (): Promise<void> => {
+    setLoadingDirs(true);
+    const dirs = await (window as ElectronWindow).api.getCtp2InstallDir();
+    setInstallDirs(dirs);
+
+    await loadMods();
 
     setLoadingDirs(false);
   };
@@ -66,13 +69,14 @@ export const App: FC = (): React.ReactElement => {
     setInstallDirModalOpen(false);
   };
 
-  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = Array.from(e.target.files);
-    console.log('files:', files);
-    (window as ElectronWindow).api.copyFileToModDir(
+    await (window as ElectronWindow).api.copyFileToModDir(
       'file:copy',
       (files[0] as File & { path: string }).path
     );
+
+    await loadMods();
   };
 
   const openModsDir = (): void => {

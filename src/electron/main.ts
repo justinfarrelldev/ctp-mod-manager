@@ -67,7 +67,7 @@ ipcMain.handle('file:viewFileDirsInZip', (event, zipFilePath) => viewFileDirsInZ
 
 ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
 
-ipcMain.on('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));
+ipcMain.handle('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));
 
 ipcMain.handle('file:loadMods', () => loadMods());
 

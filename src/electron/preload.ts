@@ -10,6 +10,6 @@ contextBridge.exposeInMainWorld('api', {
   viewFileDirsInZip: (event, zipFilePath) =>
     ipcRenderer.invoke('file:viewFileDirsInZip', zipFilePath),
   goToRoute: (event, route) => ipcRenderer.send('process:goToRoute', route),
-  copyFileToModDir: (event, fileDir) => ipcRenderer.send('file:copyFileToModDir', fileDir),
+  copyFileToModDir: (event, fileDir) => ipcRenderer.invoke('file:copyFileToModDir', fileDir),
   loadMods: () => ipcRenderer.invoke('file:loadMods'),
 });

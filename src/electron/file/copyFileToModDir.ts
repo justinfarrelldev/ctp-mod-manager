@@ -73,7 +73,6 @@ export const copyFileToModDir = async (fileDir: string) => {
   const split = fileDir.split('\\');
   const fileName = split[split.length - 1];
   let stats: fs.Stats | undefined;
-  console.log('trying to copy file to mod dir');
   try {
     stats = fs.statSync(DEFAULT_MOD_DIR);
   } catch (err) {
@@ -92,8 +91,6 @@ export const copyFileToModDir = async (fileDir: string) => {
   await unzipInModDir(fileDir, fileName);
 
   await unzipAllFiles(destination);
-
-  console.log('finished copyFileToModDir');
 };
 
 const createAppDataFolder = async (name: string) => {

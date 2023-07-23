@@ -6,6 +6,7 @@ import { Modal } from './components/Modal';
 import { AUTO_DETECT_INSTALL_TEXT } from './constants';
 import { InstallDirTable } from './components/InstallDirTable';
 import { IZipEntry } from 'adm-zip';
+import { ErrorModal } from './components/ErrorModal';
 
 export type ElectronWindow = Window &
   typeof globalThis & {
@@ -43,6 +44,7 @@ export const App: FC = (): React.ReactElement => {
   const [settingsOpen, setSettingsOpen] = useState<boolean>();
   const [modNamesAdded, setModNamesAdded] = useState<string[] | undefined>(undefined);
   const [modNamesQueued, setModNamesQueued] = useState<string[]>([]);
+  const [error, setError] = useState<string>();
 
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
@@ -50,7 +52,12 @@ export const App: FC = (): React.ReactElement => {
     setInstallDirs(dirs);
 
     // Should extract this to its own loader eventually
-    setModNamesAdded(await (window as ElectronWindow).api.loadMods());
+    try {
+      setModNamesAdded(await (window as ElectronWindow).api.loadMods());
+    } catch (err) {
+      console.error(`An error occurred within App while setting mod names: ${err}`);
+      setError(`An error occurred while attempting to load mods: ${err}.`);
+    }
 
     setLoadingDirs(false);
   };
@@ -106,6 +113,15 @@ export const App: FC = (): React.ReactElement => {
       </Grid>
       <Typography variant="h4">Call to Power 2 Installations</Typography>
 
+      {error && (
+        <ErrorModal
+          open={error.length > 0}
+          errorMessage={error}
+          onClose={() => {
+            setError('');
+          }}
+        />
+      )}
       {loadingDirs && <Loader />}
       {settingsOpen && (
         <Modal width="50%" open={settingsOpen} onClose={() => setSettingsOpen(false)}>

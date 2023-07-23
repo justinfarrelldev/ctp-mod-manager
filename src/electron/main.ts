@@ -40,7 +40,21 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   ipcMain.handle('load:getCtp2InstallDir', getInstallDirectories);
-  // ipcMain.handle('file:openInstallDir', openInstallDir);
+
+  ipcMain.on('file:openInstallDir', (event, dir) => shell.openPath(dir));
+
+  ipcMain.on('file:openModsDir', () => shell.openPath(DEFAULT_MOD_DIR));
+
+  ipcMain.handle('file:viewFileDirsInZip', (event, zipFilePath) => viewFileDirsInZip(zipFilePath));
+
+  ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
+
+  ipcMain.handle('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));
+
+  ipcMain.handle('file:loadMods', () => loadMods());
+
+  ipcMain.handle('file:getModsDir', () => DEFAULT_MOD_DIR);
+
   createWindow();
 });
 
@@ -58,17 +72,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-
-ipcMain.on('file:openInstallDir', (event, dir) => shell.openPath(dir));
-
-ipcMain.on('file:openModsDir', () => shell.openPath(DEFAULT_MOD_DIR));
-
-ipcMain.handle('file:viewFileDirsInZip', (event, zipFilePath) => viewFileDirsInZip(zipFilePath));
-
-ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
-
-ipcMain.handle('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));
-
-ipcMain.handle('file:loadMods', () => loadMods());
-
-ipcMain.handle('file:getModsDir', () => DEFAULT_MOD_DIR);

@@ -62,11 +62,6 @@ export const App: FC = (): React.ReactElement => {
     setLoadingDirs(false);
   };
 
-  const goToRoute = (route: string): void => {
-    console.log('going to a route: ', route);
-    (window as ElectronWindow).api.goToRoute('process:goToRoute', route);
-  };
-
   const handleInstallDirModalClose = (): void => {
     setInstallDirModalOpen(false);
   };

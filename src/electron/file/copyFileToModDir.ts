@@ -81,6 +81,42 @@ const unzipAllFiles = async (destination: string): Promise<void> => {
   }
 };
 
+const copyDataFoldersToModDirs = (dirs: string[], modDir: string): void => {
+  if (dirs.length === 0) return;
+  dirs.forEach((dir) => {
+    copyDataFolderToModDir(dir);
+  });
+
+  fs.rmSync(modDir.replace('.zip', ''), {
+    recursive: true,
+    force: true,
+  });
+};
+
+const copyDataFolderToModDir = (dir: string): void => {
+  if (!dir.endsWith('ctp2_data')) {
+    throw new Error(
+      `Dir passed to copyDataFolderToModDir that does not end with ctp2_data: ${dir}. Aborting.`
+    );
+  }
+
+  const splitDir = dir.split('\\');
+
+  const parentDirName = splitDir[splitDir.length - 2];
+
+  const dirToMove = dir.replace('\\ctp2_data', '');
+
+  try {
+    fs.cpSync(dirToMove, `${DEFAULT_MOD_DIR}\\${parentDirName}`, {
+      recursive: true,
+    });
+  } catch (err) {
+    console.error(
+      `An error occurred while copying the directory ${dirToMove} to ${DEFAULT_MOD_DIR}: ${err}`
+    );
+  }
+};
+
 // Copy file to mod dir should:
 // - Extract the files of the zip to the mods folder (preserve original)
 // - Determine if that is a zip (unzip if it is, and repeat until there is not a zip)
@@ -111,9 +147,9 @@ export const copyFileToModDir = async (fileDir: string) => {
 
   await unzipAllFiles(destination);
 
-  // TODO make this move each individual mod to their respective folder instead (so, for example,
-  // one folder will be "AOM II" and one will be "AOM IV")
-  console.log('all ctp2_data dirs: ', findGameRootsWithinDir(destination.replace('.zip', '')));
+  const dataDirs = findGameRootsWithinDir(destination.replace('.zip', ''));
+
+  copyDataFoldersToModDirs(dataDirs, destination.replace('.zip', ''));
 };
 
 const createAppDataFolder = async (name: string) => {

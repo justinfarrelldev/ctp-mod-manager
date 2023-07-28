@@ -20,8 +20,17 @@ const openInstallDir = (dir: string): void => {
 export const InstallDirTable: FC<Props> = ({ installDirs, onClickModify }) => {
   const addInstall = async () => {
     const folder = await (window as ElectronWindow).api.selectFolder('file:selectFolder');
-    console.log('folder: ', folder);
-    alert('would then validate that this is actually an install folder')
+    console.log('FOLDER IS: ', folder);
+    const isValidInstall = await (window as ElectronWindow).api.validInstall(
+      'file:validInstall',
+      folder
+    );
+
+    if (isValidInstall === String(true)) {
+      console.log('This is a valid install');
+    } else {
+      console.error('Invalid install! Inform the user here!');
+    }
   };
   return (
     <>

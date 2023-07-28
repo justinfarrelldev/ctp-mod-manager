@@ -28,6 +28,7 @@ export type ElectronWindow = Window &
       loadMods: () => Promise<string[]>;
       getModsDir: (ipcCommand: string) => Promise<string>;
       selectFolder: (ipcCommand: string) => Promise<string>;
+      validInstall: (ipcCommand: string, dir: string) => Promise<string>;
     };
   };
 

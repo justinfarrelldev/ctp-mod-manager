@@ -27,6 +27,7 @@ export type ElectronWindow = Window &
       goToRoute: (ipcCommand: string, route: string) => void;
       loadMods: () => Promise<string[]>;
       getModsDir: (ipcCommand: string) => Promise<string>;
+      selectFolder: (ipcCommand: string) => Promise<string>;
     };
   };
 
@@ -166,7 +167,6 @@ export const App: FC = (): React.ReactElement => {
                             onClick={async () => {
                               setModNamesQueued([...modNamesQueued, modName]);
                               setModNamesAdded(modNamesAdded.filter((value) => value !== modName));
-                              console.log('getModsDir: ', await getModsDir());
                               viewFileDirsInZip(`${await getModsDir()}\\${modName}`); // FIXME 100% temporary
                             }}
                           >

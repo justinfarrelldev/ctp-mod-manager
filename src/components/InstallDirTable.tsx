@@ -18,6 +18,11 @@ const openInstallDir = (dir: string): void => {
 };
 
 export const InstallDirTable: FC<Props> = ({ installDirs, onClickModify }) => {
+  const addInstall = async () => {
+    const folder = await (window as ElectronWindow).api.selectFolder('file:selectFolder');
+    console.log('folder: ', folder);
+    alert('would then validate that this is actually an install folder')
+  };
   return (
     <>
       {installDirs.length === 0 && (
@@ -46,10 +51,10 @@ export const InstallDirTable: FC<Props> = ({ installDirs, onClickModify }) => {
             </Tooltip>
             <Tooltip title="Run game">
               <span>
-              <Button
+                <Button
                   onClick={() => {
                     //onClickModify(dir.directory);
-                    alert('Would launch game')
+                    alert('Would launch game');
                   }}
                 >
                   <PlayCircle />
@@ -66,7 +71,7 @@ export const InstallDirTable: FC<Props> = ({ installDirs, onClickModify }) => {
         </Grid>
       ))}
       <Tooltip title="Add an Installation of Call to Power II">
-        <Button onClick={() => alert('would add install')}>Add Installation</Button>
+        <Button onClick={() => addInstall()}>Add Installation</Button>
       </Tooltip>
     </>
   );

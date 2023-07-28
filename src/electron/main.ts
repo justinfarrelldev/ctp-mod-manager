@@ -9,6 +9,7 @@ import { getInstallDirectories } from './getInstallDirectories';
 import { loadMods } from './file/loadMods';
 import { DEFAULT_MOD_DIR } from './constants';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
+import { selectFolder } from './file/selectFolder';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -54,6 +55,8 @@ app.whenReady().then(() => {
   ipcMain.handle('file:loadMods', () => loadMods());
 
   ipcMain.handle('file:getModsDir', () => DEFAULT_MOD_DIR);
+
+  ipcMain.handle('file:selectFolder', () => selectFolder(win));
 
   createWindow();
 });

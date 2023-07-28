@@ -12,4 +12,5 @@ contextBridge.exposeInMainWorld('api', {
   goToRoute: (event, route) => ipcRenderer.send('process:goToRoute', route),
   copyFileToModDir: (event, fileDir) => ipcRenderer.invoke('file:copyFileToModDir', fileDir),
   loadMods: () => ipcRenderer.invoke('file:loadMods'),
+  selectFolder: () => ipcRenderer.invoke('file:selectFolder'),
 });

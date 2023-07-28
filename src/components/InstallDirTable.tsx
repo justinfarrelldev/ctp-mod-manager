@@ -2,7 +2,7 @@
     Holds a table which displays the user-specified installation directories
 */
 
-import { Folder, BuildCircle } from '@mui/icons-material';
+import { Folder, BuildCircle, PlayCircle } from '@mui/icons-material';
 import { Grid, Tooltip, Button, Typography } from '@mui/material';
 import React, { FC } from 'react';
 import { ElectronWindow, InstallDirectory } from '../App';
@@ -41,6 +41,18 @@ export const InstallDirTable: FC<Props> = ({ installDirs, onClickModify }) => {
                   }}
                 >
                   <BuildCircle />
+                </Button>
+              </span>
+            </Tooltip>
+            <Tooltip title="Run game">
+              <span>
+              <Button
+                  onClick={() => {
+                    //onClickModify(dir.directory);
+                    alert('Would launch game')
+                  }}
+                >
+                  <PlayCircle />
                 </Button>
               </span>
             </Tooltip>

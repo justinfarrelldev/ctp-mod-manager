@@ -65,6 +65,9 @@ export const InstallDirTable: FC<Props> = ({ installDirs, onClickModify }) => {
           </Grid>
         </Grid>
       ))}
+      <Tooltip title="Add an Installation of Call to Power II">
+        <Button onClick={() => alert('would add install')}>Add Installation</Button>
+      </Tooltip>
     </>
   );
 };

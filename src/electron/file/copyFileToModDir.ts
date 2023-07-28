@@ -44,7 +44,7 @@ const findGameRootsWithinDir = (dir: string): string[] => {
 const findZipFilesInDir = (dir: string): string[] => {
   try {
     return klawSync(dir)
-      .filter((files) => files.path.endsWith('.zip'))
+      .filter((files) => files.path.toLowerCase().endsWith('.zip'))
       .map((item) => item.path);
   } catch (err) {
     console.error(`An error occurred while searching for zip files: ${err}`);

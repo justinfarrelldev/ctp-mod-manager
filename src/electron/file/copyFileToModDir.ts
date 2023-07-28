@@ -22,6 +22,25 @@ const unzipInModDir = async (zipFullPath: string, fileName: string): Promise<voi
   });
 };
 
+// Recursively find all ctp2_data and ctp2_program folders and mark each occurrence (not within the same
+// folder as another) as roots, then returns their dirs.
+const findGameRootsWithinDir = (dir: string): string[] => {
+  const dirs: string[] = [];
+  try {
+    const ctp2DataPaths = klawSync(dir)
+      .filter((file) => file.path.includes('ctp2_data'))
+      .map((dirWithData) => dirWithData.path.split('ctp2_data')[0]);
+
+    ctp2DataPaths.forEach((path) => {
+      if (!dirs.includes(path + 'ctp2_data')) dirs.push(path + 'ctp2_data');
+    });
+  } catch (err) {
+    console.error(`An error occurred while searching for "ctp2_data" folders: ${err}`);
+  }
+
+  return dirs;
+};
+
 const findZipFilesInDir = (dir: string): string[] => {
   try {
     return klawSync(dir)
@@ -91,6 +110,10 @@ export const copyFileToModDir = async (fileDir: string) => {
   await unzipInModDir(fileDir, fileName);
 
   await unzipAllFiles(destination);
+
+  // TODO make this move each individual mod to their respective folder instead (so, for example,
+  // one folder will be "AOM II" and one will be "AOM IV")
+  console.log('all ctp2_data dirs: ', findGameRootsWithinDir(destination.replace('.zip', '')));
 };
 
 const createAppDataFolder = async (name: string) => {

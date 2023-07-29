@@ -13,5 +13,5 @@ contextBridge.exposeInMainWorld('api', {
   copyFileToModDir: (event, fileDir) => ipcRenderer.invoke('file:copyFileToModDir', fileDir),
   loadMods: () => ipcRenderer.invoke('file:loadMods'),
   selectFolder: () => ipcRenderer.invoke('file:selectFolder'),
-  validInstall: (event, fileDir) => ipcRenderer.invoke('file:validInstall', fileDir),
+  isValidInstall: (event, fileDir) => ipcRenderer.invoke('file:isValidInstall', fileDir),
 });

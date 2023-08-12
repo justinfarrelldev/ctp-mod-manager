@@ -29,6 +29,7 @@ export type ElectronWindow = Window &
       getModsDir: (ipcCommand: string) => Promise<string>;
       selectFolder: (ipcCommand: string) => Promise<string>;
       isValidInstall: (ipcCommand: string, dir: string) => Promise<boolean>;
+      addToInstallDirs: (ipcCommand: string, dir: string) => Promise<void>;
     };
   };
 

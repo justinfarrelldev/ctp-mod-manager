@@ -11,6 +11,7 @@ import { DEFAULT_MOD_DIR } from './constants';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
 import { selectFolder } from './file/selectFolder';
 import { isValidInstall } from './file/isValidInstall';
+import { addToInstallDirs } from './file/addToInstallDirs';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -60,6 +61,8 @@ app.whenReady().then(() => {
   ipcMain.handle('file:selectFolder', () => selectFolder(win));
 
   ipcMain.handle('file:isValidInstall', (event, dir) => isValidInstall(dir));
+
+  ipcMain.handle('file:addToInstallDirs', (event, dir) => addToInstallDirs(dir));
 
   createWindow();
 });

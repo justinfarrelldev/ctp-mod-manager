@@ -152,10 +152,11 @@ export const copyFileToModDir = async (fileDir: string) => {
   copyDataFoldersToModDirs(dataDirs, destination.replace('.zip', ''));
 };
 
-const createAppDataFolder = async (name: string) => {
+export const createAppDataFolder = async (name: string) => {
   let folderPath;
   try {
     folderPath = `${app.getPath('appData')}\\${app.getName()}\\${name}`;
+    console.log('folder path: ', folderPath);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(`An error occurred while getting the app path to the AppData folder: ${err}`);
@@ -163,8 +164,6 @@ const createAppDataFolder = async (name: string) => {
   }
 
   fs.mkdir(folderPath, (err) => {
-    // eslint-disable-next-line no-console
-    console.error(`An error occurred while creating a directory within the AppData folder: ${err}`);
     if (err) throw err;
   });
 };

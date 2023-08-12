@@ -21,4 +21,6 @@ try {
   console.error(`An error has occurred getting the appData path: ${err}`);
 }
 
+export const DEFAULT_INSTALLS_FILE = `${DEFAULT_INSTALLS_DIR}\\installations.json`;
+
 export { DEFAULT_MOD_DIR, DEFAULT_INSTALLS_DIR };

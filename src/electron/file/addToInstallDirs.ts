@@ -1,5 +1,9 @@
 import * as fs from 'fs';
-import { DEFAULT_INSTALLS_DIR, DEFAULT_INSTALLS_FOLDER_NAME } from '../constants';
+import {
+  DEFAULT_INSTALLS_DIR,
+  DEFAULT_INSTALLS_FILE,
+  DEFAULT_INSTALLS_FOLDER_NAME,
+} from '../constants';
 import { createAppDataFolder } from './copyFileToModDir';
 
 const makeDirDefaultArray = (dir: string) => {
@@ -13,7 +17,7 @@ const makeDirDefaultArray = (dir: string) => {
   }
 };
 
-export const addToInstallDirs = async (dir: string) => {
+const selectivelyAddInstallsFolder = async (): Promise<void> => {
   let stats: fs.Stats | undefined;
   try {
     stats = fs.statSync(DEFAULT_INSTALLS_DIR);
@@ -28,22 +32,24 @@ export const addToInstallDirs = async (dir: string) => {
   if (stats) {
     if (!stats.isDirectory()) await createAppDataFolder(DEFAULT_INSTALLS_FOLDER_NAME);
   }
+};
 
-  const filePath = `${DEFAULT_INSTALLS_DIR}\\installations.json`;
-  // Installs dir definitely exists, so we can add the file to it if it does not exist
+const selectivelyAddInstallationFile = async (dir: string): Promise<void> => {
   let statsOfFile: fs.Stats | undefined;
   try {
-    statsOfFile = fs.statSync(filePath);
+    statsOfFile = fs.statSync(DEFAULT_INSTALLS_FILE);
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error(`An error occurred while getting the stats for the file ${filePath}: ${err}`);
+    console.error(
+      `An error occurred while getting the stats for the file ${DEFAULT_INSTALLS_FILE}: ${err}`
+    );
     try {
-      fs.writeFileSync(filePath, makeDirDefaultArray(dir));
+      fs.writeFileSync(DEFAULT_INSTALLS_FILE, makeDirDefaultArray(dir));
       return;
     } catch (fileWriteErr) {
       // eslint-disable-next-line no-console
       console.error(
-        `An error occurred while writing "[]" to the file ${filePath}: ${fileWriteErr}`
+        `An error occurred while writing "[]" to the file ${DEFAULT_INSTALLS_FILE}: ${fileWriteErr}`
       );
     }
   }
@@ -51,23 +57,28 @@ export const addToInstallDirs = async (dir: string) => {
   if (statsOfFile) {
     if (!statsOfFile.isFile()) {
       try {
-        fs.writeFileSync(filePath, makeDirDefaultArray(dir));
-        return;
+        fs.writeFileSync(DEFAULT_INSTALLS_FILE, makeDirDefaultArray(dir));
       } catch (fileWriteErr) {
         // eslint-disable-next-line no-console
         console.error(
-          `An error occurred while writing "[]" to the file ${filePath}: ${fileWriteErr}`
+          `An error occurred while writing "[]" to the file ${DEFAULT_INSTALLS_FILE}: ${fileWriteErr}`
         );
       }
     }
   }
+};
+
+export const addToInstallDirs = async (dir: string) => {
+  await selectivelyAddInstallsFolder();
+
+  await selectivelyAddInstallationFile(dir);
 
   let contents;
   try {
-    contents = fs.readFileSync(filePath).toString();
+    contents = fs.readFileSync(DEFAULT_INSTALLS_FILE).toString();
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error(`An error occurred while reading the file ${filePath}: ${err}`);
+    console.error(`An error occurred while reading the file ${DEFAULT_INSTALLS_FILE}: ${err}`);
   }
 
   let jsonFile: string[];
@@ -88,9 +99,11 @@ export const addToInstallDirs = async (dir: string) => {
     const newArr = [...jsonFile, dir];
     jsonFile = newArr;
     const dataToPush = JSON.stringify(jsonFile);
-    fs.writeFileSync(filePath, dataToPush);
+    fs.writeFileSync(DEFAULT_INSTALLS_FILE, dataToPush);
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error(`An error occurred while writing the new data to the file ${filePath}: ${err}`);
+    console.error(
+      `An error occurred while writing the new data to the file ${DEFAULT_INSTALLS_FILE}: ${err}`
+    );
   }
 };

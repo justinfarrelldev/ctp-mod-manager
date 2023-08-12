@@ -10,6 +10,7 @@ import { ElectronWindow, InstallDirectory } from '../App';
 interface Props {
   installDirs: InstallDirectory[];
   onClickModify: (dirPathBeingModified: string) => void;
+  onAddedInstallDirectory: () => void;
 }
 
 const openInstallDir = (dir: string): void => {
@@ -21,7 +22,11 @@ const addToInstallDirs = async (dir: string): Promise<void> => {
   await (window as ElectronWindow).api.addToInstallDirs('file:addToInstallDirs', dir);
 };
 
-export const InstallDirTable: FC<Props> = ({ installDirs, onClickModify }) => {
+export const InstallDirTable: FC<Props> = ({
+  installDirs,
+  onClickModify,
+  onAddedInstallDirectory,
+}) => {
   const addInstall = async () => {
     const folder = await (window as ElectronWindow).api.selectFolder('file:selectFolder');
     const isValidInstall = await (window as ElectronWindow).api.isValidInstall(
@@ -32,6 +37,7 @@ export const InstallDirTable: FC<Props> = ({ installDirs, onClickModify }) => {
     if (isValidInstall) {
       console.log('This is a valid install');
       addToInstallDirs(folder);
+      onAddedInstallDirectory();
     } else {
       console.error('Invalid install! Inform the user here!');
     }

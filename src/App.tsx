@@ -42,7 +42,7 @@ export type InstallDirectory = {
 
 export const App: FC = (): React.ReactElement => {
   const [loadingDirs, setLoadingDirs] = useState<boolean>();
-  const [installDirModalOpen, setInstallDirModalOpen] = useState<boolean>(true);
+  const [installDirModalOpen, setInstallDirModalOpen] = useState<boolean>(false);
   const [installDirs, setInstallDirs] = useState<InstallDirectory[]>([]);
   const [dirBeingModified, setDirBeingModified] = useState<string>('');
   const [settingsOpen, setSettingsOpen] = useState<boolean>();
@@ -67,6 +67,9 @@ export const App: FC = (): React.ReactElement => {
       dirsFromFile.map((dir) => ({ directory: dir, installationType: 'steam', os: 'win32' }))
     );
     setLoadingDirs(false);
+    if (dirsFromFile.length === 0) {
+      setInstallDirModalOpen(true);
+    }
   };
 
   const findInstallDirs = async (): Promise<void> => {
@@ -156,6 +159,7 @@ export const App: FC = (): React.ReactElement => {
       <InstallDirTable
         installDirs={installDirs}
         onClickModify={(dir) => setDirBeingModified(dir)}
+        onAddedInstallDirectory={() => loadInstallDirs()}
       />
       <Modal
         open={dirBeingModified !== ''}

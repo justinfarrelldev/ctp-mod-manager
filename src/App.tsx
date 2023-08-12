@@ -30,6 +30,7 @@ export type ElectronWindow = Window &
       selectFolder: (ipcCommand: string) => Promise<string>;
       isValidInstall: (ipcCommand: string, dir: string) => Promise<boolean>;
       addToInstallDirs: (ipcCommand: string, dir: string) => Promise<void>;
+      getInstallDirs: (ipcCommand: 'file:getInstallDirs') => Promise<string[]>;
     };
   };
 
@@ -61,6 +62,10 @@ export const App: FC = (): React.ReactElement => {
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
     const dirs = await (window as ElectronWindow).api.getCtp2InstallDir();
+
+    const dirsFromFile = await (window as ElectronWindow).api.getInstallDirs('file:getInstallDirs');
+    console.log('dirsFromFile: ', dirsFromFile);
+
     setInstallDirs(dirs);
 
     await loadMods();

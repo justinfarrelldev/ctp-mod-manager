@@ -17,7 +17,7 @@ const makeDirDefaultArray = (dir: string) => {
   }
 };
 
-const selectivelyAddInstallsFolder = async (): Promise<void> => {
+export const selectivelyAddInstallsFolder = async (): Promise<void> => {
   let stats: fs.Stats | undefined;
   try {
     stats = fs.statSync(DEFAULT_INSTALLS_DIR);
@@ -34,7 +34,7 @@ const selectivelyAddInstallsFolder = async (): Promise<void> => {
   }
 };
 
-const selectivelyAddInstallationFile = async (dir: string): Promise<void> => {
+export const selectivelyAddInstallationFile = async (dir?: string): Promise<void> => {
   let statsOfFile: fs.Stats | undefined;
   try {
     statsOfFile = fs.statSync(DEFAULT_INSTALLS_FILE);
@@ -44,7 +44,11 @@ const selectivelyAddInstallationFile = async (dir: string): Promise<void> => {
       `An error occurred while getting the stats for the file ${DEFAULT_INSTALLS_FILE}: ${err}`
     );
     try {
-      fs.writeFileSync(DEFAULT_INSTALLS_FILE, makeDirDefaultArray(dir));
+      if (dir) {
+        fs.writeFileSync(DEFAULT_INSTALLS_FILE, makeDirDefaultArray(dir));
+      } else {
+        fs.writeFileSync(DEFAULT_INSTALLS_FILE, '[]');
+      }
       return;
     } catch (fileWriteErr) {
       // eslint-disable-next-line no-console
@@ -57,7 +61,11 @@ const selectivelyAddInstallationFile = async (dir: string): Promise<void> => {
   if (statsOfFile) {
     if (!statsOfFile.isFile()) {
       try {
-        fs.writeFileSync(DEFAULT_INSTALLS_FILE, makeDirDefaultArray(dir));
+        if (dir) {
+          fs.writeFileSync(DEFAULT_INSTALLS_FILE, makeDirDefaultArray(dir));
+        } else {
+          fs.writeFileSync(DEFAULT_INSTALLS_FILE, '[]');
+        }
       } catch (fileWriteErr) {
         // eslint-disable-next-line no-console
         console.error(

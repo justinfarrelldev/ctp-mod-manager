@@ -12,6 +12,7 @@ import { viewFileDirsInZip } from './file/viewFilesInZip';
 import { selectFolder } from './file/selectFolder';
 import { isValidInstall } from './file/isValidInstall';
 import { addToInstallDirs } from './file/addToInstallDirs';
+import { getInstallDirs } from './file/getInstallDirs';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -63,6 +64,8 @@ app.whenReady().then(() => {
   ipcMain.handle('file:isValidInstall', (event, dir) => isValidInstall(dir));
 
   ipcMain.handle('file:addToInstallDirs', (event, dir) => addToInstallDirs(dir));
+
+  ipcMain.handle('file:getInstallDirs', () => getInstallDirs());
 
   createWindow();
 });

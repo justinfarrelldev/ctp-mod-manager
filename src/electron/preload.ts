@@ -15,4 +15,5 @@ contextBridge.exposeInMainWorld('api', {
   selectFolder: () => ipcRenderer.invoke('file:selectFolder'),
   isValidInstall: (event, fileDir) => ipcRenderer.invoke('file:isValidInstall', fileDir),
   addToInstallDirs: (event, dir) => ipcRenderer.invoke('file:addToInstallDirs', dir),
+  getInstallDirs: () => ipcRenderer.invoke('file:getInstallDirs'),
 });

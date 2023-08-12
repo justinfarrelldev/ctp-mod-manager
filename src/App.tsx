@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Typography, Box, Grid, CircularProgress as Loader, Tooltip, Button } from '@mui/material';
 import { Settings } from '@mui/icons-material';
 import { Settings as SettingsMenu } from './components/Settings';
@@ -59,14 +59,27 @@ export const App: FC = (): React.ReactElement => {
     }
   };
 
+  const loadInstallDirs = async (): Promise<void> => {
+    setLoadingDirs(true);
+    const dirsFromFile = await (window as ElectronWindow).api.getInstallDirs('file:getInstallDirs');
+
+    setInstallDirs(
+      dirsFromFile.map((dir) => ({ directory: dir, installationType: 'steam', os: 'win32' }))
+    );
+    setLoadingDirs(false);
+  };
+
   const findInstallDirs = async (): Promise<void> => {
     setLoadingDirs(true);
-    const dirs = await (window as ElectronWindow).api.getCtp2InstallDir();
+    const dirs: InstallDirectory[] = await (window as ElectronWindow).api.getCtp2InstallDir();
 
-    const dirsFromFile = await (window as ElectronWindow).api.getInstallDirs('file:getInstallDirs');
-    console.log('dirsFromFile: ', dirsFromFile);
+    for (const dir of dirs) {
+      // For the sake of speed, I am disabling this
+      // eslint-disable-next-line no-await-in-loop
+      await (window as ElectronWindow).api.addToInstallDirs('file:addToInstallDirs', dir.directory);
+    }
 
-    setInstallDirs(dirs);
+    setInstallDirs([...installDirs, ...dirs]);
 
     await loadMods();
 
@@ -105,6 +118,10 @@ export const App: FC = (): React.ReactElement => {
   const getModsDir = async (): Promise<string> => {
     return await (window as ElectronWindow).api.getModsDir('file:getModsDir');
   };
+
+  useEffect(() => {
+    loadInstallDirs();
+  }, []);
 
   return (
     <>

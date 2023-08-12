@@ -70,12 +70,18 @@ export const addToInstallDirs = async (dir: string) => {
     console.error(`An error occurred while reading the file ${filePath}: ${err}`);
   }
 
-  let jsonFile;
+  let jsonFile: string[];
   try {
     jsonFile = JSON.parse(contents);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(`An error occurred while converting the file contents to JSON: ${err}`);
+  }
+
+  if (jsonFile.includes(dir)) {
+    // eslint-disable-next-line no-console
+    console.log('No-op - install directory is already in the file!');
+    return;
   }
 
   try {

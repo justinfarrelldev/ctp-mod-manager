@@ -42,6 +42,10 @@ export const InstallDirTable: FC<Props> = ({
       console.error('Invalid install! Inform the user here!');
     }
   };
+
+  const runGame = (dir: string) => {
+    (window as ElectronWindow).api.runGame('file:runGame', `${dir}\\ctp2_program\\ctp\\ctp2.exe`);
+  };
   return (
     <>
       {installDirs.length === 0 && (
@@ -73,7 +77,7 @@ export const InstallDirTable: FC<Props> = ({
                 <Button
                   onClick={() => {
                     //onClickModify(dir.directory);
-                    alert('Would launch game');
+                    runGame(dir.directory);
                   }}
                 >
                   <PlayCircle />

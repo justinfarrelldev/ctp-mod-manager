@@ -13,6 +13,7 @@ import { selectFolder } from './file/selectFolder';
 import { isValidInstall } from './file/isValidInstall';
 import { addToInstallDirs } from './file/addToInstallDirs';
 import { getInstallDirs } from './file/getInstallDirs';
+import { runGame } from './file/runGame';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -66,6 +67,8 @@ app.whenReady().then(() => {
   ipcMain.handle('file:addToInstallDirs', (event, dir) => addToInstallDirs(dir));
 
   ipcMain.handle('file:getInstallDirs', () => getInstallDirs());
+
+  ipcMain.handle('file:runGame', (event, exeDir) => runGame(exeDir));
 
   createWindow();
 });

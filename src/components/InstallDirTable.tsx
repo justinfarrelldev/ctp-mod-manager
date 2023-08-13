@@ -2,7 +2,7 @@
     Holds a table which displays the user-specified installation directories
 */
 
-import { Folder, BuildCircle, PlayCircle } from '@mui/icons-material';
+import { Folder, BuildCircle, PlayCircle, Delete } from '@mui/icons-material';
 import { Grid, Tooltip, Button, Typography } from '@mui/material';
 import React, { FC } from 'react';
 import { ElectronWindow, InstallDirectory } from '../App';
@@ -69,6 +69,17 @@ export const InstallDirTable: FC<Props> = ({
                   }}
                 >
                   <BuildCircle />
+                </Button>
+              </span>
+            </Tooltip>
+            <Tooltip title="Remove this installation from the list (this will not delete the installation, rather it will just remove it graphically from this view)">
+              <span>
+                <Button
+                  onClick={() => {
+                    console.log('Would delete from list');
+                  }}
+                >
+                  <Delete />
                 </Button>
               </span>
             </Tooltip>

@@ -37,6 +37,7 @@ export type ElectronWindow = Window &
         ipcCommand: 'file:removeFromInstallDirs',
         dir: string
       ) => Promise<void>;
+      makeBackup: (ipcCommand: 'file:makeBackup', installDir: string) => Promise<void>;
     };
   };
 

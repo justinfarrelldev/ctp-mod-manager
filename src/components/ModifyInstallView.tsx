@@ -1,5 +1,6 @@
 import { Box, Button, Typography, Grid, Tooltip, Card, CardContent } from '@mui/material';
 import React, { FC } from 'react';
+import { ElectronWindow } from '../App';
 
 type Props = {
   onBackClicked: () => void;
@@ -22,6 +23,10 @@ export const ModifyInstallView: FC<Props> = ({
   onDequeueMod,
   onOpenModsDir,
 }): React.ReactElement => {
+  const applyMods = (installDirToApplyTo: string) => {
+    (window as ElectronWindow).api.makeBackup('file:makeBackup', installDirToApplyTo);
+  };
+
   return (
     <Box padding="2%">
       <Button onClick={() => onBackClicked()}>Back</Button>
@@ -85,7 +90,7 @@ export const ModifyInstallView: FC<Props> = ({
           <Button
             variant="outlined"
             onClick={() => {
-              console.log('Would apply mods!');
+              applyMods(dirBeingModified);
             }}
             disabled={!queuedMods.length}
           >

@@ -23,4 +23,9 @@ try {
 
 export const DEFAULT_INSTALLS_FILE = `${DEFAULT_INSTALLS_DIR}\\installations.json`;
 
+export const DEFAULT_BACKUPS_FOLDER_NAME = 'InstallationBackups';
+export const DEFAULT_BACKUPS_FOLDER = `${app.getPath(
+  'appData'
+)}\\${app.getName()}\\${DEFAULT_BACKUPS_FOLDER_NAME}`;
+
 export { DEFAULT_MOD_DIR, DEFAULT_INSTALLS_DIR };

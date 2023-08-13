@@ -76,11 +76,7 @@ export const selectivelyAddInstallationFile = async (dir?: string): Promise<void
   }
 };
 
-export const addToInstallDirs = async (dir: string) => {
-  await selectivelyAddInstallsFolder();
-
-  await selectivelyAddInstallationFile(dir);
-
+export const parseInstallFileIntoJSON = (): string[] => {
   let contents;
   try {
     contents = fs.readFileSync(DEFAULT_INSTALLS_FILE).toString();
@@ -96,6 +92,15 @@ export const addToInstallDirs = async (dir: string) => {
     // eslint-disable-next-line no-console
     console.error(`An error occurred while converting the file contents to JSON: ${err}`);
   }
+  return jsonFile;
+};
+
+export const addToInstallDirs = async (dir: string) => {
+  await selectivelyAddInstallsFolder();
+
+  await selectivelyAddInstallationFile(dir);
+
+  let jsonFile: string[] = parseInstallFileIntoJSON();
 
   if (jsonFile.includes(dir)) {
     // eslint-disable-next-line no-console

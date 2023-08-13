@@ -32,6 +32,10 @@ export type ElectronWindow = Window &
       addToInstallDirs: (ipcCommand: string, dir: string) => Promise<void>;
       getInstallDirs: (ipcCommand: 'file:getInstallDirs') => Promise<string[]>;
       runGame: (ipcCommand: 'file:runGame', exeDir: string) => void;
+      removeFromInstallDirs: (
+        ipcCommand: 'file:removeFromInstallDirs',
+        dir: string
+      ) => Promise<void>;
     };
   };
 

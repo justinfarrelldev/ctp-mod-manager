@@ -14,6 +14,7 @@ import { isValidInstall } from './file/isValidInstall';
 import { addToInstallDirs } from './file/addToInstallDirs';
 import { getInstallDirs } from './file/getInstallDirs';
 import { runGame } from './file/runGame';
+import { removeFromInstallDirs } from './file/removeFromInstallDirs';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -69,6 +70,8 @@ app.whenReady().then(() => {
   ipcMain.handle('file:getInstallDirs', () => getInstallDirs());
 
   ipcMain.handle('file:runGame', (event, exeDir) => runGame(exeDir));
+
+  ipcMain.handle('file:removeFromInstallDirs', (event, dir) => removeFromInstallDirs(dir));
 
   createWindow();
 });

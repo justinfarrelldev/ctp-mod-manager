@@ -22,6 +22,10 @@ const addToInstallDirs = async (dir: string): Promise<void> => {
   await (window as ElectronWindow).api.addToInstallDirs('file:addToInstallDirs', dir);
 };
 
+const removeFromInstallDirs = async (dir: string): Promise<void> => {
+  await (window as ElectronWindow).api.removeFromInstallDirs('file:removeFromInstallDirs', dir);
+};
+
 export const InstallDirTable: FC<Props> = ({
   installDirs,
   onClickModify,
@@ -41,6 +45,11 @@ export const InstallDirTable: FC<Props> = ({
     } else {
       console.error('Invalid install! Inform the user here!');
     }
+  };
+
+  const removeInstall = async (dir: string) => {
+    removeFromInstallDirs(dir);
+    onAddedInstallDirectory();
   };
 
   const runGame = (dir: string) => {
@@ -76,7 +85,7 @@ export const InstallDirTable: FC<Props> = ({
               <span>
                 <Button
                   onClick={() => {
-                    console.log('Would delete from list');
+                    removeInstall(dir.directory);
                   }}
                 >
                   <Delete />

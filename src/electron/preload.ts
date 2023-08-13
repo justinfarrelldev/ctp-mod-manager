@@ -17,4 +17,5 @@ contextBridge.exposeInMainWorld('api', {
   addToInstallDirs: (event, dir) => ipcRenderer.invoke('file:addToInstallDirs', dir),
   getInstallDirs: () => ipcRenderer.invoke('file:getInstallDirs'),
   runGame: (event, exeDir) => ipcRenderer.invoke('file:runGame', exeDir),
+  removeFromInstallDirs: (event, dir) => ipcRenderer.invoke('file:removeFromInstallDirs', dir),
 });

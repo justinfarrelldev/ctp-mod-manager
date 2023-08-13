@@ -58,7 +58,8 @@ export const App: FC = (): React.ReactElement => {
 
   const loadMods = async (): Promise<void> => {
     try {
-      setModNamesAdded(await (window as ElectronWindow).api.loadMods());
+      const loadedMods = await (window as ElectronWindow).api.loadMods();
+      setModNamesAdded(loadedMods);
     } catch (err) {
       console.error(`An error occurred within App while setting mod names: ${err}`);
       setError(`An error occurred while attempting to load mods: ${err}.`);
@@ -129,6 +130,7 @@ export const App: FC = (): React.ReactElement => {
   };
 
   useEffect(() => {
+    loadMods();
     loadInstallDirs();
   }, []);
 

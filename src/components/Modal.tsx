@@ -14,13 +14,14 @@ const style = {
 
 export interface ModalProps extends MuiModalProps {
   width: string;
+  height?: string;
   children: React.ReactElement;
 }
 
 export const Modal: FC<ModalProps> = (props: ModalProps): React.ReactElement => {
   return (
     <MuiModal open {...props}>
-      <Box sx={{ ...style, width: props.width }}>{props.children}</Box>
+      <Box sx={{ ...style, width: props.width, height: props.height }}>{props.children}</Box>
     </MuiModal>
   );
 };

@@ -171,9 +171,10 @@ export const App: FC = (): React.ReactElement => {
         onClose={() => {
           setDirBeingModified('');
         }}
-        width="50%"
+        width="100%"
+        height="100%"
       >
-        <Box>
+        <Box padding="2%">
           <Typography variant="h4">Modify</Typography>
           <Typography>{`${dirBeingModified}`}</Typography>
           <Grid container>

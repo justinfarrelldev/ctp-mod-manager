@@ -32,8 +32,6 @@ export const ModifyInstallView: FC<Props> = ({
           <Grid container>
             <Grid item>
               <Typography variant="h6">Mod List</Typography>
-            </Grid>
-            <Grid item>
               <Tooltip title="Add a mod to the mod list (this simply adds the mod to your mod storage directory)">
                 <div>
                   <input
@@ -66,8 +64,8 @@ export const ModifyInstallView: FC<Props> = ({
         </Grid>
         <Grid item xs={6}>
           <Grid container>
-            <Typography variant="h6">Mods To Be Applied</Typography>
             <Grid item>
+              <Typography variant="h6">Mods To Be Applied</Typography>
               {queuedMods.map((modName) => (
                 <Card
                   key={modName}

@@ -7,6 +7,7 @@ import { AUTO_DETECT_INSTALL_TEXT } from './constants';
 import { InstallDirTable } from './components/InstallDirTable';
 import { IZipEntry } from 'adm-zip';
 import { ErrorModal } from './components/ErrorModal';
+import { ModifyInstallView } from './components/ModifyInstallView';
 
 export type ElectronWindow = Window &
   typeof globalThis & {
@@ -173,86 +174,23 @@ export const App: FC = (): React.ReactElement => {
         width="100%"
         height="100%"
       >
-        <Box padding="2%">
-          <Button onClick={() => setDirBeingModified('')}>Back</Button>
-          <Typography variant="h4">Modify</Typography>
-          <Typography>{`${dirBeingModified}`}</Typography>
-          <Grid container>
-            <Grid item xs={6}>
-              <Grid container>
-                <Grid item>
-                  <Typography variant="h6">Mod List</Typography>
-                </Grid>
-                <Grid item>
-                  <Tooltip title="Add a mod to the mod list (this simply adds the mod to your mod storage directory)">
-                    <div>
-                      <input
-                        onChange={handleFileSelected}
-                        accept=".zip"
-                        id="add-mod-button"
-                        type="file"
-                        hidden
-                      />
-                      {modNamesAdded !== undefined &&
-                        modNamesAdded.map((modName, index) => (
-                          <Button
-                            variant="outlined"
-                            key={modName}
-                            onClick={async () => {
-                              setModNamesQueued([...modNamesQueued, modName]);
-                              setModNamesAdded(modNamesAdded.filter((value) => value !== modName));
-                              viewFileDirsInZip(`${await getModsDir()}\\${modName}`); // FIXME 100% temporary
-                            }}
-                          >
-                            {modName}
-                          </Button>
-                        ))}
-                      <label htmlFor="add-mod-button">
-                        <Button component="span">Add a Mod (Zip File)</Button>
-                      </label>
-                    </div>
-                  </Tooltip>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={6}>
-              <Grid container>
-                <Typography variant="h6">Mods To Be Applied</Typography>
-                <Grid item>
-                  {modNamesQueued.map((modName) => (
-                    <Button
-                      variant="outlined"
-                      key={modName}
-                      onClick={() => {
-                        setModNamesQueued(modNamesQueued.filter((value) => value !== modName));
-                        setModNamesAdded([...modNamesAdded, modName]);
-                      }}
-                    >
-                      {modName}
-                    </Button>
-                  ))}
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                variant="outlined"
-                onClick={() => alert('would apply mods')}
-                disabled={!modNamesQueued.length}
-              >
-                Apply Mods
-              </Button>
-              <Button variant="outlined" onClick={() => openModsDir()}>
-                Open Mods Folder
-              </Button>
-            </Grid>
-            <Grid item xs={6}>
-              <Grid container>
-                <Typography variant="h6">Files Changed by Mods</Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Box>
+        <ModifyInstallView
+          onBackClicked={() => setDirBeingModified('')}
+          dirBeingModified={dirBeingModified}
+          onModSelected={handleFileSelected}
+          onQueueMod={async (modName: string) => {
+            setModNamesQueued([...modNamesQueued, modName]);
+            setModNamesAdded(modNamesAdded.filter((value) => value !== modName));
+            viewFileDirsInZip(`${await getModsDir()}\\${modName}`); // FIXME 100% temporary
+          }}
+          onDequeueMod={async (modName: string) => {
+            setModNamesQueued(modNamesQueued.filter((value) => value !== modName));
+            setModNamesAdded([...modNamesAdded, modName]);
+          }}
+          addedMods={modNamesAdded}
+          queuedMods={modNamesQueued}
+          onOpenModsDir={() => openModsDir()}
+        />
       </Modal>
       <Modal width="50%" open={installDirModalOpen} onClose={handleInstallDirModalClose}>
         <Box>

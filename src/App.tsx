@@ -136,14 +136,13 @@ export const App: FC = (): React.ReactElement => {
       <Grid container>
         <Grid item xs={6}>
           <Box display="flex">
-            <Typography variant="h3">Call to Power Mod Manager</Typography>
+            <Typography variant="h4">Call to Power 2 Installations</Typography>
           </Box>
         </Grid>
         <Grid item xs={6} textAlign="right">
           <Settings onClick={() => setSettingsOpen(true)} />
         </Grid>
       </Grid>
-      <Typography variant="h4">Call to Power 2 Installations</Typography>
 
       {error && (
         <ErrorModal
@@ -175,6 +174,7 @@ export const App: FC = (): React.ReactElement => {
         height="100%"
       >
         <Box padding="2%">
+          <Button onClick={() => setDirBeingModified('')}>Back</Button>
           <Typography variant="h4">Modify</Typography>
           <Typography>{`${dirBeingModified}`}</Typography>
           <Grid container>

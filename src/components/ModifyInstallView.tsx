@@ -1,6 +1,5 @@
-import { Box, Button, Typography, Grid, Tooltip } from '@mui/material';
+import { Box, Button, Typography, Grid, Tooltip, Card, CardContent } from '@mui/material';
 import React, { FC } from 'react';
-import { viewFileDirsInZip } from '../electron/file/viewFilesInZip';
 
 type Props = {
   onBackClicked: () => void;
@@ -46,15 +45,16 @@ export const ModifyInstallView: FC<Props> = ({
                   />
                   {addedMods !== undefined &&
                     addedMods.map((modName, index) => (
-                      <Button
-                        variant="outlined"
+                      <Card
                         key={modName}
-                        onClick={async () => {
+                        onClick={() => {
                           onQueueMod(modName);
                         }}
                       >
-                        {modName}
-                      </Button>
+                        <CardContent>
+                          <Typography>{modName}</Typography>
+                        </CardContent>
+                      </Card>
                     ))}
                   <label htmlFor="add-mod-button">
                     <Button component="span">Add a Mod (Zip File)</Button>
@@ -69,15 +69,16 @@ export const ModifyInstallView: FC<Props> = ({
             <Typography variant="h6">Mods To Be Applied</Typography>
             <Grid item>
               {queuedMods.map((modName) => (
-                <Button
-                  variant="outlined"
+                <Card
                   key={modName}
                   onClick={() => {
                     onDequeueMod(modName);
                   }}
                 >
-                  {modName}
-                </Button>
+                  <CardContent>
+                    <Typography>{modName}</Typography>
+                  </CardContent>
+                </Card>
               ))}
             </Grid>
           </Grid>

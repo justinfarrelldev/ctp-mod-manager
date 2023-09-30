@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
     - name: Use Node.js ${{ matrix.node-version }}
     - env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref_name }}
-      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'

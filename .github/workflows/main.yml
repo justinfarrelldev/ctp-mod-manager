@@ -1,5 +1,5 @@
 name: create-release
-run-name: Push to Main 
+run-name: Create Release
 on:
   push:
     branches: [ $default-branch ]

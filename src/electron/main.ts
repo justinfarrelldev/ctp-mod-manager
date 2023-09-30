@@ -16,6 +16,7 @@ import { getInstallDirs } from './file/getInstallDirs';
 import { runGame } from './file/runGame';
 import { removeFromInstallDirs } from './file/removeFromInstallDirs';
 import { makeBackup } from './file/makeBackup';
+import { applyModsToInstall } from './file/applyModsToInstall';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -75,6 +76,8 @@ app.whenReady().then(() => {
   ipcMain.handle('file:removeFromInstallDirs', (event, dir) => removeFromInstallDirs(dir));
 
   ipcMain.handle('file:makeBackup', (event, dir) => makeBackup(dir));
+
+  ipcMain.handle('file:applyModsToInstall', (event, dir, mods) => applyModsToInstall(dir, mods));
 
   createWindow();
 });

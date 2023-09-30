@@ -38,6 +38,11 @@ export type ElectronWindow = Window &
         dir: string
       ) => Promise<void>;
       makeBackup: (ipcCommand: 'file:makeBackup', installDir: string) => Promise<void>;
+      applyModsToInstall: (
+        ipcCommand: 'file:applyModsToInstall',
+        installDir: string,
+        mods: string[]
+      ) => Promise<void>;
     };
   };
 

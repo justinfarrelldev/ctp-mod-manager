@@ -19,4 +19,6 @@ contextBridge.exposeInMainWorld('api', {
   runGame: (event, exeDir) => ipcRenderer.invoke('file:runGame', exeDir),
   removeFromInstallDirs: (event, dir) => ipcRenderer.invoke('file:removeFromInstallDirs', dir),
   makeBackup: (event, dir) => ipcRenderer.invoke('file:makeBackup', dir),
+  applyModsToInstall: (event, dir, mods) =>
+    ipcRenderer.invoke('file:applyModsToInstall', dir, mods),
 });

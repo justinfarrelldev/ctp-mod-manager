@@ -25,7 +25,11 @@ export const ModifyInstallView: FC<Props> = ({
 }): React.ReactElement => {
   const applyMods = (installDirToApplyTo: string) => {
     (window as ElectronWindow).api.makeBackup('file:makeBackup', installDirToApplyTo);
-    // apply the mods in queue order
+    (window as ElectronWindow).api.applyModsToInstall(
+      'file:applyModsToInstall',
+      installDirToApplyTo,
+      queuedMods
+    );
   };
 
   return (

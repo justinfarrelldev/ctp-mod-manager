@@ -23,8 +23,9 @@ export const applyModsToInstall = (installDir: string, queuedMods: string[]) => 
     }
 
     if (statsOfFile) {
-      if (!statsOfFile.isFile()) {
-        console.error(`Error: ${`${DEFAULT_MOD_DIR}\\${mod}`} is not a file.`);
+      if (!statsOfFile.isDirectory()) {
+        console.error(`Error: ${`${DEFAULT_MOD_DIR}\\${mod}`} is not a directory.`);
+        return;
       }
     }
 

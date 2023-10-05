@@ -8,7 +8,7 @@
     "start": "electron-forge start",
     "lint": "eslint .",
     "package": "electron-forge package --arch=x64 --platform=win32",
-    "make": "electron-forge make"
+    "make": "electron-forge make --arch=x64 --platform=win32"
   },
   "keywords": [],
   "author": "",

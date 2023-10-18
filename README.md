@@ -26,6 +26,15 @@ All of the changes it makes aim to be non-destructive and entirely reversible.
 
 The mod manager provides a diff view so you can see which files and lines each mod affects. This should allow you to safely add multiple mods together with confidence!
 
+# Debugging
+
+If you encounter this error:
+
+An unhandled rejection has occurred inside Forge:
+Error: EPERM: operation not permitted, rmdir 'C:\Users\YOUR~1.NAME\AppData\Local\Temp\electron-packager\win32-x64\ctp-mod-manager-win32-x64-FBAsa7\resources\app\.github\workflows'
+
+...then you should try going to `C:\Users\YOUR~1.NAME\AppData\Local\Temp` and `rm -rf` the `electron-packager` folder.
+
 # F.A.Q.
 
 _Why Electron?_

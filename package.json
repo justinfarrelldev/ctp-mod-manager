@@ -1,24 +1,21 @@
 {
   "name": "ctp-mod-manager",
   "version": "1.0.0",
-  "description": "",
-  "main": ".vite/build/main.js",
+  "main": "src/electron/main.ts",
+  "description": "The Call to Power Mod Manager",
+  "author": "Justin Farrell",
   "scripts": {
     "test:integration": "jest --group=integration",
-    "start": "electron-forge start",
+    "start": "env-cmd -f .env.development electron-forge start",
     "lint": "eslint .",
-    "package": "electron-forge package --arch=x64 --platform=win32",
-    "make": "rm -rf .vite && electron-forge make --platform=win32 --overwrite --tmpdir=false"
+    "package": "env-cmd -f .env.production electron-forge package --arch=x64 --platform=win32",
+    "make": "env-cmd -f .env.production rm -rf .vite && electron-forge make --platform=win32"
   },
   "keywords": [],
-  "author": "",
   "license": "LGPL-2.1-or-later",
   "devDependencies": {
     "@electron-forge/cli": "6.4.2",
-    "@electron-forge/maker-deb": "6.4.2",
-    "@electron-forge/maker-rpm": "6.4.2",
     "@electron-forge/maker-squirrel": "6.4.2",
-    "@electron-forge/maker-zip": "6.4.2",
     "@electron-forge/plugin-auto-unpack-natives": "6.4.2",
     "@electron-forge/plugin-vite": "6.4.2",
     "@electron-internal/eslint-config": "^1.0.1",

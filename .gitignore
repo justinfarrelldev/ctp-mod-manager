@@ -1,5 +1,6 @@
 node_modules
 .env.development
+.env.production
 *.js
 *.js.map
 dist

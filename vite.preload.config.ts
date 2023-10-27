@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
 
-export default defineConfig({
-  plugins: [],
-});
+// https://vitejs.dev/config
+export default defineConfig({});

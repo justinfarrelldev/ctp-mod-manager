@@ -1,7 +1,7 @@
 {
   "name": "ctp-mod-manager",
   "version": "1.0.0",
-  "main": "src/electron/main.ts",
+  "main": ".vite/build/main.js",
   "description": "The Call to Power Mod Manager",
   "author": "Justin Farrell",
   "scripts": {
@@ -46,6 +46,9 @@
     "wait-on": "^7.0.1"
   },
   "dependencies": {
+    "@electron-forge/maker-deb": "^6.4.2",
+    "@electron-forge/maker-rpm": "^6.4.2",
+    "@electron-forge/maker-zip": "^6.4.2",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/icons-material": "^5.11.16",

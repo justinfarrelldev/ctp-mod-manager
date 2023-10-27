@@ -6,10 +6,10 @@
   "author": "Justin Farrell",
   "scripts": {
     "test:integration": "jest --group=integration",
-    "start": "env-cmd -f .env.development electron-forge start",
+    "start": "electron-forge start",
     "lint": "eslint .",
-    "package": "env-cmd -f .env.production electron-forge package --arch=x64 --platform=win32",
-    "make": "env-cmd -f .env.production rm -rf .vite && electron-forge make --platform=win32"
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "keywords": [],
   "license": "LGPL-2.1-or-later",

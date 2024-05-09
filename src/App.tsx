@@ -153,6 +153,10 @@ export const App: FC = (): React.ReactElement => {
         </Grid>
       </Grid>
 
+      <h1 className="text-orange-200">Orange!</h1>
+
+      <button className="btn btn-primary">This is a test</button>
+
       {error && (
         <ErrorModal
           open={error.length > 0}
@@ -207,15 +211,15 @@ export const App: FC = (): React.ReactElement => {
               <Typography textAlign="center">{AUTO_DETECT_INSTALL_TEXT}</Typography>
             </Grid>
             <Grid item xs={6} textAlign="center">
-              <Button
+              <button
                 onClick={() => {
                   findInstallDirs();
                   handleInstallDirModalClose();
                 }}
-                variant="outlined"
+                className="btn btn-primary"
               >
                 Yes
-              </Button>
+              </button>
             </Grid>
             <Grid item xs={6} textAlign="center">
               <Button

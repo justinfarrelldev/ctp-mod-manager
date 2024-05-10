@@ -2,7 +2,6 @@
     Holds a table which displays the user-specified installation directories
 */
 
-import { Folder, BuildCircle, PlayCircle, Delete } from '@mui/icons-material';
 import { Grid, Tooltip, Button, Typography } from '@mui/material';
 import React, { FC, useState } from 'react';
 import { ElectronWindow, InstallDirectory } from '../App';

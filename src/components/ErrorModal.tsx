@@ -14,17 +14,16 @@ export const ErrorModal: FC<Props> = (props: Props): React.ReactElement => {
             width="50%"
             open={props.open}
             onClose={props.onClose}
-            modalName="An error occurred"
-        >
-            <>
-                <Typography variant="h3">An Error Occurred</Typography>
-                <Typography>{props.errorMessage}</Typography>
-                <br></br>
-                <Typography>
-                    Please try again and feel free to submit an issue if this
-                    problem persists.
-                </Typography>
-            </>
-        </Modal>
+            modalName="An Error Occurred"
+            text={`The error: ${props.errorMessage}\n\nPlease try again and feel free to submit an issue if this
+            problem persists.`}
+            buttons={[
+                {
+                    text: 'Close',
+                    onClick: props.onClose,
+                    color: 'neutral',
+                },
+            ]}
+        />
     );
 };

@@ -85,36 +85,27 @@ export const InstallDirTable: FC<Props> = ({
                             open={deletePopupOpen !== ''}
                             onClose={() => setDeletePopupOpen('')}
                             modalName="Remove Installation From Mod Manager"
-                        >
-                            <>
-                                <Typography variant="h3">
-                                    Are you sure?
-                                </Typography>
-                                <Typography>{`This will remove the installation from the "installations" list in the mod manager, but it will not delete any actual files.`}</Typography>
-                                <br></br>
-                                <Grid container>
-                                    <Grid item xs={6}>
-                                        <Button
-                                            onClick={() => {
-                                                removeInstall(deletePopupOpen);
-                                                setDeletePopupOpen('');
-                                            }}
-                                        >
-                                            Yes, do it!
-                                        </Button>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Button
-                                            onClick={() =>
-                                                setDeletePopupOpen('')
-                                            }
-                                        >
-                                            No
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </>
-                        </Modal>
+                            text={
+                                'This will remove the installation from the "installations" list in the mod manager, but it will not delete any actual files. Are you sure you want to do this?'
+                            }
+                            buttons={[
+                                {
+                                    text: 'Yes',
+                                    onClick: () => {
+                                        removeInstall(deletePopupOpen);
+                                        setDeletePopupOpen('');
+                                    },
+                                    color: 'primary',
+                                },
+                                {
+                                    text: 'No',
+                                    onClick: () => {
+                                        setDeletePopupOpen('');
+                                    },
+                                    color: 'neutral',
+                                },
+                            ]}
+                        />
                     )}
                     <Grid
                         container

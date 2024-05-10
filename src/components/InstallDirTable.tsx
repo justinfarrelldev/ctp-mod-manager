@@ -7,6 +7,10 @@ import { Grid, Tooltip, Button, Typography } from '@mui/material';
 import React, { FC, useState } from 'react';
 import { ElectronWindow, InstallDirectory } from '../App';
 import { Modal } from './Modal';
+import { FolderIcon } from './icons/folder';
+import { WrenchIcon } from './icons/wrench';
+import { TrashIcon } from './icons/trash';
+import { PlayIcon } from './icons/play';
 
 interface Props {
     installDirs: InstallDirectory[];
@@ -119,7 +123,7 @@ export const InstallDirTable: FC<Props> = ({
                                             openInstallDir(dir.directory)
                                         }
                                     >
-                                        <Folder />
+                                        <FolderIcon />
                                     </Button>
                                 </span>
                             </Tooltip>
@@ -130,7 +134,7 @@ export const InstallDirTable: FC<Props> = ({
                                             onClickModify(dir.directory);
                                         }}
                                     >
-                                        <BuildCircle />
+                                        <WrenchIcon />
                                     </Button>
                                 </span>
                             </Tooltip>
@@ -141,7 +145,7 @@ export const InstallDirTable: FC<Props> = ({
                                             setDeletePopupOpen(dir.directory);
                                         }}
                                     >
-                                        <Delete />
+                                        <TrashIcon />
                                     </Button>
                                 </span>
                             </Tooltip>
@@ -153,7 +157,7 @@ export const InstallDirTable: FC<Props> = ({
                                             runGame(dir.directory);
                                         }}
                                     >
-                                        <PlayCircle />
+                                        <PlayIcon />
                                     </Button>
                                 </span>
                             </Tooltip>

@@ -9,6 +9,7 @@ import { FolderIcon } from './icons/folder';
 import { WrenchIcon } from './icons/wrench';
 import { TrashIcon } from './icons/trash';
 import { PlayIcon } from './icons/play';
+import { InstallationPathText } from './InstallationPathText';
 
 interface Props {
     installDirs: InstallDirectory[];
@@ -149,10 +150,14 @@ export const InstallDirTable: FC<Props> = ({
                                 </button>
                             </span>
                         </div>
-                        <div className="flex justify-start space-x-4">
-                            <p className="text-lg font-bold text-primary">{`[${dir.installationType.toUpperCase()}]`}</p>
-                            <p className="text-lg text-primary">{`${dir.directory}`}</p>
-                        </div>
+                        <InstallationPathText
+                            dir={dir.directory}
+                            installationType={
+                                dir.installationType.toUpperCase() as
+                                    | 'steam'
+                                    | 'gog'
+                            }
+                        />
                     </div>
                 </div>
             ))}

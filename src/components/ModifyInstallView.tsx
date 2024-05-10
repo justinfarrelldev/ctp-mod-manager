@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import React, { FC } from 'react';
 import { ElectronWindow } from '../App';
+import { InstallationPathText } from './InstallationPathText';
 
 type Props = {
     onBackClicked: () => void;
@@ -46,7 +47,7 @@ export const ModifyInstallView: FC<Props> = ({
     return (
         <div>
             <Box padding="2%">
-                <Typography>{`${dirBeingModified}`}</Typography>
+                <InstallationPathText dir={dirBeingModified} />
                 <Grid container>
                     <Grid item xs={6}>
                         <Grid container>

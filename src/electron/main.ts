@@ -24,75 +24,90 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 let win: BrowserWindow;
 
 const createWindow = () => {
-  // Create the browser window.
-  win = new BrowserWindow({
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-    },
-  });
+    // Create the browser window.
+    win = new BrowserWindow({
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
+        },
+    });
 
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
-  } else {
-    win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
-  }
-  // Open the DevTools.
-  if (isDev) {
-    win.webContents.openDevTools({ mode: 'detach' });
-  }
+    if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+        win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    } else {
+        win.loadFile(
+            path.join(
+                __dirname,
+                `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`
+            )
+        );
+    }
+    // Open the DevTools.
+    if (isDev) {
+        win.webContents.openDevTools({ mode: 'detach' });
+    }
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  ipcMain.handle('load:getCtp2InstallDir', getInstallDirectories);
+    ipcMain.handle('load:getCtp2InstallDir', getInstallDirectories);
 
-  ipcMain.on('file:openInstallDir', (event, dir) => shell.openPath(dir));
+    ipcMain.on('file:openInstallDir', (event, dir) => shell.openPath(dir));
 
-  ipcMain.on('file:openModsDir', () => shell.openPath(DEFAULT_MOD_DIR));
+    ipcMain.on('file:openModsDir', () => shell.openPath(DEFAULT_MOD_DIR));
 
-  ipcMain.handle('file:viewFileDirsInZip', (event, zipFilePath) => viewFileDirsInZip(zipFilePath));
+    ipcMain.handle('file:viewFileDirsInZip', (event, zipFilePath) =>
+        viewFileDirsInZip(zipFilePath)
+    );
 
-  ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
+    ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
 
-  ipcMain.handle('file:copyFileToModDir', (event, fileDir) => copyFileToModDir(fileDir));
+    ipcMain.handle('file:copyFileToModDir', (event, fileDir) =>
+        copyFileToModDir(fileDir)
+    );
 
-  ipcMain.handle('file:loadMods', () => loadMods());
+    ipcMain.handle('file:loadMods', () => loadMods());
 
-  ipcMain.handle('file:getModsDir', () => DEFAULT_MOD_DIR);
+    ipcMain.handle('file:getModsDir', () => DEFAULT_MOD_DIR);
 
-  ipcMain.handle('file:selectFolder', () => selectFolder(win));
+    ipcMain.handle('file:selectFolder', () => selectFolder(win));
 
-  ipcMain.handle('file:isValidInstall', (event, dir) => isValidInstall(dir));
+    ipcMain.handle('file:isValidInstall', (event, dir) => isValidInstall(dir));
 
-  ipcMain.handle('file:addToInstallDirs', (event, dir) => addToInstallDirs(dir));
+    ipcMain.handle('file:addToInstallDirs', (event, dir) =>
+        addToInstallDirs(dir)
+    );
 
-  ipcMain.handle('file:getInstallDirs', () => getInstallDirs());
+    ipcMain.handle('file:getInstallDirs', () => getInstallDirs());
 
-  ipcMain.handle('file:runGame', (event, exeDir) => runGame(exeDir));
+    ipcMain.handle('file:runGame', (event, exeDir) => runGame(exeDir));
 
-  ipcMain.handle('file:removeFromInstallDirs', (event, dir) => removeFromInstallDirs(dir));
+    ipcMain.handle('file:removeFromInstallDirs', (event, dir) =>
+        removeFromInstallDirs(dir)
+    );
 
-  ipcMain.handle('file:makeBackup', (event, dir) => makeBackup(dir));
+    ipcMain.handle('file:makeBackup', (event, dir) => makeBackup(dir));
 
-  ipcMain.handle('file:applyModsToInstall', (event, dir, mods) => applyModsToInstall(dir, mods));
+    ipcMain.handle('file:applyModsToInstall', (event, dir, mods) =>
+        applyModsToInstall(dir, mods)
+    );
 
-  createWindow();
+    createWindow();
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
 });

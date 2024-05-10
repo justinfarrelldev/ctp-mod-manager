@@ -7,10 +7,10 @@ This is a mod manager intended for use with the Call to Power series of games (h
 
 # Plans for the Future
 
-- [] Fill out more tests to cover common cases
-- [] Make long-running calls to the backend asynchronous
-- [] Make scenario mods apply successfully
-- [] Add fallbacks for common mods (such as Spyroviper's mod) which have different folder structures
+-   [] Fill out more tests to cover common cases
+-   [] Make long-running calls to the backend asynchronous
+-   [] Make scenario mods apply successfully
+-   [] Add fallbacks for common mods (such as Spyroviper's mod) which have different folder structures
 
 # Features
 

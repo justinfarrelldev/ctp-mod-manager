@@ -2,8 +2,8 @@
 
 There are a few different steps to get started with this repo. To get started, you will need:
 
-- `Node` and `npm` installed (nvm is highly recommended - the repo is set up so that you can simply run `nvm use` in the root to install the correct versions automatically)
-- Create a `.env.development` file locally
+-   `Node` and `npm` installed (nvm is highly recommended - the repo is set up so that you can simply run `nvm use` in the root to install the correct versions automatically)
+-   Create a `.env.development` file locally
 
 From here, you can start the dev server with:
 

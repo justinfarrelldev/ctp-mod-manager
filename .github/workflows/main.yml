@@ -1,34 +1,34 @@
 name: create-release
 run-name: Create Release
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - v*
-  pull_request:
-    branches:
-      - main
-    tags:
-      - v*
+    push:
+        branches:
+            - main
+        tags:
+            - v*
+    pull_request:
+        branches:
+            - main
+        tags:
+            - v*
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref_name }}
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run make --if-present
-      - run: npm test
-      - run: |
-          gh release create "$tag" \
-          --repo="$GITHUB_REPOSITORY" \
-          --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-          --generate-notes
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  tag: ${{ github.ref_name }}
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'npm'
+            - run: npm ci
+            - run: npm run make --if-present
+            - run: npm test
+            - run: |
+                  gh release create "$tag" \
+                  --repo="$GITHUB_REPOSITORY" \
+                  --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+                  --generate-notes

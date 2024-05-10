@@ -1,4 +1,3 @@
-import { Grid, MenuItem, Select, TextField, Typography } from '@mui/material';
 import React, { FC, useState } from 'react';
 import Cookie from 'js-cookie';
 
@@ -17,24 +16,24 @@ export const Settings: FC = (): React.ReactElement => {
 
     return (
         <>
-            <Typography>General Settings</Typography>
-            <Grid container>
-                <Grid item xs={12} paddingBottom={4}>
-                    <Select label="Theme" defaultValue="light">
-                        <MenuItem value="light">Light</MenuItem>
-                        <MenuItem value="cafe">Cafe</MenuItem>
-                        <MenuItem value="dark">Dark</MenuItem>
-                        <MenuItem value="tokyo-night">Tokyo Night</MenuItem>
-                        <MenuItem value="amoled">Amoled</MenuItem>
-                    </Select>
-                </Grid>
-                <Grid item>
-                    <TextField
-                        variant="outlined"
-                        label="Mod Storage Directory"
-                    ></TextField>
-                </Grid>
-            </Grid>
+            <p className="text-xl">General Settings</p>
+            <p className="text-lg">Theme</p>
+            <div className="dropdown">
+                <div tabIndex={0} role="button" className="btn m-1">
+                    Click
+                </div>
+                <ul
+                    tabIndex={0}
+                    className="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow"
+                >
+                    <li>
+                        <a onClick={() => alert('clicked 1')}>Item 1</a>
+                    </li>
+                    <li>
+                        <a onClick={() => alert('clicked 2')}>Item 2</a>
+                    </li>
+                </ul>
+            </div>
         </>
     );
 };

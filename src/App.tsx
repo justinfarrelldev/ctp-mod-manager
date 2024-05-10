@@ -180,14 +180,15 @@ export const App: FC = (): React.ReactElement => {
     }, []);
 
     return (
-        <>
-            <p className="top-2 text-2xl">Call to Power 2 Installations</p>
-            <div className="absolute right-0 top-2 h-16 w-16">
-                <button onClick={() => setSettingsOpen(true)}>
-                    <SettingsIcon />
-                </button>
+        <div className="p-6">
+            <div className="flex justify-between">
+                <p className="top-2 text-2xl">Call to Power 2 Installations</p>
+                <div className="right-0 top-2 h-16 w-16">
+                    <button onClick={() => setSettingsOpen(true)}>
+                        <SettingsIcon />
+                    </button>
+                </div>
             </div>
-
             {error && (
                 <ErrorModal
                     open={error.length > 0}
@@ -287,6 +288,6 @@ export const App: FC = (): React.ReactElement => {
                     },
                 ]}
             />
-        </>
+        </div>
     );
 };

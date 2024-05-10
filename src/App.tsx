@@ -213,6 +213,15 @@ export const App: FC = (): React.ReactElement => {
                     width="50%"
                     open={settingsOpen}
                     onClose={() => setSettingsOpen(false)}
+                    modalName="Settings"
+                    text=""
+                    buttons={[
+                        {
+                            text: 'Close',
+                            onClick: () => setSettingsOpen(false),
+                            color: 'neutral',
+                        },
+                    ]}
                 >
                     <SettingsMenu />
                 </Modal>
@@ -230,6 +239,15 @@ export const App: FC = (): React.ReactElement => {
                 }}
                 width="100%"
                 height="100%"
+                modalName="Modify Installations"
+                buttons={[
+                    {
+                        text: 'Close',
+                        onClick: () => setDirBeingModified(''),
+                        color: 'neutral',
+                    },
+                ]}
+                text=""
             >
                 <ModifyInstallView
                     onBackClicked={() => setDirBeingModified('')}
@@ -257,38 +275,26 @@ export const App: FC = (): React.ReactElement => {
                 width="50%"
                 open={installDirModalOpen}
                 onClose={handleInstallDirModalClose}
-            >
-                <Box>
-                    <Grid container rowSpacing="1rem">
-                        <Grid item xs={12}>
-                            <Typography textAlign="center">
-                                {AUTO_DETECT_INSTALL_TEXT}
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={6} textAlign="center">
-                            <button
-                                onClick={() => {
-                                    findInstallDirs();
-                                    handleInstallDirModalClose();
-                                }}
-                                className="btn btn-primary"
-                            >
-                                Yes
-                            </button>
-                        </Grid>
-                        <Grid item xs={6} textAlign="center">
-                            <Button
-                                onClick={() => {
-                                    handleInstallDirModalClose();
-                                }}
-                                variant="outlined"
-                            >
-                                No
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Box>
-            </Modal>
+                modalName="Installation Auto-Detection"
+                text={AUTO_DETECT_INSTALL_TEXT}
+                buttons={[
+                    {
+                        text: 'Yes',
+                        onClick: () => {
+                            findInstallDirs();
+                            handleInstallDirModalClose();
+                        },
+                        color: 'primary',
+                    },
+                    {
+                        text: 'No',
+                        onClick: () => {
+                            handleInstallDirModalClose();
+                        },
+                        color: 'neutral',
+                    },
+                ]}
+            />
         </>
     );
 };

@@ -21,10 +21,10 @@ export const Modal: FC<ModalProps> = (
     return (
         <dialog id={props.modalName} className="modal" open={props.open}>
             <div className="modal-box">
-                <p className="text-xl">{props.modalName}</p>
+                <p className="pb-4 text-xl font-bold">{props.modalName}</p>
                 <p className="text-l">{props.text}</p>
                 {props.children && <>{props.children}</>}
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-4">
                     {props.buttons.map((btn) => (
                         <button
                             key={btn.text.replaceAll(' ', '')}

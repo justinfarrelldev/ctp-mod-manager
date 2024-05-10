@@ -6,6 +6,7 @@ import { InstallDirTable } from './components/InstallDirTable';
 import { ErrorModal } from './components/ErrorModal';
 import { ModifyInstallView } from './components/ModifyInstallView';
 import { SettingsIcon } from './components/icons/settings';
+import { themeChange } from 'theme-change';
 
 export type ElectronWindow = Window &
     typeof globalThis & {
@@ -177,6 +178,8 @@ export const App: FC = (): React.ReactElement => {
     useEffect(() => {
         loadMods();
         loadInstallDirs();
+        themeChange(false);
+        // 👆 false parameter is required for react project
     }, []);
 
     return (

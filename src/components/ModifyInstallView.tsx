@@ -44,92 +44,95 @@ export const ModifyInstallView: FC<Props> = ({
     };
 
     return (
-        <Box padding="2%">
-            <Button onClick={() => onBackClicked()}>Back</Button>
-            <Typography variant="h4">Modify</Typography>
-            <Typography>{`${dirBeingModified}`}</Typography>
-            <Grid container>
-                <Grid item xs={6}>
-                    <Grid container>
-                        <Grid item>
-                            <Typography variant="h6">Mod List</Typography>
-                            <Tooltip title="Add a mod to the mod list (this simply adds the mod to your mod storage directory)">
-                                <div>
-                                    <input
-                                        onChange={onModSelected}
-                                        accept=".zip"
-                                        id="add-mod-button"
-                                        type="file"
-                                        hidden
-                                    />
-                                    {addedMods !== undefined &&
-                                        addedMods.map((modName, index) => (
-                                            <Card
-                                                key={modName}
-                                                onClick={() => {
-                                                    onQueueMod(modName);
-                                                }}
-                                            >
-                                                <CardContent>
-                                                    <Typography>
-                                                        {modName}
-                                                    </Typography>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    <label htmlFor="add-mod-button">
-                                        <Button component="span">
-                                            Add a Mod (Zip File)
-                                        </Button>
-                                    </label>
-                                </div>
-                            </Tooltip>
+        <div>
+            <Box padding="2%">
+                <Typography>{`${dirBeingModified}`}</Typography>
+                <Grid container>
+                    <Grid item xs={6}>
+                        <Grid container>
+                            <Grid item>
+                                <Typography variant="h6">Mod List</Typography>
+                                <Tooltip title="Add a mod to the mod list (this simply adds the mod to your mod storage directory)">
+                                    <div>
+                                        <input
+                                            onChange={onModSelected}
+                                            accept=".zip"
+                                            id="add-mod-button"
+                                            type="file"
+                                            hidden
+                                        />
+                                        {addedMods !== undefined &&
+                                            addedMods.map((modName, index) => (
+                                                <Card
+                                                    key={modName}
+                                                    onClick={() => {
+                                                        onQueueMod(modName);
+                                                    }}
+                                                >
+                                                    <CardContent>
+                                                        <Typography>
+                                                            {modName}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                        <label htmlFor="add-mod-button">
+                                            <Button component="span">
+                                                Add a Mod (Zip File)
+                                            </Button>
+                                        </label>
+                                    </div>
+                                </Tooltip>
+                            </Grid>
                         </Grid>
                     </Grid>
-                </Grid>
-                <Grid item xs={6}>
-                    <Grid container>
-                        <Grid item>
+                    <Grid item xs={6}>
+                        <Grid container>
+                            <Grid item>
+                                <Typography variant="h6">
+                                    Mods To Be Applied
+                                </Typography>
+                                {queuedMods.map((modName) => (
+                                    <Card
+                                        key={modName}
+                                        onClick={() => {
+                                            onDequeueMod(modName);
+                                        }}
+                                    >
+                                        <CardContent>
+                                            <Typography>{modName}</Typography>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => {
+                                applyMods(dirBeingModified);
+                            }}
+                            disabled={!queuedMods.length}
+                        >
+                            Apply Mods
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={() => onOpenModsDir()}
+                        >
+                            Open Mods Folder
+                        </Button>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Grid container>
                             <Typography variant="h6">
-                                Mods To Be Applied
+                                Files Changed by Mods
                             </Typography>
-                            {queuedMods.map((modName) => (
-                                <Card
-                                    key={modName}
-                                    onClick={() => {
-                                        onDequeueMod(modName);
-                                    }}
-                                >
-                                    <CardContent>
-                                        <Typography>{modName}</Typography>
-                                    </CardContent>
-                                </Card>
-                            ))}
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            applyMods(dirBeingModified);
-                        }}
-                        disabled={!queuedMods.length}
-                    >
-                        Apply Mods
-                    </Button>
-                    <Button variant="outlined" onClick={() => onOpenModsDir()}>
-                        Open Mods Folder
-                    </Button>
-                </Grid>
-                <Grid item xs={6}>
-                    <Grid container>
-                        <Typography variant="h6">
-                            Files Changed by Mods
-                        </Typography>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Box>
+            </Box>
+        </div>
     );
 };

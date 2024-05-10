@@ -232,7 +232,7 @@ export const App: FC = (): React.ReactElement => {
                 }}
                 width="100%"
                 height="100%"
-                modalName="Modify Installations"
+                modalName="Modify Installation"
                 buttons={[
                     {
                         text: 'Close',

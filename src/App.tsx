@@ -1,18 +1,8 @@
 import React, { FC, useEffect, useState } from 'react';
-import {
-    Typography,
-    Box,
-    Grid,
-    CircularProgress as Loader,
-    Tooltip,
-    Button,
-} from '@mui/material';
-import { Settings } from '@mui/icons-material';
 import { Settings as SettingsMenu } from './components/Settings';
 import { Modal } from './components/Modal';
 import { AUTO_DETECT_INSTALL_TEXT } from './constants';
 import { InstallDirTable } from './components/InstallDirTable';
-import { IZipEntry } from 'adm-zip';
 import { ErrorModal } from './components/ErrorModal';
 import { ModifyInstallView } from './components/ModifyInstallView';
 import { SettingsIcon } from './components/icons/settings';
@@ -207,7 +197,9 @@ export const App: FC = (): React.ReactElement => {
                     }}
                 />
             )}
-            {loadingDirs && <Loader />}
+            {loadingDirs && (
+                <span className="loading loading-ring loading-lg"></span>
+            )}
             {settingsOpen && (
                 <Modal
                     width="50%"

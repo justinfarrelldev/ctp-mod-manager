@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
-import { Modal, ModalProps } from './Modal';
-import { Typography } from '@mui/material';
+import { Modal } from './Modal';
 
 interface Props {
     errorMessage: string;

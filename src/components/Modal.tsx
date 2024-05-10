@@ -27,6 +27,7 @@ export const Modal: FC<ModalProps> = (
                 <div className="flex justify-between">
                     {props.buttons.map((btn) => (
                         <button
+                            key={btn.text.replaceAll(' ', '')}
                             className={`btn btn-${btn.color}`}
                             onClick={btn.onClick}
                         >

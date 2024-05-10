@@ -110,66 +110,51 @@ export const InstallDirTable: FC<Props> = ({
                             ]}
                         />
                     )}
-                    <Grid
-                        container
-                        key={`${dir.os}${dir.installationType}${dir.directory}`}
-                    >
-                        <Grid item xs={6}>
-                            <Tooltip title="View files">
-                                <span>
-                                    <Button
-                                        onClick={() =>
-                                            openInstallDir(dir.directory)
-                                        }
-                                    >
-                                        <FolderIcon />
-                                    </Button>
-                                </span>
-                            </Tooltip>
-                            <Tooltip title="Modify game">
-                                <span>
-                                    <Button
-                                        onClick={() => {
-                                            onClickModify(dir.directory);
-                                        }}
-                                    >
-                                        <WrenchIcon />
-                                    </Button>
-                                </span>
-                            </Tooltip>
-                            <Tooltip title="Remove this installation from the list (this will not delete the installation, rather it will just remove it graphically from this view)">
-                                <span>
-                                    <Button
-                                        onClick={() => {
-                                            setDeletePopupOpen(dir.directory);
-                                        }}
-                                    >
-                                        <TrashIcon />
-                                    </Button>
-                                </span>
-                            </Tooltip>
-                            <Tooltip title="Run game">
-                                <span>
-                                    <Button
-                                        onClick={() => {
-                                            //onClickModify(dir.directory);
-                                            runGame(dir.directory);
-                                        }}
-                                    >
-                                        <PlayIcon />
-                                    </Button>
-                                </span>
-                            </Tooltip>
-                        </Grid>
-
-                        <Grid item xs={6}>
-                            <Typography
-                                sx={{ color: 'green' }}
-                            >{`[${dir.installationType.toUpperCase()}] ${
-                                dir.directory
-                            }`}</Typography>
-                        </Grid>
-                    </Grid>
+                    <div className="flex justify-between p-6">
+                        <div className="space-x-10">
+                            <span>
+                                <button
+                                    onClick={() =>
+                                        openInstallDir(dir.directory)
+                                    }
+                                >
+                                    <FolderIcon />
+                                </button>
+                            </span>
+                            <span>
+                                <button
+                                    onClick={() => {
+                                        onClickModify(dir.directory);
+                                    }}
+                                >
+                                    <WrenchIcon />
+                                </button>
+                            </span>
+                            <span>
+                                <button
+                                    onClick={() => {
+                                        setDeletePopupOpen(dir.directory);
+                                    }}
+                                >
+                                    <TrashIcon />
+                                </button>
+                            </span>
+                            <span>
+                                <button
+                                    onClick={() => {
+                                        //onClickModify(dir.directory);
+                                        runGame(dir.directory);
+                                    }}
+                                >
+                                    <PlayIcon />
+                                </button>
+                            </span>
+                        </div>
+                        <div className="flex justify-start space-x-4">
+                            <p className="text-lg font-bold text-primary">{`[${dir.installationType.toUpperCase()}]`}</p>
+                            <p className="text-lg text-primary">{`${dir.directory}`}</p>
+                        </div>
+                    </div>
                 </div>
             ))}
             <Tooltip title="Add an Installation of Call to Power II">

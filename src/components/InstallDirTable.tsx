@@ -2,7 +2,6 @@
     Holds a table which displays the user-specified installation directories
 */
 
-import { Grid, Tooltip, Button, Typography } from '@mui/material';
 import React, { FC, useState } from 'react';
 import { ElectronWindow, InstallDirectory } from '../App';
 import { Modal } from './Modal';
@@ -74,10 +73,10 @@ export const InstallDirTable: FC<Props> = ({
     return (
         <>
             {installDirs.length === 0 && (
-                <Typography>
+                <p className="text-lg">
                     No installation directories have been added yet. Add one
                     now?
-                </Typography>
+                </p>
             )}
 
             {installDirs.map((dir) => (
@@ -157,9 +156,9 @@ export const InstallDirTable: FC<Props> = ({
                     </div>
                 </div>
             ))}
-            <Tooltip title="Add an Installation of Call to Power II">
-                <Button onClick={() => addInstall()}>Add Installation</Button>
-            </Tooltip>
+            <button className="btn btn-primary" onClick={() => addInstall()}>
+                Add Installation
+            </button>
         </>
     );
 };

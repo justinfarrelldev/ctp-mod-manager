@@ -182,7 +182,9 @@ export const App: FC = (): React.ReactElement => {
     return (
         <div className="p-6">
             <div className="flex justify-between">
-                <p className="top-2 text-2xl">Call to Power 2 Installations</p>
+                <p className="top-2 text-2xl font-bold">
+                    Call to Power II Installations
+                </p>
                 <div className="right-0 top-2 h-16 w-16">
                     <button onClick={() => setSettingsOpen(true)}>
                         <SettingsIcon />

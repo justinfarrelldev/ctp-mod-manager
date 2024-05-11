@@ -17,6 +17,7 @@ import { runGame } from './file/runGame';
 import { removeFromInstallDirs } from './file/removeFromInstallDirs';
 import { makeBackup } from './file/makeBackup';
 import { applyModsToInstall } from './file/applyModsToInstall';
+import { removeModFromMods } from './file/removeModFromMods';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -67,6 +68,10 @@ app.whenReady().then(() => {
     ipcMain.handle('file:copyFileToModDir', (event, fileDir) =>
         copyFileToModDir(fileDir)
     );
+
+    ipcMain.handle('file:removeModFromMods', (event, fileName) => {
+        removeModFromMods(fileName);
+    });
 
     ipcMain.handle('file:loadMods', () => loadMods());
 

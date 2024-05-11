@@ -7,6 +7,7 @@ import { ErrorModal } from './components/ErrorModal';
 import { ModifyInstallView } from './components/ModifyInstallView';
 import { SettingsIcon } from './components/icons/settings';
 import { themeChange } from 'theme-change';
+import { TrashIcon } from './components/icons/trash';
 
 export type ElectronWindow = Window &
     typeof globalThis & {
@@ -23,6 +24,10 @@ export type ElectronWindow = Window &
             openInstallDir: (ipcCommand: string, dir: string) => void;
             openModsDir: (ipcCommand: string) => void;
             copyFileToModDir: (
+                ipcCommand: string,
+                fileDir: string
+            ) => Promise<void>;
+            removeModFromMods: (
                 ipcCommand: string,
                 fileDir: string
             ) => Promise<void>;
@@ -358,6 +363,24 @@ export const App: FC = (): React.ReactElement => {
                                     </td>
                                 </tr>
                             ))}
+                            <tr>
+                                <td>
+                                    <button
+                                        onClick={() => {
+                                            for (const mod of checkedMods) {
+                                                (
+                                                    window as ElectronWindow
+                                                ).api.removeModFromMods(
+                                                    'file:removeModFromMods',
+                                                    mod
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        <TrashIcon />
+                                    </button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 )}

@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld('api', {
     goToRoute: (event, route) => ipcRenderer.send('process:goToRoute', route),
     copyFileToModDir: (event, fileDir) =>
         ipcRenderer.invoke('file:copyFileToModDir', fileDir),
+    removeModFromMods: (event, fileName) =>
+        ipcRenderer.invoke('file:removeModFromMods', fileName),
     loadMods: () => ipcRenderer.invoke('file:loadMods'),
     selectFolder: () => ipcRenderer.invoke('file:selectFolder'),
     isValidInstall: (event, fileDir) =>

@@ -90,7 +90,7 @@ app.whenReady().then(() => {
 
     ipcMain.handle('file:makeBackup', (event, dir) => makeBackup(dir));
 
-    ipcMain.handle('file:applyModsToInstall', (event, dir, mods) =>
+    ipcMain.on('file:applyModsToInstall', (event, dir, mods) =>
         applyModsToInstall(dir, mods)
     );
 

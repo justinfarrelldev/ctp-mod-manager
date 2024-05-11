@@ -10,6 +10,20 @@ import { themeChange } from 'theme-change';
 import { TrashIcon } from './components/icons/trash';
 import { ApplyIcon } from './components/icons/apply';
 
+// Wish there was a way to share this type, but alas... it's also found in electron/file/getFileChangesToApplyMod.tsx
+type LineChangeGroup = {
+    startLineNumber: number;
+    endLineNumber: number;
+    change: string; // The change, including everything between startLineNumber and endLineNumber (including newlines)
+    contentBeforeChange: string; // The content before it was replaced by the mod
+};
+
+// Wish there was a way to share this type, but alas... it's also found in electron/file/getFileChangesToApplyMod.tsx
+type FileChange = {
+    fileName: string;
+    lineChangeGroups: LineChangeGroup[];
+};
+
 export type ElectronWindow = Window &
     typeof globalThis & {
         api: {
@@ -65,6 +79,10 @@ export type ElectronWindow = Window &
                 installDir: string,
                 mods: string[]
             ) => Promise<void>;
+            getFileChangesToApplyMod: (
+                ipcCommand: 'file:getFileChangesToApplyMod',
+                modName: string
+            ) => Promise<FileChange[]>;
         };
     };
 
@@ -393,7 +411,18 @@ export const App: FC = (): React.ReactElement => {
                                         >
                                             <TrashIcon />
                                         </button>
-                                        <button onClick={() => {}}>
+                                        <button
+                                            onClick={() => {
+                                                for (const mod of checkedMods) {
+                                                    (
+                                                        window as ElectronWindow
+                                                    ).api.getFileChangesToApplyMod(
+                                                        'file:getFileChangesToApplyMod',
+                                                        mod
+                                                    );
+                                                }
+                                            }}
+                                        >
                                             <ApplyIcon />
                                         </button>
                                     </td>

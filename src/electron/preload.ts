@@ -29,4 +29,6 @@ contextBridge.exposeInMainWorld('api', {
         ipcRenderer.invoke('file:makeBackup', dir),
     applyModsToInstall: (_: Event, dir: string, mods: string[]) =>
         ipcRenderer.send('file:applyModsToInstall', dir, mods),
+    getFileChangesToApplyMod: (_: Event, modName: string) =>
+        ipcRenderer.send('file:getFileChangesToApplyMod', modName),
 });

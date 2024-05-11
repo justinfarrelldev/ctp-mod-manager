@@ -124,15 +124,6 @@ export const InstallDirTable: FC<Props> = ({
                             <span>
                                 <button
                                     onClick={() => {
-                                        onClickModify(dir.directory);
-                                    }}
-                                >
-                                    <WrenchIcon />
-                                </button>
-                            </span>
-                            <span>
-                                <button
-                                    onClick={() => {
                                         setDeletePopupOpen(dir.directory);
                                     }}
                                 >

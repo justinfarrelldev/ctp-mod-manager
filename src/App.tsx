@@ -8,6 +8,7 @@ import { ModifyInstallView } from './components/ModifyInstallView';
 import { SettingsIcon } from './components/icons/settings';
 import { themeChange } from 'theme-change';
 import { TrashIcon } from './components/icons/trash';
+import { ApplyIcon } from './components/icons/apply';
 
 export type ElectronWindow = Window &
     typeof globalThis & {
@@ -375,7 +376,7 @@ export const App: FC = (): React.ReactElement => {
                                     </tr>
                                 ))}
                                 <tr>
-                                    <td>
+                                    <td className="space-x-10">
                                         <button
                                             onClick={() => {
                                                 for (const mod of checkedMods) {
@@ -391,6 +392,9 @@ export const App: FC = (): React.ReactElement => {
                                             }}
                                         >
                                             <TrashIcon />
+                                        </button>
+                                        <button onClick={() => {}}>
+                                            <ApplyIcon />
                                         </button>
                                     </td>
                                 </tr>

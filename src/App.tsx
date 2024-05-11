@@ -86,8 +86,10 @@ export const App: FC = (): React.ReactElement => {
     const [modNamesQueued, setModNamesQueued] = useState<string[]>([]);
     const [error, setError] = useState<string>();
     const [checkedMods, setCheckedMods] = useState<string[]>([]);
+    const [loadingMods, setLoadingMods] = useState<boolean>(false);
 
     const loadMods = async (): Promise<void> => {
+        setLoadingMods(true);
         try {
             const loadedMods = await (window as ElectronWindow).api.loadMods();
             setModNamesAdded(loadedMods);
@@ -98,7 +100,9 @@ export const App: FC = (): React.ReactElement => {
             setError(
                 `An error occurred while attempting to load mods: ${err}.`
             );
+            setLoadingMods(false);
         }
+        setLoadingMods(false);
     };
 
     const loadInstallDirs = async (): Promise<void> => {
@@ -149,12 +153,14 @@ export const App: FC = (): React.ReactElement => {
     const handleFileSelected = async (
         e: React.ChangeEvent<HTMLInputElement>
     ): Promise<void> => {
+        setLoadingMods(true);
         const files = Array.from(e.target.files);
         await (window as ElectronWindow).api.copyFileToModDir(
             'file:copy',
             (files[0] as File & { path: string }).path
         );
 
+        setLoadingMods(false);
         await loadMods();
     };
 
@@ -320,72 +326,95 @@ export const App: FC = (): React.ReactElement => {
                         installations listed above using the "Modify" menu.
                     </p>
                 )}
-                {modNamesAdded !== undefined && modNamesAdded.length > 0 && (
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Select</th>
-                                <th>Mod Name</th>
-                                <th>Applied to Installations</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {modNamesAdded.map((name) => (
-                                <tr key={name}>
-                                    <th>
-                                        <label>
-                                            <input
-                                                type="checkbox"
-                                                className="checkbox"
-                                                onChange={(event) => {
-                                                    if (event.target.checked) {
-                                                        setCheckedMods([
-                                                            ...checkedMods,
-                                                            name,
-                                                        ]);
-                                                    } else {
-                                                        setCheckedMods([
-                                                            ...checkedMods.filter(
-                                                                (mod) =>
-                                                                    mod !== name
-                                                            ),
-                                                        ]);
-                                                    }
-                                                }}
-                                            />
-                                        </label>
-                                    </th>
+                {modNamesAdded !== undefined &&
+                    !loadingMods &&
+                    modNamesAdded.length > 0 && (
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Mod Name</th>
+                                    <th>Applied to Installations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {modNamesAdded.map((name) => (
+                                    <tr key={name}>
+                                        <th>
+                                            <label>
+                                                <input
+                                                    type="checkbox"
+                                                    className="checkbox"
+                                                    onChange={(event) => {
+                                                        if (
+                                                            event.target.checked
+                                                        ) {
+                                                            setCheckedMods([
+                                                                ...checkedMods,
+                                                                name,
+                                                            ]);
+                                                        } else {
+                                                            setCheckedMods([
+                                                                ...checkedMods.filter(
+                                                                    (mod) =>
+                                                                        mod !==
+                                                                        name
+                                                                ),
+                                                            ]);
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                        </th>
+                                        <td>
+                                            <p>{name}</p>
+                                        </td>
+                                        <td>
+                                            <p>TODO</p>
+                                        </td>
+                                    </tr>
+                                ))}
+                                <tr>
                                     <td>
-                                        <p>{name}</p>
-                                    </td>
-                                    <td>
-                                        <p>TODO</p>
+                                        <button
+                                            onClick={() => {
+                                                for (const mod of checkedMods) {
+                                                    (
+                                                        window as ElectronWindow
+                                                    ).api.removeModFromMods(
+                                                        'file:removeModFromMods',
+                                                        mod
+                                                    );
+                                                }
+
+                                                loadMods();
+                                            }}
+                                        >
+                                            <TrashIcon />
+                                        </button>
                                     </td>
                                 </tr>
-                            ))}
-                            <tr>
-                                <td>
-                                    <button
-                                        onClick={() => {
-                                            for (const mod of checkedMods) {
-                                                (
-                                                    window as ElectronWindow
-                                                ).api.removeModFromMods(
-                                                    'file:removeModFromMods',
-                                                    mod
-                                                );
-                                            }
-
-                                            loadMods();
-                                        }}
-                                    >
-                                        <TrashIcon />
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    )}
+                {loadingMods && (
+                    <span className="loading loading-bars loading-md block"></span>
                 )}
+                <input
+                    onChange={handleFileSelected}
+                    accept=".zip"
+                    id="add-mod-button"
+                    type="file"
+                    hidden
+                />
+                <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                        document.getElementById('add-mod-button').click();
+                    }}
+                >
+                    Add Mod
+                </button>
             </div>
         </div>
     );

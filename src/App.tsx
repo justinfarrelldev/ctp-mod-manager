@@ -80,6 +80,7 @@ export const App: FC = (): React.ReactElement => {
     );
     const [modNamesQueued, setModNamesQueued] = useState<string[]>([]);
     const [error, setError] = useState<string>();
+    const [checkedMods, setCheckedMods] = useState<string[]>([]);
 
     const loadMods = async (): Promise<void> => {
         try {
@@ -181,6 +182,8 @@ export const App: FC = (): React.ReactElement => {
         themeChange(false);
         // 👆 false parameter is required for react project
     }, []);
+
+    console.log('Checked mods: ', checkedMods);
 
     return (
         <div>
@@ -305,14 +308,14 @@ export const App: FC = (): React.ReactElement => {
                 <p className="top-2 text-2xl font-bold">
                     Call to Power II Mods
                 </p>
-                {modNamesAdded.length === 0 && (
+                {modNamesAdded !== undefined && modNamesAdded.length === 0 && (
                     <p>
                         You have not added any Call to Power II mods just yet.
                         Add one below, then apply it to one of your
                         installations listed above using the "Modify" menu.
                     </p>
                 )}
-                {modNamesAdded.length > 0 && (
+                {modNamesAdded !== undefined && modNamesAdded.length > 0 && (
                     <table className="table">
                         <thead>
                             <tr>
@@ -323,12 +326,27 @@ export const App: FC = (): React.ReactElement => {
                         </thead>
                         <tbody>
                             {modNamesAdded.map((name) => (
-                                <tr>
+                                <tr key={name}>
                                     <th>
                                         <label>
                                             <input
                                                 type="checkbox"
                                                 className="checkbox"
+                                                onChange={(event) => {
+                                                    if (event.target.checked) {
+                                                        setCheckedMods([
+                                                            ...checkedMods,
+                                                            name,
+                                                        ]);
+                                                    } else {
+                                                        setCheckedMods([
+                                                            ...checkedMods.filter(
+                                                                (mod) =>
+                                                                    mod !== name
+                                                            ),
+                                                        ]);
+                                                    }
+                                                }}
                                             />
                                         </label>
                                     </th>

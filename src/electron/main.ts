@@ -1,6 +1,4 @@
-// Since this is an Electron file, we must use require
 import path from 'path';
-
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import isDev from 'electron-is-dev';
 import { copyFileToModDir } from './file/copyFileToModDir';
@@ -55,21 +53,21 @@ const createWindow = () => {
 app.whenReady().then(() => {
     ipcMain.handle('load:getCtp2InstallDir', getInstallDirectories);
 
-    ipcMain.on('file:openInstallDir', (event, dir) => shell.openPath(dir));
+    ipcMain.on('file:openInstallDir', (_, dir) => shell.openPath(dir));
 
     ipcMain.on('file:openModsDir', () => shell.openPath(DEFAULT_MOD_DIR));
 
-    ipcMain.handle('file:viewFileDirsInZip', (event, zipFilePath) =>
+    ipcMain.handle('file:viewFileDirsInZip', (_, zipFilePath) =>
         viewFileDirsInZip(zipFilePath)
     );
 
-    ipcMain.on('process:goToRoute', (event, route) => goToRoute(route, win));
+    ipcMain.on('process:goToRoute', (_, route) => goToRoute(route, win));
 
-    ipcMain.handle('file:copyFileToModDir', (event, fileDir) =>
+    ipcMain.handle('file:copyFileToModDir', (_, fileDir) =>
         copyFileToModDir(fileDir)
     );
 
-    ipcMain.handle('file:removeModFromMods', (event, fileName) => {
+    ipcMain.handle('file:removeModFromMods', (_, fileName) => {
         removeModFromMods(fileName);
     });
 
@@ -79,23 +77,21 @@ app.whenReady().then(() => {
 
     ipcMain.handle('file:selectFolder', () => selectFolder(win));
 
-    ipcMain.handle('file:isValidInstall', (event, dir) => isValidInstall(dir));
+    ipcMain.handle('file:isValidInstall', (_, dir) => isValidInstall(dir));
 
-    ipcMain.handle('file:addToInstallDirs', (event, dir) =>
-        addToInstallDirs(dir)
-    );
+    ipcMain.handle('file:addToInstallDirs', (_, dir) => addToInstallDirs(dir));
 
     ipcMain.handle('file:getInstallDirs', () => getInstallDirs());
 
-    ipcMain.handle('file:runGame', (event, exeDir) => runGame(exeDir));
+    ipcMain.handle('file:runGame', (_, exeDir) => runGame(exeDir));
 
-    ipcMain.handle('file:removeFromInstallDirs', (event, dir) =>
+    ipcMain.handle('file:removeFromInstallDirs', (_, dir) =>
         removeFromInstallDirs(dir)
     );
 
-    ipcMain.handle('file:makeBackup', (event, dir) => makeBackup(dir));
+    ipcMain.handle('file:makeBackup', (_, dir) => makeBackup(dir));
 
-    ipcMain.on('file:applyModsToInstall', (event, dir, mods) =>
+    ipcMain.on('file:applyModsToInstall', (_, dir, mods) =>
         applyModsToInstall(dir, mods)
     );
 

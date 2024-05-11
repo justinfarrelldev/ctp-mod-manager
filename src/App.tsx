@@ -375,6 +375,8 @@ export const App: FC = (): React.ReactElement => {
                                                     mod
                                                 );
                                             }
+
+                                            loadMods();
                                         }}
                                     >
                                         <TrashIcon />

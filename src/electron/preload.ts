@@ -1,31 +1,32 @@
 import { ipcRenderer, contextBridge } from 'electron';
 
-// load:getCtp2InstallDir
-
 contextBridge.exposeInMainWorld('api', {
     getCtp2InstallDir: () => ipcRenderer.invoke('load:getCtp2InstallDir'),
-    openInstallDir: (event, dir) =>
+    openInstallDir: (_: Event, dir: string) =>
         ipcRenderer.send('file:openInstallDir', dir),
     openModsDir: () => ipcRenderer.send('file:openModsDir'),
     getModsDir: () => ipcRenderer.invoke('file:getModsDir'),
-    viewFileDirsInZip: (event, zipFilePath) =>
+    viewFileDirsInZip: (_: Event, zipFilePath: string) =>
         ipcRenderer.invoke('file:viewFileDirsInZip', zipFilePath),
-    goToRoute: (event, route) => ipcRenderer.send('process:goToRoute', route),
-    copyFileToModDir: (event, fileDir) =>
+    goToRoute: (_: Event, route: string) =>
+        ipcRenderer.send('process:goToRoute', route),
+    copyFileToModDir: (_: Event, fileDir: string) =>
         ipcRenderer.invoke('file:copyFileToModDir', fileDir),
-    removeModFromMods: (event, fileName) =>
+    removeModFromMods: (_: Event, fileName: string) =>
         ipcRenderer.invoke('file:removeModFromMods', fileName),
     loadMods: () => ipcRenderer.invoke('file:loadMods'),
     selectFolder: () => ipcRenderer.invoke('file:selectFolder'),
-    isValidInstall: (event, fileDir) =>
+    isValidInstall: (_: Event, fileDir: string) =>
         ipcRenderer.invoke('file:isValidInstall', fileDir),
-    addToInstallDirs: (event, dir) =>
+    addToInstallDirs: (_: Event, dir: string) =>
         ipcRenderer.invoke('file:addToInstallDirs', dir),
     getInstallDirs: () => ipcRenderer.invoke('file:getInstallDirs'),
-    runGame: (event, exeDir) => ipcRenderer.invoke('file:runGame', exeDir),
-    removeFromInstallDirs: (event, dir) =>
+    runGame: (_: Event, exeDir: string) =>
+        ipcRenderer.invoke('file:runGame', exeDir),
+    removeFromInstallDirs: (_: Event, dir: string) =>
         ipcRenderer.invoke('file:removeFromInstallDirs', dir),
-    makeBackup: (event, dir) => ipcRenderer.invoke('file:makeBackup', dir),
-    applyModsToInstall: (event, dir, mods) =>
+    makeBackup: (_: Event, dir: string) =>
+        ipcRenderer.invoke('file:makeBackup', dir),
+    applyModsToInstall: (_: Event, dir: string, mods: string[]) =>
         ipcRenderer.send('file:applyModsToInstall', dir, mods),
 });

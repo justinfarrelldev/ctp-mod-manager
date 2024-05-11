@@ -81,7 +81,8 @@ export type ElectronWindow = Window &
             ) => Promise<void>;
             getFileChangesToApplyMod: (
                 ipcCommand: 'file:getFileChangesToApplyMod',
-                modName: string
+                modName: string,
+                installDir: string
             ) => Promise<FileChange[]>;
         };
     };
@@ -418,7 +419,8 @@ export const App: FC = (): React.ReactElement => {
                                                         window as ElectronWindow
                                                     ).api.getFileChangesToApplyMod(
                                                         'file:getFileChangesToApplyMod',
-                                                        mod
+                                                        mod,
+                                                        installDirs[0].directory // FIXME make this a part of the GUI
                                                     );
                                                 }
                                             }}

@@ -96,8 +96,8 @@ app.whenReady().then(() => {
         applyModsToInstall(dir, mods)
     );
 
-    ipcMain.on('file:getFileChangesToApplyMod', (_, modName) => {
-        getFileChangesToApplyMod(modName);
+    ipcMain.on('file:getFileChangesToApplyMod', (_, modName, installDir) => {
+        getFileChangesToApplyMod(modName, installDir);
     });
 
     createWindow();

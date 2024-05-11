@@ -183,116 +183,167 @@ export const App: FC = (): React.ReactElement => {
     }, []);
 
     return (
-        <div className="p-6">
-            <div className="flex justify-between">
-                <p className="top-2 text-2xl font-bold">
-                    Call to Power II Installations
-                </p>
-                <div className="right-0 top-2 h-16 w-16">
-                    <button onClick={() => setSettingsOpen(true)}>
-                        <SettingsIcon />
-                    </button>
+        <div>
+            <div className="p-6">
+                <div className="flex justify-between">
+                    <p className="top-2 text-2xl font-bold">
+                        Call to Power II Installations
+                    </p>
+                    <div className="right-0 top-2 h-16 w-16">
+                        <button onClick={() => setSettingsOpen(true)}>
+                            <SettingsIcon />
+                        </button>
+                    </div>
                 </div>
-            </div>
-            {error && (
-                <ErrorModal
-                    open={error.length > 0}
-                    errorMessage={error}
-                    onClose={() => {
-                        setError('');
-                    }}
+                {error && (
+                    <ErrorModal
+                        open={error.length > 0}
+                        errorMessage={error}
+                        onClose={() => {
+                            setError('');
+                        }}
+                    />
+                )}
+                {loadingDirs && (
+                    <span className="loading loading-ring loading-lg"></span>
+                )}
+                {settingsOpen && (
+                    <Modal
+                        width="50%"
+                        open={settingsOpen}
+                        onClose={() => setSettingsOpen(false)}
+                        modalName="Settings"
+                        text=""
+                        buttons={[
+                            {
+                                text: 'Close',
+                                onClick: () => setSettingsOpen(false),
+                                color: 'neutral',
+                            },
+                        ]}
+                    >
+                        <SettingsMenu />
+                    </Modal>
+                )}
+
+                <InstallDirTable
+                    installDirs={installDirs}
+                    onClickModify={(dir) => setDirBeingModified(dir)}
+                    onAddedInstallDirectory={() => loadInstallDirs()}
                 />
-            )}
-            {loadingDirs && (
-                <span className="loading loading-ring loading-lg"></span>
-            )}
-            {settingsOpen && (
                 <Modal
-                    width="50%"
-                    open={settingsOpen}
-                    onClose={() => setSettingsOpen(false)}
-                    modalName="Settings"
-                    text=""
+                    open={dirBeingModified !== ''}
+                    onClose={() => {
+                        setDirBeingModified('');
+                    }}
+                    width="100%"
+                    height="100%"
+                    modalName="Modify Installation"
                     buttons={[
                         {
                             text: 'Close',
-                            onClick: () => setSettingsOpen(false),
+                            onClick: () => setDirBeingModified(''),
                             color: 'neutral',
                         },
                     ]}
+                    text=""
                 >
-                    <SettingsMenu />
+                    <ModifyInstallView
+                        onBackClicked={() => setDirBeingModified('')}
+                        dirBeingModified={dirBeingModified}
+                        onModSelected={handleFileSelected}
+                        onQueueMod={async (modName: string) => {
+                            setModNamesQueued([...modNamesQueued, modName]);
+                            setModNamesAdded(
+                                modNamesAdded.filter(
+                                    (value) => value !== modName
+                                )
+                            );
+                            viewFileDirsInZip(
+                                `${await getModsDir()}\\${modName}`
+                            ); // FIXME 100% temporary
+                        }}
+                        onDequeueMod={async (modName: string) => {
+                            setModNamesQueued(
+                                modNamesQueued.filter(
+                                    (value) => value !== modName
+                                )
+                            );
+                            setModNamesAdded([...modNamesAdded, modName]);
+                        }}
+                        addedMods={modNamesAdded}
+                        queuedMods={modNamesQueued}
+                        onOpenModsDir={() => openModsDir()}
+                    />
                 </Modal>
-            )}
-
-            <InstallDirTable
-                installDirs={installDirs}
-                onClickModify={(dir) => setDirBeingModified(dir)}
-                onAddedInstallDirectory={() => loadInstallDirs()}
-            />
-            <Modal
-                open={dirBeingModified !== ''}
-                onClose={() => {
-                    setDirBeingModified('');
-                }}
-                width="100%"
-                height="100%"
-                modalName="Modify Installation"
-                buttons={[
-                    {
-                        text: 'Close',
-                        onClick: () => setDirBeingModified(''),
-                        color: 'neutral',
-                    },
-                ]}
-                text=""
-            >
-                <ModifyInstallView
-                    onBackClicked={() => setDirBeingModified('')}
-                    dirBeingModified={dirBeingModified}
-                    onModSelected={handleFileSelected}
-                    onQueueMod={async (modName: string) => {
-                        setModNamesQueued([...modNamesQueued, modName]);
-                        setModNamesAdded(
-                            modNamesAdded.filter((value) => value !== modName)
-                        );
-                        viewFileDirsInZip(`${await getModsDir()}\\${modName}`); // FIXME 100% temporary
-                    }}
-                    onDequeueMod={async (modName: string) => {
-                        setModNamesQueued(
-                            modNamesQueued.filter((value) => value !== modName)
-                        );
-                        setModNamesAdded([...modNamesAdded, modName]);
-                    }}
-                    addedMods={modNamesAdded}
-                    queuedMods={modNamesQueued}
-                    onOpenModsDir={() => openModsDir()}
+                <Modal
+                    width="50%"
+                    open={installDirModalOpen}
+                    onClose={handleInstallDirModalClose}
+                    modalName="Installation Auto-Detection"
+                    text={AUTO_DETECT_INSTALL_TEXT}
+                    buttons={[
+                        {
+                            text: 'Yes',
+                            onClick: () => {
+                                findInstallDirs();
+                                handleInstallDirModalClose();
+                            },
+                            color: 'primary',
+                        },
+                        {
+                            text: 'No',
+                            onClick: () => {
+                                handleInstallDirModalClose();
+                            },
+                            color: 'neutral',
+                        },
+                    ]}
                 />
-            </Modal>
-            <Modal
-                width="50%"
-                open={installDirModalOpen}
-                onClose={handleInstallDirModalClose}
-                modalName="Installation Auto-Detection"
-                text={AUTO_DETECT_INSTALL_TEXT}
-                buttons={[
-                    {
-                        text: 'Yes',
-                        onClick: () => {
-                            findInstallDirs();
-                            handleInstallDirModalClose();
-                        },
-                        color: 'primary',
-                    },
-                    {
-                        text: 'No',
-                        onClick: () => {
-                            handleInstallDirModalClose();
-                        },
-                        color: 'neutral',
-                    },
-                ]}
-            />
+            </div>
+            <div className="p-6">
+                <p className="top-2 text-2xl font-bold">
+                    Call to Power II Mods
+                </p>
+                {modNamesAdded.length === 0 && (
+                    <p>
+                        You have not added any Call to Power II mods just yet.
+                        Add one below, then apply it to one of your
+                        installations listed above using the "Modify" menu.
+                    </p>
+                )}
+                {modNamesAdded.length > 0 && (
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Mod Name</th>
+                                <th>Applied to Installations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {modNamesAdded.map((name) => (
+                                <tr>
+                                    <th>
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                className="checkbox"
+                                            />
+                                        </label>
+                                    </th>
+                                    <td>
+                                        <p>{name}</p>
+                                    </td>
+                                    <td>
+                                        <p>TODO</p>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
         </div>
     );
 };

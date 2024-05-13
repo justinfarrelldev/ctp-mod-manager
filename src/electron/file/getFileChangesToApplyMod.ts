@@ -18,10 +18,16 @@ type LineChangeGroup = {
 };
 
 // Wish there was a way to share this type, but alas... it's also found in App.tsx
-type FileChange = {
-    fileName: string;
-    lineChangeGroups: LineChangeGroup[];
-};
+type FileChange =
+    | {
+          fileName: string;
+          lineChangeGroups: LineChangeGroup[];
+          isBinary?: false;
+      }
+    | {
+          fileName: string;
+          isBinary: true;
+      };
 // Limit the number of concurrent file reads
 const limit = pLimit(5);
 
@@ -134,6 +140,24 @@ async function processDirectory(
                 typeof newFilePath === 'string' &&
                 typeof oldFilePath === 'string'
             ) {
+                if (
+                    (newFilePath.endsWith('.tga') &&
+                        oldFilePath.endsWith('.tga')) ||
+                    (newFilePath.endsWith('.til') &&
+                        oldFilePath.endsWith('.til')) ||
+                    (newFilePath.endsWith('.pdf') &&
+                        oldFilePath.endsWith('.pdf'))
+                ) {
+                    if (
+                        fs.readFileSync(newFilePath).byteLength !==
+                        fs.readFileSync(oldFilePath).byteLength
+                    ) {
+                        changes.push({
+                            fileName: fullPath,
+                            isBinary: true,
+                        });
+                    }
+                }
                 // If both are files, push to promise list to resolve later
                 fileDiffPromises.push(
                     new Promise<FileDiff>((resolve) => {

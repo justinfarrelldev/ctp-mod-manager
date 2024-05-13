@@ -282,6 +282,11 @@ export const getFileChangesToApplyMod = async (
         const gameDirStructure = readDirectory(installDir);
 
         console.log('comparing dirs!');
+        /*
+            This compares the game's structure to the mod's structure. To extrapolate this into other
+            mods, we need to compare the other mods to the game's structure as well and then use the line 
+            changes to deduce incompatible files. This can be done with as many mods as we like...
+        */
         compareDirectories(gameDirStructure, modDirStructure).then(
             (fileChanges) => {
                 console.log('file changes: ', JSON.stringify(fileChanges));

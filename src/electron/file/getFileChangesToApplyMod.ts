@@ -28,37 +28,6 @@ type FileChange =
           fileName: string;
           isBinary: true;
       };
-// Limit the number of concurrent file reads
-const limit = pLimit(5);
-
-const readdirPromisified = async (
-    path: fs.PathLike,
-    options: ObjectEncodingOptions & {
-        withFileTypes: true;
-    }
-): Promise<fs.Dirent[]> => {
-    return new Promise((resolve) => {
-        fs.readdir(path, options, (err, files) => {
-            if (err)
-                console.error(
-                    `An error occurred while reading a directory: ${err}`
-                );
-
-            resolve(files);
-        });
-    });
-};
-
-const readfilePromisified = async (fullPath: string): Promise<string> => {
-    return new Promise((resolve) => {
-        fs.readFile(fullPath, 'utf-8', (err, data) => {
-            if (err)
-                console.error(`An error occurred while reading a file: ${err}`);
-
-            resolve(data);
-        });
-    });
-};
 
 // Function to read directory contents recursively
 const readDirectory = (dirPath: string): DirectoryContents => {
@@ -158,22 +127,28 @@ async function processDirectory(
                         });
                     }
                 }
-                // If both are files, push to promise list to resolve later
-                fileDiffPromises.push(
-                    new Promise<FileDiff>((resolve) => {
-                        getFileDiff(
-                            oldFilePath,
-                            newFilePath,
-                            fullPath,
-                            (value) => {
-                                resolve({
-                                    fileName: fullPath,
-                                    changeDiffs: value,
-                                });
-                            }
-                        );
-                    })
-                );
+
+                if (oldFilePath.length === newFilePath.length) {
+                    // These are very likely the same
+                    continue;
+                } else {
+                    // If both are files, push to promise list to resolve later
+                    fileDiffPromises.push(
+                        new Promise<FileDiff>((resolve) => {
+                            getFileDiff(
+                                oldFilePath,
+                                newFilePath,
+                                fullPath,
+                                (value) => {
+                                    resolve({
+                                        fileName: fullPath,
+                                        changeDiffs: value,
+                                    });
+                                }
+                            );
+                        })
+                    );
+                }
             }
         }
     }

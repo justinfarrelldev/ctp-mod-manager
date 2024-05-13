@@ -1,6 +1,6 @@
 import { DEFAULT_MOD_DIR } from '../constants';
 import fs, { ObjectEncodingOptions } from 'node:fs';
-import path from 'node:path';
+import path, { resolve } from 'node:path';
 import * as diff from 'diff';
 import pLimit from 'p-limit';
 
@@ -23,7 +23,7 @@ type FileChange = {
     lineChangeGroups: LineChangeGroup[];
 };
 // Limit the number of concurrent file reads
-const limit = pLimit(50);
+const limit = pLimit(5);
 
 const readdirPromisified = async (
     path: fs.PathLike,
@@ -99,7 +99,8 @@ async function processDirectory(
     prefix: string = ''
 ): Promise<FileChange[]> {
     let changes: FileChange[] = [];
-    let promises: Promise<void>[] = [];
+    let promises: Promise<FileChange[]>[] = [];
+    let fileDiffs: FileDiff[] = [];
 
     console.log('prefix: ', prefix);
     for (const key of Object.keys(newContent)) {
@@ -114,28 +115,27 @@ async function processDirectory(
             typeof oldFilePath === 'object'
         ) {
             promises.push(
-                processDirectory(oldFilePath, newFilePath, fullPath + '/').then(
-                    (value) => {
-                        changes = [...changes, ...value];
-                    }
+                limit(async () =>
+                    processDirectory(oldFilePath, newFilePath, fullPath + '/')
                 )
             );
         } else if (
             typeof newFilePath === 'string' &&
             typeof oldFilePath === 'string'
         ) {
-            promises.push(
-                getFileChanges(fullPath, oldFilePath, newFilePath).then(
-                    (fileChanges) => {
-                        if (fileChanges.lineChangeGroups.length > 0) {
-                            changes.push(fileChanges);
-                        }
-                    }
-                )
-            );
+            fileDiffs.push(getFileDiff(oldFilePath, newFilePath, fullPath));
         }
     }
-    return Promise.all(promises).then(() => {
+
+    let fileChanges: FileChange[] = [];
+
+    for (const diff of fileDiffs) {
+        fileChanges.push(getFileChanges(diff));
+    }
+    return Promise.all(promises).then((results) => {
+        for (const resolvedPromise of results) {
+            changes = [...changes, ...resolvedPromise, ...fileChanges];
+        }
         return changes;
     });
 }
@@ -147,16 +147,28 @@ async function compareDirectories(
     return processDirectory(oldDir, newDir);
 }
 
-async function getFileChanges(
-    fileName: string,
+type FileDiff = {
+    fileName: string;
+    changeDiffs: diff.Change[];
+};
+
+const getFileDiff = (
     oldContent: string,
-    newContent: string
-): Promise<FileChange> {
+    newContent: string,
+    fileName: string
+): FileDiff => {
     const changeDiffs = diff.diffLines(oldContent, newContent);
+    return {
+        fileName,
+        changeDiffs,
+    };
+};
+
+function getFileChanges(fileDiff: FileDiff): FileChange {
     const lineChangeGroups: LineChangeGroup[] = [];
     let lineIndex = 1;
 
-    for (const part of changeDiffs) {
+    for (const part of fileDiff.changeDiffs) {
         if (part.added || part.removed) {
             const startLine = lineIndex;
             const endLine = lineIndex + part.count - 1;
@@ -171,7 +183,7 @@ async function getFileChanges(
     }
 
     return {
-        fileName,
+        fileName: fileDiff.fileName,
         lineChangeGroups,
     };
 }

@@ -100,7 +100,7 @@ async function processDirectory(
 ): Promise<FileChange[]> {
     let changes: FileChange[] = [];
     let promises: Promise<FileChange[]>[] = [];
-    let fileDiffs: FileDiff[] = [];
+    let fileDiffPromises: Promise<FileDiff>[] = [];
 
     console.log('prefix: ', prefix);
     for (const key of Object.keys(newContent)) {
@@ -123,20 +123,32 @@ async function processDirectory(
             typeof newFilePath === 'string' &&
             typeof oldFilePath === 'string'
         ) {
-            fileDiffs.push(getFileDiff(oldFilePath, newFilePath, fullPath));
+            fileDiffPromises.push(
+                new Promise<FileDiff>((resolve) => {
+                    getFileDiff(oldFilePath, newFilePath, fullPath, (value) => {
+                        resolve({
+                            fileName: fullPath,
+                            changeDiffs: value,
+                        });
+                    });
+                })
+            );
         }
     }
 
-    let fileChanges: FileChange[] = [];
-
-    for (const diff of fileDiffs) {
-        fileChanges.push(getFileChanges(diff));
-    }
     return Promise.all(promises).then((results) => {
-        for (const resolvedPromise of results) {
-            changes = [...changes, ...resolvedPromise, ...fileChanges];
-        }
-        return changes;
+        return Promise.all(fileDiffPromises).then((fileDiffs) => {
+            let fileChanges: FileChange[] = [];
+
+            for (const diff of fileDiffs) {
+                fileChanges.push(getFileChanges(diff));
+            }
+
+            for (const resolvedPromise of results) {
+                changes = [...changes, ...resolvedPromise, ...fileChanges];
+            }
+            return changes;
+        });
     });
 }
 
@@ -155,13 +167,20 @@ type FileDiff = {
 const getFileDiff = (
     oldContent: string,
     newContent: string,
-    fileName: string
-): FileDiff => {
-    const changeDiffs = diff.diffLines(oldContent, newContent);
-    return {
-        fileName,
-        changeDiffs,
-    };
+    fileName: string,
+    onValueGotten: (changes: diff.Change[]) => any
+): void => {
+    diff.diffLines(oldContent, newContent, (err, value) => {
+        if (err) {
+            console.error(
+                `An error occurred while diffing the file ${fileName}: ${err}`
+            );
+        }
+
+        console.log(`Got value for ${fileName}`);
+
+        onValueGotten(value);
+    });
 };
 
 function getFileChanges(fileDiff: FileDiff): FileChange {

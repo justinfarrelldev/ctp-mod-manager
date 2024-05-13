@@ -99,57 +99,70 @@ async function processDirectory(
     prefix: string = ''
 ): Promise<FileChange[]> {
     let changes: FileChange[] = [];
-    let promises: Promise<FileChange[]>[] = [];
+    let stack: {
+        oldContent: DirectoryContents;
+        newContent: DirectoryContents;
+        prefix: string;
+    }[] = [];
     let fileDiffPromises: Promise<FileDiff>[] = [];
 
-    console.log('prefix: ', prefix);
-    for (const key of Object.keys(newContent)) {
-        const oldFilePath = oldContent[key];
-        const newFilePath = newContent[key];
-        const fullPath = prefix + key;
+    // Start with the initial directory
+    stack.push({ oldContent, newContent, prefix });
 
-        console.log('now processing: ', fullPath);
+    while (stack.length > 0) {
+        const { oldContent, newContent, prefix } = stack.pop()!;
+        console.log('prefix: ', prefix);
 
-        if (
-            typeof newFilePath === 'object' &&
-            typeof oldFilePath === 'object'
-        ) {
-            promises.push(
-                limit(async () =>
-                    processDirectory(oldFilePath, newFilePath, fullPath + '/')
-                )
-            );
-        } else if (
-            typeof newFilePath === 'string' &&
-            typeof oldFilePath === 'string'
-        ) {
-            fileDiffPromises.push(
-                new Promise<FileDiff>((resolve) => {
-                    getFileDiff(oldFilePath, newFilePath, fullPath, (value) => {
-                        resolve({
-                            fileName: fullPath,
-                            changeDiffs: value,
-                        });
-                    });
-                })
-            );
+        for (const key of Object.keys(newContent)) {
+            const oldFilePath = oldContent[key];
+            const newFilePath = newContent[key];
+            const fullPath = prefix + key;
+
+            console.log('now processing: ', fullPath);
+
+            if (
+                typeof newFilePath === 'object' &&
+                typeof oldFilePath === 'object'
+            ) {
+                // If both are directories, push to stack to process later
+                stack.push({
+                    oldContent: oldFilePath,
+                    newContent: newFilePath,
+                    prefix: fullPath + '/',
+                });
+            } else if (
+                typeof newFilePath === 'string' &&
+                typeof oldFilePath === 'string'
+            ) {
+                // If both are files, push to promise list to resolve later
+                fileDiffPromises.push(
+                    new Promise<FileDiff>((resolve) => {
+                        getFileDiff(
+                            oldFilePath,
+                            newFilePath,
+                            fullPath,
+                            (value) => {
+                                resolve({
+                                    fileName: fullPath,
+                                    changeDiffs: value,
+                                });
+                            }
+                        );
+                    })
+                );
+            }
         }
     }
 
-    return Promise.all(promises).then((results) => {
-        return Promise.all(fileDiffPromises).then((fileDiffs) => {
-            let fileChanges: FileChange[] = [];
+    // Wait for all file diffs to be resolved
+    const fileDiffs = await Promise.all(fileDiffPromises);
 
-            for (const diff of fileDiffs) {
-                fileChanges.push(getFileChanges(diff));
-            }
+    // Convert file diffs to file changes
+    for (const diff of fileDiffs) {
+        changes.push(getFileChanges(diff));
+    }
 
-            for (const resolvedPromise of results) {
-                changes = [...changes, ...resolvedPromise, ...fileChanges];
-            }
-            return changes;
-        });
-    });
+    return changes;
 }
 
 async function compareDirectories(

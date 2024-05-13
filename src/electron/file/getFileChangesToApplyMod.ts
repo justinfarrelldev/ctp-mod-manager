@@ -3,6 +3,7 @@ import fs, { ObjectEncodingOptions } from 'node:fs';
 import path, { resolve } from 'node:path';
 import * as diff from 'diff';
 import pLimit from 'p-limit';
+import diff_match_patch from 'diff-match-patch';
 
 // Define the type for the nested object structure
 type DirectoryContents = {
@@ -68,6 +69,20 @@ const readDirectory = (dirPath: string): DirectoryContents => {
 //     return result;
 // }
 
+const diffLineDiffMatchPatch = (
+    text1: string,
+    text2: string
+): diff_match_patch.Diff[] => {
+    const dmp = new diff_match_patch();
+    const a = dmp.diff_linesToChars_(text1, text2);
+    const lineText1 = a.chars1;
+    const lineText2 = a.chars2;
+    const lineArray = a.lineArray;
+    const diffs = dmp.diff_main(lineText1, lineText2, false);
+    dmp.diff_charsToLines_(diffs, lineArray);
+    return diffs;
+};
+
 async function processDirectory(
     oldContent: DirectoryContents,
     newContent: DirectoryContents,
@@ -131,6 +146,23 @@ async function processDirectory(
                 if (oldFilePath.length === newFilePath.length) {
                     // These are very likely the same
                     continue;
+                } else if (newFilePath.split('\n').length > 400) {
+                    const diffs = diffLineDiffMatchPatch(
+                        oldFilePath,
+                        newFilePath
+                    );
+                    fileDiffPromises.push(
+                        new Promise((resolve) => {
+                            const converted = diffs.map((dmpDiff) => ({
+                                count: diffs.length,
+                                value: dmpDiff[1],
+                            }));
+                            resolve({
+                                fileName: fullPath,
+                                changeDiffs: [...converted],
+                            });
+                        })
+                    );
                 } else {
                     // If both are files, push to promise list to resolve later
                     fileDiffPromises.push(

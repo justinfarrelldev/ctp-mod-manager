@@ -107,6 +107,7 @@ export const App: FC = (): React.ReactElement => {
     const [error, setError] = useState<string>();
     const [checkedMods, setCheckedMods] = useState<string[]>([]);
     const [loadingMods, setLoadingMods] = useState<boolean>(false);
+    const [applyingMods, setApplyingMods] = useState<boolean>(false);
 
     const loadMods = async (): Promise<void> => {
         setLoadingMods(true);
@@ -257,6 +258,28 @@ export const App: FC = (): React.ReactElement => {
                         ]}
                     >
                         <SettingsMenu />
+                    </Modal>
+                )}
+                {applyingMods && (
+                    <Modal
+                        width="50%"
+                        open={applyingMods}
+                        onClose={() => setApplyingMods(false)}
+                        modalName="Applying Mods"
+                        text=""
+                        buttons={[
+                            {
+                                text: 'Cancel',
+                                onClick: () => setApplyingMods(false),
+                                color: 'neutral',
+                            },
+                        ]}
+                    >
+                        <p>
+                            Applying mods, please wait (this can take a
+                            while)...
+                        </p>
+                        <span className="loading loading-bars loading-md block"></span>
                     </Modal>
                 )}
 
@@ -413,9 +436,13 @@ export const App: FC = (): React.ReactElement => {
                                             <TrashIcon />
                                         </button>
                                         <button
-                                            onClick={() => {
-                                                for (const mod of checkedMods) {
-                                                    (
+                                            onClick={async () => {
+                                                console.log(
+                                                    'Setting applying mods to true'
+                                                );
+                                                setApplyingMods(true);
+                                                for await (const mod of checkedMods) {
+                                                    await (
                                                         window as ElectronWindow
                                                     ).api.getFileChangesToApplyMod(
                                                         'file:getFileChangesToApplyMod',
@@ -423,6 +450,7 @@ export const App: FC = (): React.ReactElement => {
                                                         installDirs[0].directory // FIXME make this a part of the GUI
                                                     );
                                                 }
+                                                setApplyingMods(false);
                                             }}
                                         >
                                             <ApplyIcon />

@@ -1,5 +1,5 @@
-name: create-release
-run-name: Create Release
+name: test-backend
+run-name: Test Backend
 on:
     push:
         branches:
@@ -25,10 +25,4 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   cache: 'npm'
             - run: npm ci
-            - run: npm run make --if-present
             - run: npm test
-            - run: |
-                  gh release create "$tag" \
-                  --repo="$GITHUB_REPOSITORY" \
-                  --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-                  --generate-notes

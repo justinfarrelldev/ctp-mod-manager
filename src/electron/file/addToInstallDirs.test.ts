@@ -5,6 +5,7 @@ import {
     ensureInstallFileExists,
     ensureInstallsFolderExists,
     parseInstallFileIntoJSON,
+    writeJsonArrayToFile,
 } from './addToInstallDirs';
 import {
     DEFAULT_INSTALLS_DIR,
@@ -293,5 +294,38 @@ describe('parseInstallFileIntoJSON', () => {
             'An error occurred while converting the file contents to JSON: SyntaxError: Unexpected token i in JSON at position 0'
         );
         expect(result).toEqual([]);
+    });
+});
+describe('writeJsonArrayToFile', () => {
+    afterAll(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should write the JSON array to the file', () => {
+        const jsonArray = '["/new/dir"]';
+        vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
+
+        writeJsonArrayToFile(jsonArray);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+            DEFAULT_INSTALLS_FILE,
+            jsonArray
+        );
+    });
+
+    it('should handle errors during file writing', () => {
+        const consoleErrorSpy = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
+        const jsonArray = '["/new/dir"]';
+        vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {
+            throw new Error('write error');
+        });
+
+        writeJsonArrayToFile(jsonArray);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            `An error occurred while writing to the file ${DEFAULT_INSTALLS_FILE}: Error: write error`
+        );
     });
 });

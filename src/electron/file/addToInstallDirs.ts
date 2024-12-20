@@ -52,6 +52,23 @@ export const ensureInstallsFolderExists = async (): Promise<void> => {
 };
 
 /**
+ * Writes a JSON array to the default installs file.
+ *
+ * @param {string} jsonArray - The JSON array to write to the file.
+ * @throws Will log an error to the console if there is an error writing to the file.
+ */
+export const writeJsonArrayToFile = (jsonArray: string): void => {
+    try {
+        fs.writeFileSync(DEFAULT_INSTALLS_FILE, jsonArray);
+    } catch (fileWriteErr) {
+        // eslint-disable-next-line no-console
+        console.error(
+            `An error occurred while writing to the file ${DEFAULT_INSTALLS_FILE}: ${fileWriteErr}`
+        );
+    }
+};
+
+/**
  * Ensures that the default installs file exists. If the file does not exist or is not a file,
  * it creates the file and writes an empty JSON array or a JSON array generated from the provided directory.
  *
@@ -69,42 +86,14 @@ export const ensureInstallFileExists = async (dir?: string): Promise<void> => {
         console.error(
             `An error occurred while getting the stats for the file ${DEFAULT_INSTALLS_FILE}: ${err}`
         );
-        try {
-            if (dir) {
-                fs.writeFileSync(
-                    DEFAULT_INSTALLS_FILE,
-                    generateJsonArrayFromDir(dir)
-                );
-            } else {
-                fs.writeFileSync(DEFAULT_INSTALLS_FILE, '[]');
-            }
-            return;
-        } catch (fileWriteErr) {
-            // eslint-disable-next-line no-console
-            console.error(
-                `An error occurred while writing "[]" to the file ${DEFAULT_INSTALLS_FILE}: ${fileWriteErr}`
-            );
-        }
+        const jsonArray = dir ? generateJsonArrayFromDir(dir) : '[]';
+        writeJsonArrayToFile(jsonArray);
+        return;
     }
 
-    if (statsOfFile) {
-        if (!statsOfFile.isFile()) {
-            try {
-                if (dir) {
-                    fs.writeFileSync(
-                        DEFAULT_INSTALLS_FILE,
-                        generateJsonArrayFromDir(dir)
-                    );
-                } else {
-                    fs.writeFileSync(DEFAULT_INSTALLS_FILE, '[]');
-                }
-            } catch (fileWriteErr) {
-                // eslint-disable-next-line no-console
-                console.error(
-                    `An error occurred while writing "[]" to the file ${DEFAULT_INSTALLS_FILE}: ${fileWriteErr}`
-                );
-            }
-        }
+    if (statsOfFile && !statsOfFile.isFile()) {
+        const jsonArray = dir ? generateJsonArrayFromDir(dir) : '[]';
+        writeJsonArrayToFile(jsonArray);
     }
 };
 

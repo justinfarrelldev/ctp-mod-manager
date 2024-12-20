@@ -1,10 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, vi, afterAll } from 'vitest';
 import * as fs from 'fs';
 import {
     addToInstallDirs,
     ensureInstallsFolderExists,
-    ensureInstallFileExists,
-    parseInstallFileIntoJSON,
 } from './addToInstallDirs';
 import {
     DEFAULT_INSTALLS_DIR,
@@ -115,5 +113,58 @@ describe('addToInstallDirs', () => {
         await addToInstallDirs('/new/dir');
 
         expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+});
+describe('ensureInstallsFolderExists', () => {
+    afterAll(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should ensure the installs folder exists', async () => {
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(
+            () => ({ isFile: () => true, isDirectory: () => true }) as fs.Stats
+        );
+
+        await ensureInstallsFolderExists();
+
+        expect(createAppDataFolder).not.toHaveBeenCalled();
+    });
+
+    it('should create the installs folder if it does not exist', async () => {
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
+            throw new Error('not found');
+        });
+
+        await ensureInstallsFolderExists();
+
+        expect(createAppDataFolder).toHaveBeenCalledWith(
+            DEFAULT_INSTALLS_FOLDER_NAME
+        );
+    });
+
+    it('should create the installs folder if the path is not a directory', async () => {
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(
+            () => ({ isFile: () => true, isDirectory: () => false }) as fs.Stats
+        );
+
+        await ensureInstallsFolderExists();
+
+        expect(createAppDataFolder).toHaveBeenCalledWith(
+            DEFAULT_INSTALLS_FOLDER_NAME
+        );
+    });
+    it('should handle errors during folder operations', async () => {
+        const consoleErrorSpy = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
+            throw new Error('stat error');
+        });
+
+        await ensureInstallsFolderExists();
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            `An error occurred while getting the stats for the directory ${DEFAULT_INSTALLS_DIR}: Error: stat error`
+        );
     });
 });

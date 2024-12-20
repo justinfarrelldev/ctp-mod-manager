@@ -6,7 +6,14 @@ import {
 } from '../constants';
 import { createAppDataFolder } from './copyFileToModDir';
 
-const makeDirDefaultArray = (dir: string) => {
+/**
+ * Generates a JSON string representation of an array containing the provided directory.
+ *
+ * @param dir - The directory to be included in the JSON array.
+ * @returns A JSON string representation of an array containing the provided directory.
+ * @throws Will log an error message if JSON stringification fails.
+ */
+const generateJsonArrayFromDir = (dir: string) => {
     try {
         return JSON.stringify([dir]);
     } catch (err) {
@@ -17,6 +24,15 @@ const makeDirDefaultArray = (dir: string) => {
     }
 };
 
+/**
+ * Ensures that the default installs folder exists. If the folder does not exist,
+ * it attempts to create it. If the path exists but is not a directory, it also
+ * attempts to create the folder.
+ *
+ * @returns {Promise<void>} A promise that resolves when the folder is ensured to exist.
+ *
+ * @throws Will log an error to the console if there is an issue accessing the directory stats.
+ */
 export const ensureInstallsFolderExists = async (): Promise<void> => {
     let stats: fs.Stats | undefined;
     try {
@@ -35,6 +51,15 @@ export const ensureInstallsFolderExists = async (): Promise<void> => {
     }
 };
 
+/**
+ * Ensures that the default installs file exists. If the file does not exist or is not a file,
+ * it creates the file and writes an empty JSON array or a JSON array generated from the provided directory.
+ *
+ * @param {string} [dir] - Optional directory path to generate a JSON array from and write to the file.
+ * @returns {Promise<void>} - A promise that resolves when the operation is complete.
+ *
+ * @throws Will log an error to the console if there is an error getting the file stats or writing to the file.
+ */
 export const ensureInstallFileExists = async (dir?: string): Promise<void> => {
     let statsOfFile: fs.Stats | undefined;
     try {
@@ -48,7 +73,7 @@ export const ensureInstallFileExists = async (dir?: string): Promise<void> => {
             if (dir) {
                 fs.writeFileSync(
                     DEFAULT_INSTALLS_FILE,
-                    makeDirDefaultArray(dir)
+                    generateJsonArrayFromDir(dir)
                 );
             } else {
                 fs.writeFileSync(DEFAULT_INSTALLS_FILE, '[]');
@@ -68,7 +93,7 @@ export const ensureInstallFileExists = async (dir?: string): Promise<void> => {
                 if (dir) {
                     fs.writeFileSync(
                         DEFAULT_INSTALLS_FILE,
-                        makeDirDefaultArray(dir)
+                        generateJsonArrayFromDir(dir)
                     );
                 } else {
                     fs.writeFileSync(DEFAULT_INSTALLS_FILE, '[]');
@@ -83,6 +108,13 @@ export const ensureInstallFileExists = async (dir?: string): Promise<void> => {
     }
 };
 
+/**
+ * Parses the contents of the default installs file into a JSON array.
+ *
+ * @returns {string[]} An array of strings parsed from the JSON file.
+ *
+ * @throws Will log an error to the console if the file cannot be read or if the contents cannot be parsed as JSON.
+ */
 export const parseInstallFileIntoJSON = (): string[] => {
     let contents;
     try {
@@ -106,7 +138,20 @@ export const parseInstallFileIntoJSON = (): string[] => {
     return jsonFile;
 };
 
-export const addToInstallDirs = async (dir: string) => {
+/**
+ * Adds a directory to the install directories list.
+ *
+ * This function ensures that the installs folder and the install file exist,
+ * then parses the install file into a JSON array. If the directory is already
+ * in the list, it logs a message and returns. Otherwise, it adds the directory
+ * to the list and writes the updated list back to the install file.
+ *
+ * @param dir - The directory to add to the install directories list.
+ * @returns A promise that resolves when the operation is complete.
+ *
+ * @throws Will log an error message if there is an issue writing to the install file.
+ */
+export const addToInstallDirs = async (dir: string): Promise<void> => {
     await ensureInstallsFolderExists();
 
     await ensureInstallFileExists(dir);

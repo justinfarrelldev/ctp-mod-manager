@@ -1,15 +1,15 @@
 import * as fs from 'fs';
 import { DEFAULT_INSTALLS_FILE } from '../constants';
 import {
-    selectivelyAddInstallsFolder,
-    selectivelyAddInstallationFile,
+    ensureInstallsFolderExists,
+    ensureInstallFileExists,
     parseInstallFileIntoJSON,
 } from './addToInstallDirs';
 
 export const removeFromInstallDirs = async (dir: string): Promise<void> => {
-    await selectivelyAddInstallsFolder();
+    await ensureInstallsFolderExists();
 
-    await selectivelyAddInstallationFile(dir);
+    await ensureInstallFileExists(dir);
 
     let jsonFile: string[] = parseInstallFileIntoJSON();
 

@@ -17,7 +17,7 @@ const makeDirDefaultArray = (dir: string) => {
     }
 };
 
-export const selectivelyAddInstallsFolder = async (): Promise<void> => {
+export const ensureInstallsFolderExists = async (): Promise<void> => {
     let stats: fs.Stats | undefined;
     try {
         stats = fs.statSync(DEFAULT_INSTALLS_DIR);
@@ -35,9 +35,7 @@ export const selectivelyAddInstallsFolder = async (): Promise<void> => {
     }
 };
 
-export const selectivelyAddInstallationFile = async (
-    dir?: string
-): Promise<void> => {
+export const ensureInstallFileExists = async (dir?: string): Promise<void> => {
     let statsOfFile: fs.Stats | undefined;
     try {
         statsOfFile = fs.statSync(DEFAULT_INSTALLS_FILE);
@@ -109,9 +107,9 @@ export const parseInstallFileIntoJSON = (): string[] => {
 };
 
 export const addToInstallDirs = async (dir: string) => {
-    await selectivelyAddInstallsFolder();
+    await ensureInstallsFolderExists();
 
-    await selectivelyAddInstallationFile(dir);
+    await ensureInstallFileExists(dir);
 
     let jsonFile: string[] = parseInstallFileIntoJSON();
 

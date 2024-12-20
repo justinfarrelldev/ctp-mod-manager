@@ -1,14 +1,14 @@
 import { DEFAULT_INSTALLS_FILE } from '../constants';
 import {
-    selectivelyAddInstallationFile,
-    selectivelyAddInstallsFolder,
+    ensureInstallFileExists,
+    ensureInstallsFolderExists,
 } from './addToInstallDirs';
 import * as fs from 'fs';
 
 export const getInstallDirs = async (): Promise<string[]> => {
-    await selectivelyAddInstallsFolder();
+    await ensureInstallsFolderExists();
 
-    await selectivelyAddInstallationFile();
+    await ensureInstallFileExists();
 
     let contents: string;
     try {

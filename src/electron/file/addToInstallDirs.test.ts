@@ -4,6 +4,7 @@ import {
     addToInstallDirs,
     ensureInstallFileExists,
     ensureInstallsFolderExists,
+    parseInstallFileIntoJSON,
 } from './addToInstallDirs';
 import {
     DEFAULT_INSTALLS_DIR,
@@ -241,5 +242,56 @@ describe('ensureInstallFileExists', () => {
             DEFAULT_INSTALLS_FILE,
             JSON.stringify(['/new/dir'])
         );
+    });
+});
+describe('parseInstallFileIntoJSON', () => {
+    afterAll(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should parse the installs file into JSON', () => {
+        vi.spyOn(fs, 'readFileSync').mockReturnValueOnce('["/existing/dir"]');
+
+        const result = parseInstallFileIntoJSON();
+
+        expect(result).toEqual(['/existing/dir']);
+    });
+
+    it('should return an empty array if the installs file is empty', () => {
+        vi.spyOn(fs, 'readFileSync').mockReturnValueOnce('');
+
+        const result = parseInstallFileIntoJSON();
+
+        expect(result).toEqual([]);
+    });
+
+    it('should handle errors during file reading', () => {
+        const consoleErrorSpy = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
+        vi.spyOn(fs, 'readFileSync').mockImplementationOnce(() => {
+            throw new Error('read error');
+        });
+
+        const result = parseInstallFileIntoJSON();
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            `An error occurred while reading the file ${DEFAULT_INSTALLS_FILE}: Error: read error`
+        );
+        expect(result).toEqual([]);
+    });
+
+    it('should handle errors during JSON parsing', () => {
+        const consoleErrorSpy = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
+        vi.spyOn(fs, 'readFileSync').mockReturnValueOnce('invalid json');
+
+        const result = parseInstallFileIntoJSON();
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'An error occurred while converting the file contents to JSON: SyntaxError: Unexpected token i in JSON at position 0'
+        );
+        expect(result).toEqual([]);
     });
 });

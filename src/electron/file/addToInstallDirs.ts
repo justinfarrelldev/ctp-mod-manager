@@ -94,7 +94,7 @@ export const parseInstallFileIntoJSON = (): string[] => {
         );
     }
 
-    let jsonFile: string[];
+    let jsonFile: string[] = [];
     try {
         jsonFile = JSON.parse(contents);
     } catch (err) {

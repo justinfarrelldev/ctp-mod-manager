@@ -4,7 +4,7 @@ import isDev from 'electron-is-dev';
 import { copyFileToModDir } from './file/copyFileToModDir';
 import { goToRoute } from './process/goToRoute';
 import { getInstallDirectories } from './getInstallDirectories';
-import { loadMods } from './file/loadMods';
+import { loadModFileNames } from './file/loadModFileNames';
 import { DEFAULT_MOD_DIR } from './constants';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
 import { selectFolder } from './file/selectFolder';
@@ -72,7 +72,7 @@ app.whenReady().then(() => {
         removeModFromMods(fileName);
     });
 
-    ipcMain.handle('file:loadMods', () => loadMods());
+    ipcMain.handle('file:loadModFileNames', () => loadModFileNames());
 
     ipcMain.handle('file:getModsDir', () => DEFAULT_MOD_DIR);
 

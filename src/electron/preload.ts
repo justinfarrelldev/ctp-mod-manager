@@ -1,4 +1,5 @@
 import { ipcRenderer, contextBridge } from 'electron';
+import { loadModFileNames } from './file/loadModFileNames';
 
 contextBridge.exposeInMainWorld('api', {
     getCtp2InstallDir: () => ipcRenderer.invoke('load:getCtp2InstallDir'),
@@ -14,7 +15,7 @@ contextBridge.exposeInMainWorld('api', {
         ipcRenderer.invoke('file:copyFileToModDir', fileDir),
     removeModFromMods: (_: Event, fileName: string) =>
         ipcRenderer.invoke('file:removeModFromMods', fileName),
-    loadMods: () => ipcRenderer.invoke('file:loadMods'),
+    loadModFileNames: () => ipcRenderer.invoke('file:loadModFileNames'),
     selectFolder: () => ipcRenderer.invoke('file:selectFolder'),
     isValidInstall: (_: Event, fileDir: string) =>
         ipcRenderer.invoke('file:isValidInstall', fileDir),

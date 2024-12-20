@@ -51,7 +51,7 @@ export type ElectronWindow = Window &
                 zipFilePath: string
             ) => Promise<string[]>;
             goToRoute: (ipcCommand: string, route: string) => void;
-            loadMods: () => Promise<string[]>;
+            loadModFileNames: () => Promise<string[]>;
             getModsDir: (ipcCommand: string) => Promise<string>;
             selectFolder: (ipcCommand: string) => Promise<string>;
             isValidInstall: (
@@ -109,10 +109,12 @@ export const App: FC = (): React.ReactElement => {
     const [loadingMods, setLoadingMods] = useState<boolean>(false);
     const [applyingMods, setApplyingMods] = useState<boolean>(false);
 
-    const loadMods = async (): Promise<void> => {
+    const loadModFileNames = async (): Promise<void> => {
         setLoadingMods(true);
         try {
-            const loadedMods = await (window as ElectronWindow).api.loadMods();
+            const loadedMods = await (
+                window as ElectronWindow
+            ).api.loadModFileNames();
             setModNamesAdded(loadedMods);
         } catch (err) {
             console.error(
@@ -162,7 +164,7 @@ export const App: FC = (): React.ReactElement => {
 
         setInstallDirs([...installDirs, ...dirs]);
 
-        await loadMods();
+        await loadModFileNames();
 
         setLoadingDirs(false);
     };
@@ -182,7 +184,7 @@ export const App: FC = (): React.ReactElement => {
         );
 
         setLoadingMods(false);
-        await loadMods();
+        await loadModFileNames();
     };
 
     const openModsDir = (): void => {
@@ -209,7 +211,7 @@ export const App: FC = (): React.ReactElement => {
     };
 
     useEffect(() => {
-        loadMods();
+        loadModFileNames();
         loadInstallDirs();
         themeChange(false);
         // 👆 false parameter is required for react project
@@ -430,7 +432,7 @@ export const App: FC = (): React.ReactElement => {
                                                     );
                                                 }
 
-                                                loadMods();
+                                                loadModFileNames();
                                             }}
                                         >
                                             <TrashIcon />

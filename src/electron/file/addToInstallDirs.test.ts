@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterAll } from 'vitest';
 import * as fs from 'fs';
 import {
     addToInstallDirs,
+    ensureInstallFileExists,
     ensureInstallsFolderExists,
 } from './addToInstallDirs';
 import {
@@ -165,6 +166,80 @@ describe('ensureInstallsFolderExists', () => {
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             `An error occurred while getting the stats for the directory ${DEFAULT_INSTALLS_DIR}: Error: stat error`
+        );
+    });
+});
+describe('ensureInstallFileExists', () => {
+    afterAll(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should create the installs file with the provided directory if it does not exist', async () => {
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
+            throw new Error('not found');
+        });
+        vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
+
+        await ensureInstallFileExists('/new/dir');
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+            DEFAULT_INSTALLS_FILE,
+            JSON.stringify(['/new/dir'])
+        );
+    });
+
+    it('should create the installs file with an empty array if no directory is provided and the file does not exist', async () => {
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
+            throw new Error('not found');
+        });
+        vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
+
+        await ensureInstallFileExists();
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+            DEFAULT_INSTALLS_FILE,
+            '[]'
+        );
+    });
+
+    it('should not create the installs file if it already exists', async () => {
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(
+            () => ({ isFile: () => true, isDirectory: () => false }) as fs.Stats
+        );
+        vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
+
+        await ensureInstallFileExists('/new/dir');
+
+        expect(fs.writeFileSync).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors during file operations', async () => {
+        const consoleErrorSpy = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
+            throw new Error('stat error');
+        });
+        vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {
+            throw new Error('write error');
+        });
+
+        await ensureInstallFileExists('/new/dir');
+
+        expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it('should create the installs file if the path is not a file', async () => {
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(
+            () => ({ isFile: () => false, isDirectory: () => true }) as fs.Stats
+        );
+        vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
+
+        await ensureInstallFileExists('/new/dir');
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+            DEFAULT_INSTALLS_FILE,
+            JSON.stringify(['/new/dir'])
         );
     });
 });

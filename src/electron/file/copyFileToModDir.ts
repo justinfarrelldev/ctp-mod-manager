@@ -32,8 +32,14 @@ const unzipInModDir = async (
     });
 };
 
-// Recursively find all ctp2_data and ctp2_program folders and mark each occurrence (not within the same
-// folder as another) as roots, then returns their dirs.
+/**
+ * Finds and returns an array of directory paths that contain the "ctp2_data" folder within the specified directory.
+ *
+ * @param dir - The root directory to search within.
+ * @returns An array of strings representing the paths to the "ctp2_data" folders found within the specified directory.
+ *
+ * @throws Will log an error message if an error occurs during the search process.
+ */
 const findGameRootsWithinDir = (dir: string): string[] => {
     const dirs: string[] = [];
     try {
@@ -54,6 +60,13 @@ const findGameRootsWithinDir = (dir: string): string[] => {
     return dirs;
 };
 
+/**
+ * Finds all zip files in the specified directory.
+ *
+ * @param dir - The directory to search for zip files.
+ * @returns An array of paths to the zip files found in the directory.
+ * @throws Will log an error message if an error occurs during the search.
+ */
 const findZipFilesInDir = (dir: string): string[] => {
     try {
         return klawSync(dir)
@@ -66,6 +79,13 @@ const findZipFilesInDir = (dir: string): string[] => {
     }
 };
 
+/**
+ * Extracts the contents of a zip file to the specified target directory asynchronously.
+ *
+ * @param {AdmZip} zip - The zip file to extract.
+ * @param {string} targetPath - The path to the directory where the contents should be extracted.
+ * @returns {Promise<void>} A promise that resolves when the extraction is complete.
+ */
 const extract = (zip: AdmZip, targetPath: string): Promise<void> => {
     return new Promise((resolve) => {
         zip.extractAllToAsync(targetPath, false, false, (err) => {
@@ -79,6 +99,15 @@ const extract = (zip: AdmZip, targetPath: string): Promise<void> => {
     });
 };
 
+/**
+ * Unzips all zip files found within the specified destination directory and its subdirectories.
+ *
+ * This function searches through every folder for zip files, extracting them as they are found.
+ * If no zip files are found, it quits with success and moves on to the next step of the process.
+ *
+ * @param destination - The path to the directory where the search for zip files will begin.
+ * @returns A promise that resolves when all zip files have been extracted.
+ */
 const unzipAllFiles = async (destination: string): Promise<void> => {
     // Search through every folder for zip files, extracting as it finds them
     // If it does not find them, it quits with success and moves on to the next step of the process
@@ -101,6 +130,16 @@ const unzipAllFiles = async (destination: string): Promise<void> => {
     }
 };
 
+/**
+ * Copies multiple data folders to the specified mod directory.
+ *
+ * @param dirs - An array of directory paths to be copied.
+ * @param modDir - The target mod directory where the data folders will be copied.
+ *
+ * @remarks
+ * If the `dirs` array is empty, the function will return immediately without performing any operations.
+ * After copying the data folders, the function will remove the target mod directory if it exists.
+ */
 const copyDataFoldersToModDirs = (dirs: string[], modDir: string): void => {
     if (dirs.length === 0) return;
     dirs.forEach((dir) => {
@@ -113,6 +152,18 @@ const copyDataFoldersToModDirs = (dirs: string[], modDir: string): void => {
     });
 };
 
+/**
+ * Copies the contents of a directory ending with 'ctp2_data' to a mod directory.
+ *
+ * @param dir - The directory path that ends with 'ctp2_data'.
+ * @throws Will throw an error if the directory does not end with 'ctp2_data'.
+ *
+ * The function extracts the parent directory name of the provided directory,
+ * removes the 'ctp2_data' suffix, and then copies the contents of the resulting
+ * directory to a predefined mod directory.
+ *
+ * If an error occurs during the copy operation, it logs the error to the console.
+ */
 const copyDataFolderToModDir = (dir: string): void => {
     if (!dir.endsWith('ctp2_data')) {
         throw new Error(
@@ -137,13 +188,22 @@ const copyDataFolderToModDir = (dir: string): void => {
     }
 };
 
-// Copy file to mod dir should:
-// - Extract the files of the zip to the mods folder (preserve original)
-// - Determine if that is a zip (unzip if it is, and repeat until there is not a zip)
-// - Determine if this is a scenario file or a full-on mod (does it have scen0000? Is there a ctp2_data or ctp2_program?)
-// - If scenario, simply say this does not support scenarios at the moment and will in a later release
-// - If it has a ctp2_data / ctp2_program folder, set that as the top-level and zip it (later, I should really add the readme to this level too...)
-// - Use that zip in the mod folder (so we can have comparisons of each file easily)
+/**
+ * Copies a file to the mod directory, unzips it, and processes its contents.
+ *
+ * @param fileDir - The directory of the file to be copied.
+ *
+ * This function performs the following steps:
+ * 1. Extracts the file name from the provided file directory.
+ * 2. Checks if the default mod directory exists and creates it if it doesn't.
+ * 3. Constructs the destination path for the file in the mod directory.
+ * 4. Unzips the file in the mod directory.
+ * 5. Unzips all files within the destination directory.
+ * 6. Finds game root directories within the unzipped contents.
+ * 7. Copies the data folders to the mod directories.
+ *
+ * @throws Will log an error if there is an issue getting the stats for the directory.
+ */
 export const copyFileToModDir = async (fileDir: string) => {
     const split = fileDir.split('\\');
     const fileName = split[split.length - 1];
@@ -173,6 +233,12 @@ export const copyFileToModDir = async (fileDir: string) => {
     copyDataFoldersToModDirs(dataDirs, destination.replace('.zip', ''));
 };
 
+/**
+ * Creates a folder in the application's AppData directory with the specified name.
+ *
+ * @param name - The name of the folder to create.
+ * @throws Will throw an error if there is an issue getting the app path or creating the folder.
+ */
 export const createAppDataFolder = async (name: string) => {
     let folderPath;
     try {

@@ -81,6 +81,15 @@ const diffLineDiffMatchPatch = (
     dmp.diff_charsToLines_(diffs, lineArray);
     return diffs;
 };
+
+/**
+ * Processes the differences between two directory contents and generates a list of file changes to apply a mod.
+ *
+ * @param oldContent - The original directory contents.
+ * @param newContent - The new directory contents to compare against the original.
+ * @param prefix - An optional prefix to prepend to file paths.
+ * @returns A promise that resolves to an array of file changes.
+ */
 const processDirectory = async (
     oldContent: DirectoryContents,
     newContent: DirectoryContents,
@@ -122,6 +131,18 @@ const processDirectory = async (
     return changes;
 };
 
+/**
+ * Processes directory entries by comparing the old and new directory contents.
+ * If both entries are directories, they are pushed to the stack for further processing.
+ * If both entries are files, the file entries are processed to determine the differences.
+ *
+ * @param oldContent - The contents of the old directory.
+ * @param newContent - The contents of the new directory.
+ * @param prefix - The prefix path to be used for the current directory.
+ * @param stack - A stack used to store directories that need further processing.
+ * @param fileDiffPromises - An array of promises that resolve to file differences.
+ * @param changes - An array to store the changes detected between the old and new directory contents.
+ */
 const processDirectoryEntries = (
     oldContent: DirectoryContents,
     newContent: DirectoryContents,
@@ -165,12 +186,36 @@ const processDirectoryEntries = (
         }
     }
 };
-const BINARY_FILE_EXTENSIONS: string[] = ['.tga', '.til', '.pdf'];
+
+const SPECIAL_FILE_EXTENSIONS: string[] = ['.tga', '.til', '.pdf'];
 const MAX_LINE_COUNT: number = 400;
 
-const isBinaryFile = (filePath: string): boolean =>
-    BINARY_FILE_EXTENSIONS.some((ext) => filePath.endsWith(ext));
+/**
+ * Checks if the given file path has a special file extension (.tga, .til, .pdf, etc.).
+ *
+ * @param filePath - The path of the file to check.
+ * @returns `true` if the file has a special extension, otherwise `false`.
+ */
+const isSpecialFile = (filePath: string): boolean =>
+    SPECIAL_FILE_EXTENSIONS.some((ext) => filePath.endsWith(ext));
 
+/**
+ * Processes file entries to determine changes between old and new file versions.
+ *
+ * @param oldFilePath - The path to the old file version.
+ * @param newFilePath - The path to the new file version.
+ * @param fullPath - The full path of the file being processed.
+ * @param fileDiffPromises - An array to store promises that resolve to file differences.
+ * @param changes - An array to store file changes.
+ *
+ * @returns void
+ *
+ * This function compares the old and new file versions to determine if there are any changes.
+ * If both files are binary and their sizes differ, it records the change.
+ * If the files are text and their contents differ, it creates a promise to compute the differences
+ * and adds it to the fileDiffPromises array.
+ * If the new file content exceeds a maximum line count, it uses a different method to compute the differences.
+ */
 const processFileEntries = (
     oldFilePath: string,
     newFilePath: string,
@@ -178,7 +223,7 @@ const processFileEntries = (
     fileDiffPromises: Promise<FileDiff>[],
     changes: FileChange[]
 ): void => {
-    if (isBinaryFile(newFilePath) && isBinaryFile(oldFilePath)) {
+    if (isSpecialFile(newFilePath) && isSpecialFile(oldFilePath)) {
         const oldFileStats = fs.statSync(oldFilePath);
         const newFileStats = fs.statSync(newFilePath);
 

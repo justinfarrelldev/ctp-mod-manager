@@ -29,7 +29,12 @@ type FileChange =
           isBinary: true;
       };
 
-// Function to read directory contents recursively
+/**
+ * Recursively reads the contents of a directory and returns an object representing the directory structure.
+ *
+ * @param dirPath - The path to the directory to read.
+ * @returns An object representing the directory structure, where keys are directory or file names and values are either nested directory contents or file contents.
+ */
 const readDirectory = (dirPath: string): DirectoryContents => {
     const entries = fs.readdirSync(dirPath, { withFileTypes: true });
     const result: DirectoryContents = {};

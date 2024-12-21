@@ -68,17 +68,22 @@ const readDirectory = (dirPath: string): DirectoryContents => {
 //     return result;
 // }
 
-const diffLineDiffMatchPatch = (
+/**
+ * Computes the differences between two texts using the Diff Match Patch library.
+ *
+ * @param text1 - The first text to compare.
+ * @param text2 - The second text to compare.
+ * @returns An array of differences, where each difference is represented as an
+ *          object with a `0` (equal), `-1` (delete), or `1` (insert) operation
+ *          and the associated text.
+ */
+export const diffTexts = (
     text1: string,
     text2: string
 ): diff_match_patch.Diff[] => {
     const dmp = new diff_match_patch();
-    const a = dmp.diff_linesToChars_(text1, text2);
-    const lineText1 = a.chars1;
-    const lineText2 = a.chars2;
-    const lineArray = a.lineArray;
-    const diffs = dmp.diff_main(lineText1, lineText2, false);
-    dmp.diff_charsToLines_(diffs, lineArray);
+    const diffs = dmp.diff_main(text1, text2);
+    dmp.diff_cleanupSemantic(diffs);
     return diffs;
 };
 
@@ -243,7 +248,7 @@ const processFileEntries = (
         // These are the same
         return;
     } else if (newFileContent.split('\n').length > MAX_LINE_COUNT) {
-        const diffs = diffLineDiffMatchPatch(oldFileContent, newFileContent);
+        const diffs = diffTexts(oldFileContent, newFileContent);
         fileDiffPromises.push(
             new Promise((resolve) => {
                 const converted = diffs.map((dmpDiff) => ({

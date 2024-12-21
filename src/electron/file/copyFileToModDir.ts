@@ -4,7 +4,7 @@ import fs from 'fs';
 import AdmZip from 'adm-zip';
 import klawSync from 'klaw-sync';
 
-const unzipInModDir = async (
+export const unzipInModDir = async (
     zipFullPath: string,
     fileName: string
 ): Promise<void> => {

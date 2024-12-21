@@ -435,7 +435,7 @@ describe('processDirectory', () => {
         expect(result[0].lineChangeGroups[0].contentBeforeChange).toBe('');
     });
 
-    it.only('should detect modified text and return correct line groups', async () => {
+    it('should detect modified text and return correct line groups', async () => {
         // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
             if (dirPath === '/mock/oldDir') {
@@ -464,8 +464,8 @@ describe('processDirectory', () => {
         const result = await (processDirectory as any)(oldDir, newDir);
         expect(result).toHaveLength(1);
         expect(result[0].fileName).toBe('/mock/newDir/README.md');
-        expect(result[0].lineChangeGroups).toHaveLength(1);
-        expect(result[0].lineChangeGroups[0].change).toContain('Line2 changed');
+        expect(result[0].lineChangeGroups).toHaveLength(2);
+        expect(result[0].lineChangeGroups[1].change).toContain('Line2 changed');
         expect(result[0].lineChangeGroups[0].contentBeforeChange).toContain(
             'Line2'
         );

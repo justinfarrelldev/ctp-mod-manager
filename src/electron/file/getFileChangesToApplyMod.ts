@@ -391,24 +391,57 @@ const getFileDiff = (
 
 function getFileChanges(fileDiff: FileDiff): FileChange {
     const lineChangeGroups: LineChangeGroup[] = [];
-    let lineIndex = 1;
 
-    for (const part of fileDiff.changeDiffs) {
-        const startLine = lineIndex;
-        const endLine = lineIndex + part.count - 1;
-        lineChangeGroups.push({
-            startLineNumber: startLine,
-            endLineNumber: endLine,
-            change: part.added ? part.value : '',
-            contentBeforeChange: part.removed ? part.value : '',
-            changeType: part.added
-                ? 'add'
-                : part.removed
-                  ? 'remove'
-                  : 'replace',
-        });
-        lineIndex += part.count;
+    let oldLineNumber = 1;
+    let newLineNumber = 1;
+
+    for (const diffPart of fileDiff.changeDiffs) {
+        const length = diffPart.count;
+        if (diffPart.added) {
+            lineChangeGroups.push({
+                startLineNumber: newLineNumber,
+                endLineNumber: newLineNumber + length - 1,
+                change: diffPart.value,
+                contentBeforeChange: '',
+                changeType: 'add',
+            });
+            newLineNumber += length;
+        } else if (diffPart.removed) {
+            lineChangeGroups.push({
+                startLineNumber: oldLineNumber,
+                endLineNumber: oldLineNumber + length - 1,
+                change: '',
+                contentBeforeChange: diffPart.value,
+                changeType: 'remove',
+            });
+            oldLineNumber += length;
+        } else {
+            oldLineNumber += length;
+            newLineNumber += length;
+        }
     }
+
+    // console.log('file diff: ', fileDiff);
+    // for (const part of fileDiff.changeDiffs) {
+    //     if (!part.added && !part.removed) {
+    //         continue;
+    //     }
+    //     const startLine = lineIndex;
+    //     const endLine = lineIndex + part.count - 1;
+    //     const changeType = part.added
+    //         ? 'add'
+    //         : part.removed
+    //           ? 'remove'
+    //           : 'replace';
+    //     lineChangeGroups.push({
+    //         startLineNumber: startLine,
+    //         endLineNumber: endLine,
+    //         change: part.added ? part.value : '',
+    //         contentBeforeChange: part.removed ? part.value : '',
+    //         changeType: changeType,
+    //     });
+    //     lineIndex += part.count;
+    // }
 
     console.log('line change groups: ', lineChangeGroups);
 

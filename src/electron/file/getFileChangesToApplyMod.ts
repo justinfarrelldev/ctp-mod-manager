@@ -226,7 +226,7 @@ const isSpecialFile = (filePath: string): boolean =>
  * and adds it to the fileDiffPromises array.
  * If the new file content exceeds a maximum line count, it uses a different method to compute the differences.
  */
-const processFileEntries = (
+export const processFileEntries = (
     oldFilePath: string,
     newFilePath: string,
     fullPath: string,

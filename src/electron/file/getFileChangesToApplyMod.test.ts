@@ -1,10 +1,19 @@
-import { describe, it, expect, vi, afterEach, afterAll } from 'vitest';
+import {
+    describe,
+    it,
+    expect,
+    vi,
+    afterEach,
+    afterAll,
+    beforeEach,
+} from 'vitest';
 import {
     diffTexts,
     getFileChangesToApplyMod,
+    processFileEntries,
     readDirectory,
 } from './getFileChangesToApplyMod';
-import fs, { readFile } from 'node:fs';
+import fs, { readFile, StatSyncFn } from 'node:fs';
 
 vi.mock('electron', () => ({
     app: {
@@ -234,5 +243,150 @@ describe('getFileChangesToApplyMod', () => {
         consoleLogMock.mockRestore();
         statMock.mockRestore();
         readMock.mockRestore();
+    });
+});
+describe('processFileEntries', () => {
+    let fileDiffPromises: Promise<any>[];
+    let changes: any[];
+
+    beforeEach(() => {
+        fileDiffPromises = [];
+        changes = [];
+    });
+
+    it('should detect no changes if files are identical text', () => {
+        const mockStat = vi.spyOn(fs, 'statSync');
+        const mockRead = vi.spyOn(fs, 'readFileSync');
+
+        mockStat.mockReturnValue({ size: 100 } as any);
+        mockRead.mockImplementation((filePath: string) => {
+            return 'Same content';
+        });
+
+        // Identical textual files
+        processFileEntries(
+            'path/to/oldFile.txt',
+            'path/to/newFile.txt',
+            'testFile.txt',
+            fileDiffPromises,
+            changes
+        );
+
+        expect(changes).toHaveLength(0);
+        expect(fileDiffPromises).toHaveLength(0);
+
+        mockStat.mockRestore();
+        mockRead.mockRestore();
+    });
+
+    it('should detect changes if textual files differ', async () => {
+        const mockStat = vi.spyOn(fs, 'statSync');
+        const mockRead = vi.spyOn(fs, 'readFileSync');
+
+        mockStat.mockReturnValue({ size: 200 } as any);
+        mockRead.mockImplementation((filePath: string) => {
+            return filePath.includes('oldFile') ? 'Old content' : 'New content';
+        });
+
+        processFileEntries(
+            'path/to/oldFile.txt',
+            'path/to/newFile.txt',
+            'testFile.txt',
+            fileDiffPromises,
+            changes
+        );
+
+        expect(changes).toHaveLength(0);
+        expect(fileDiffPromises).toHaveLength(1);
+
+        const fileDiffResults = await Promise.all(fileDiffPromises);
+        expect(fileDiffResults[0].fileName).toBe('testFile.txt');
+        expect(fileDiffResults[0].changeDiffs).toBeDefined();
+
+        mockStat.mockRestore();
+        mockRead.mockRestore();
+    });
+
+    it('should mark binary changes if special file sizes differ', () => {
+        const mockStat = vi.spyOn(fs, 'statSync');
+        const mockRead = vi.spyOn(fs, 'readFileSync');
+
+        // Mark .pdf as special
+        mockStat.mockImplementation(((filePath: string) =>
+            filePath.includes('oldFile')
+                ? { size: 123 }
+                : { size: 456 }) as any);
+        mockRead.mockReturnValue('fake');
+
+        processFileEntries(
+            'oldFile.pdf',
+            'newFile.pdf',
+            'testFile.pdf',
+            fileDiffPromises,
+            changes
+        );
+
+        expect(changes).toEqual([
+            {
+                fileName: 'testFile.pdf',
+                isBinary: true,
+            },
+        ]);
+        expect(fileDiffPromises).toHaveLength(0);
+
+        mockStat.mockRestore();
+        mockRead.mockRestore();
+    });
+
+    it('should not add binary changes if special files have same size', () => {
+        const mockStat = vi.spyOn(fs, 'statSync');
+        const mockRead = vi.spyOn(fs, 'readFileSync');
+
+        mockStat.mockReturnValue({ size: 100 } as any);
+        mockRead.mockReturnValue('irrelevant');
+
+        processFileEntries(
+            'file.tga',
+            'file.tga',
+            'sameSize.tga',
+            fileDiffPromises,
+            changes
+        );
+
+        expect(changes).toHaveLength(0);
+        expect(fileDiffPromises).toHaveLength(0);
+
+        mockStat.mockRestore();
+        mockRead.mockRestore();
+    });
+
+    it('should handle large text files by splitting lines correctly', async () => {
+        const mockStat = vi.spyOn(fs, 'statSync');
+        const mockRead = vi.spyOn(fs, 'readFileSync');
+
+        mockStat.mockReturnValue({ size: 9999 } as any);
+        // Over 400 lines
+        mockRead.mockImplementation((filePath: string) =>
+            filePath.includes('oldFile')
+                ? 'Old\n'.repeat(401)
+                : 'New\n'.repeat(401)
+        );
+
+        processFileEntries(
+            'oldFile.txt',
+            'newFile.txt',
+            'largeDiff.txt',
+            fileDiffPromises,
+            changes
+        );
+
+        expect(changes).toHaveLength(0);
+        expect(fileDiffPromises).toHaveLength(1);
+
+        const results = await Promise.all(fileDiffPromises);
+        expect(results[0].fileName).toBe('largeDiff.txt');
+
+        mockStat.mockRestore();
+        mockRead.mockRestore();
     });
 });

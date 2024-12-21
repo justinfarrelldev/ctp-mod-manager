@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { diffTexts } from './getFileChangesToApplyMod';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { diffTexts, readDirectory } from './getFileChangesToApplyMod';
+import fs, { readFile } from 'node:fs';
 
 vi.mock('electron', () => ({
     app: {
@@ -71,5 +72,21 @@ describe('diffTexts', () => {
             [-1, 'a'],
             [1, 'b'],
         ]);
+    });
+});
+
+describe('readDirectory', () => {
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
+
+    it('should read an empty directory', () => {
+        const mock = vi.spyOn(fs, 'readdirSync').mockReturnValue([]);
+
+        const result = readDirectory('/mock/empty-dir');
+        expect(result).toEqual({});
+        expect(mock).toHaveBeenCalledWith('/mock/empty-dir', {
+            withFileTypes: true,
+        });
     });
 });

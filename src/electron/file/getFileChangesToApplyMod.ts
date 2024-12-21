@@ -35,7 +35,7 @@ type FileChange =
  * @param dirPath - The path to the directory to read.
  * @returns An object representing the directory structure, where keys are directory or file names and values are either nested directory contents or file contents.
  */
-const readDirectory = (dirPath: string): DirectoryContents => {
+export const readDirectory = (dirPath: string): DirectoryContents => {
     const entries = fs.readdirSync(dirPath, { withFileTypes: true });
     const result: DirectoryContents = {};
 

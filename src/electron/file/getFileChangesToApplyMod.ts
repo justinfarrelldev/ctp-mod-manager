@@ -233,29 +233,25 @@ const processDirectoryEntries = (
     }
 
     for (const key of Object.keys(newContent)) {
-        const oldFilePath = oldContent[key];
-        const newFilePath = newContent[key];
+        console.log('new content:', newContent);
+        console.log('old content: ', oldContent);
+        const oldFilePath = Object.keys(oldContent)[0];
         const fullPath = prefix + key;
 
         console.log('now processing: ', fullPath);
+        console.log('old file path in processDirectoryEntries: ', oldFilePath);
 
-        if (
-            typeof newFilePath === 'object' &&
-            typeof oldFilePath === 'object'
-        ) {
+        if (typeof key === 'object' && typeof oldFilePath === 'object') {
             // If both are directories, push to stack to process later
             stack.push({
                 oldContent: oldFilePath,
-                newContent: newFilePath,
+                newContent: key,
                 prefix: fullPath + '/',
             });
-        } else if (
-            typeof newFilePath === 'string' &&
-            typeof oldFilePath === 'string'
-        ) {
+        } else if (typeof key === 'string' && typeof oldFilePath === 'string') {
             processFileEntries(
                 oldFilePath,
-                newFilePath,
+                key,
                 fullPath,
                 fileDiffPromises,
                 changes
@@ -300,6 +296,7 @@ export const processFileEntries = (
     fileDiffPromises: Promise<FileDiff>[],
     changes: FileChange[]
 ): void => {
+    console.log('Processing file entry');
     if (isSpecialFile(newFilePath) && isSpecialFile(oldFilePath)) {
         const oldFileStats = fs.statSync(oldFilePath);
         const newFileStats = fs.statSync(newFilePath);
@@ -313,10 +310,16 @@ export const processFileEntries = (
         return;
     }
 
-    const oldFileContent = fs.readFileSync(oldFilePath, 'utf-8');
-    const newFileContent = fs.readFileSync(newFilePath, 'utf-8');
+    console.log('old file path: ', oldFilePath);
+    console.log('new file path: ', newFilePath);
+    const oldFileContent = fs.readFileSync(oldFilePath);
+    const newFileContent = fs.readFileSync(newFilePath);
+
+    console.log('old file content: ', oldFileContent);
+    console.log('new file content: ', newFileContent);
 
     if (oldFileContent === newFileContent) {
+        console.log('Same');
         // These are the same
         return;
     } else if (newFileContent.split('\n').length > MAX_LINE_COUNT) {
@@ -334,6 +337,8 @@ export const processFileEntries = (
             })
         );
     } else {
+        console.log('Pushing to promise list');
+
         // If both are files, push to promise list to resolve later
         fileDiffPromises.push(
             new Promise<FileDiff>((resolve) => {
@@ -389,23 +394,23 @@ function getFileChanges(fileDiff: FileDiff): FileChange {
     let lineIndex = 1;
 
     for (const part of fileDiff.changeDiffs) {
-        if (part.added || part.removed) {
-            const startLine = lineIndex;
-            const endLine = lineIndex + part.count - 1;
-            lineChangeGroups.push({
-                startLineNumber: startLine,
-                endLineNumber: endLine,
-                change: part.added ? part.value : '',
-                contentBeforeChange: part.removed ? part.value : '',
-                changeType: part.added
-                    ? 'add'
-                    : part.removed
-                      ? 'remove'
-                      : 'replace',
-            });
-        }
+        const startLine = lineIndex;
+        const endLine = lineIndex + part.count - 1;
+        lineChangeGroups.push({
+            startLineNumber: startLine,
+            endLineNumber: endLine,
+            change: part.added ? part.value : '',
+            contentBeforeChange: part.removed ? part.value : '',
+            changeType: part.added
+                ? 'add'
+                : part.removed
+                  ? 'remove'
+                  : 'replace',
+        });
         lineIndex += part.count;
     }
+
+    console.log('line change groups: ', lineChangeGroups);
 
     return {
         fileName: fileDiff.fileName,

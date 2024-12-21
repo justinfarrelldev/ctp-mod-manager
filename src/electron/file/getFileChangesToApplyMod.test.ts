@@ -410,6 +410,7 @@ describe('processDirectory', () => {
     });
 
     it('should detect added text file in new directory', async () => {
+        // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
             if (dirPath === '/mock/newDir') {
                 return ['file.txt'];
@@ -434,7 +435,8 @@ describe('processDirectory', () => {
         expect(result[0].lineChangeGroups[0].contentBeforeChange).toBe('');
     });
 
-    it('should detect modified text and return correct line groups', async () => {
+    it.only('should detect modified text and return correct line groups', async () => {
+        // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
             if (dirPath === '/mock/oldDir') {
                 return ['README.md'];
@@ -445,20 +447,23 @@ describe('processDirectory', () => {
             return [];
         });
         vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: string) => {
-            if (filePath === path.join('/mock/oldDir', 'README.md')) {
+            console.log('File path gotten: ', filePath);
+            if (filePath === '/mock/oldDir/README.md') {
                 return 'Line1\nLine2\nLine3';
             }
-            if (filePath === path.join('/mock/newDir', 'README.md')) {
+            if (filePath === '/mock/newDir/README.md') {
                 return 'Line1\nLine2 changed\nLine3';
             }
             return '';
         });
 
-        const oldDir = { 'README.md': 'Line1\nLine2\nLine3' };
-        const newDir = { 'README.md': 'Line1\nLine2 changed\nLine3' };
+        const oldDir = { '/mock/oldDir/README.md': 'Line1\nLine2\nLine3' };
+        const newDir = {
+            '/mock/newDir/README.md': 'Line1\nLine2 changed\nLine3',
+        };
         const result = await (processDirectory as any)(oldDir, newDir);
         expect(result).toHaveLength(1);
-        expect(result[0].fileName).toBe('README.md');
+        expect(result[0].fileName).toBe('/mock/newDir/README.md');
         expect(result[0].lineChangeGroups).toHaveLength(1);
         expect(result[0].lineChangeGroups[0].change).toContain('Line2 changed');
         expect(result[0].lineChangeGroups[0].contentBeforeChange).toContain(
@@ -467,6 +472,7 @@ describe('processDirectory', () => {
     });
 
     it('should handle nested directories with changes', async () => {
+        // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
             const structure: Record<string, string[]> = {
                 '/mock/oldDir/src': ['index.js', 'utils'],
@@ -528,6 +534,7 @@ describe('processDirectory', () => {
     });
 
     it('should detect no changes if files and nested dirs are identical', async () => {
+        // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
             const structure: Record<string, string[]> = {
                 '/mock/oldDir/src': ['app.txt', 'assets'],

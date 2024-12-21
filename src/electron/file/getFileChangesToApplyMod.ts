@@ -312,8 +312,8 @@ export const processFileEntries = (
 
     console.log('old file path: ', oldFilePath);
     console.log('new file path: ', newFilePath);
-    const oldFileContent = fs.readFileSync(oldFilePath);
-    const newFileContent = fs.readFileSync(newFilePath);
+    const oldFileContent = fs.readFileSync(oldFilePath, 'utf-8');
+    const newFileContent = fs.readFileSync(newFilePath, 'utf-8');
 
     console.log('old file content: ', oldFileContent);
     console.log('new file content: ', newFileContent);

@@ -1,8 +1,7 @@
 import { DEFAULT_MOD_DIR } from '../constants';
-import fs, { ObjectEncodingOptions } from 'node:fs';
-import path, { resolve } from 'node:path';
+import fs from 'node:fs';
+import path from 'node:path';
 import * as diff from 'diff';
-import pLimit from 'p-limit';
 import diff_match_patch from 'diff-match-patch';
 
 // Define the type for the nested object structure
@@ -82,12 +81,11 @@ const diffLineDiffMatchPatch = (
     dmp.diff_charsToLines_(diffs, lineArray);
     return diffs;
 };
-
-async function processDirectory(
+const processDirectory = async (
     oldContent: DirectoryContents,
     newContent: DirectoryContents,
     prefix: string = ''
-): Promise<FileChange[]> {
+): Promise<FileChange[]> => {
     let changes: FileChange[] = [];
     let stack: {
         oldContent: DirectoryContents;
@@ -103,86 +101,14 @@ async function processDirectory(
         const { oldContent, newContent, prefix } = stack.pop()!;
         console.log('prefix: ', prefix);
 
-        for (const key of Object.keys(newContent)) {
-            const oldFilePath = oldContent[key];
-            const newFilePath = newContent[key];
-            const fullPath = prefix + key;
-
-            console.log('now processing: ', fullPath);
-
-            if (
-                typeof newFilePath === 'object' &&
-                typeof oldFilePath === 'object'
-            ) {
-                // If both are directories, push to stack to process later
-                stack.push({
-                    oldContent: oldFilePath,
-                    newContent: newFilePath,
-                    prefix: fullPath + '/',
-                });
-            } else if (
-                typeof newFilePath === 'string' &&
-                typeof oldFilePath === 'string'
-            ) {
-                if (
-                    (newFilePath.endsWith('.tga') &&
-                        oldFilePath.endsWith('.tga')) ||
-                    (newFilePath.endsWith('.til') &&
-                        oldFilePath.endsWith('.til')) ||
-                    (newFilePath.endsWith('.pdf') &&
-                        oldFilePath.endsWith('.pdf'))
-                ) {
-                    if (
-                        fs.readFileSync(newFilePath).byteLength !==
-                        fs.readFileSync(oldFilePath).byteLength
-                    ) {
-                        changes.push({
-                            fileName: fullPath,
-                            isBinary: true,
-                        });
-                    }
-                }
-
-                if (oldFilePath.length === newFilePath.length) {
-                    // These are very likely the same
-                    continue;
-                } else if (newFilePath.split('\n').length > 400) {
-                    const diffs = diffLineDiffMatchPatch(
-                        oldFilePath,
-                        newFilePath
-                    );
-                    fileDiffPromises.push(
-                        new Promise((resolve) => {
-                            const converted = diffs.map((dmpDiff) => ({
-                                count: diffs.length,
-                                value: dmpDiff[1],
-                            }));
-                            resolve({
-                                fileName: fullPath,
-                                changeDiffs: [...converted],
-                            });
-                        })
-                    );
-                } else {
-                    // If both are files, push to promise list to resolve later
-                    fileDiffPromises.push(
-                        new Promise<FileDiff>((resolve) => {
-                            getFileDiff(
-                                oldFilePath,
-                                newFilePath,
-                                fullPath,
-                                (value) => {
-                                    resolve({
-                                        fileName: fullPath,
-                                        changeDiffs: value,
-                                    });
-                                }
-                            );
-                        })
-                    );
-                }
-            }
-        }
+        processDirectoryEntries(
+            oldContent,
+            newContent,
+            prefix,
+            stack,
+            fileDiffPromises,
+            changes
+        );
     }
 
     // Wait for all file diffs to be resolved
@@ -194,7 +120,116 @@ async function processDirectory(
     }
 
     return changes;
-}
+};
+
+const processDirectoryEntries = (
+    oldContent: DirectoryContents,
+    newContent: DirectoryContents,
+    prefix: string,
+    stack: {
+        oldContent: DirectoryContents;
+        newContent: DirectoryContents;
+        prefix: string;
+    }[],
+    fileDiffPromises: Promise<FileDiff>[],
+    changes: FileChange[]
+): void => {
+    for (const key of Object.keys(newContent)) {
+        const oldFilePath = oldContent[key];
+        const newFilePath = newContent[key];
+        const fullPath = prefix + key;
+
+        console.log('now processing: ', fullPath);
+
+        if (
+            typeof newFilePath === 'object' &&
+            typeof oldFilePath === 'object'
+        ) {
+            // If both are directories, push to stack to process later
+            stack.push({
+                oldContent: oldFilePath,
+                newContent: newFilePath,
+                prefix: fullPath + '/',
+            });
+        } else if (
+            typeof newFilePath === 'string' &&
+            typeof oldFilePath === 'string'
+        ) {
+            processFileEntries(
+                oldFilePath,
+                newFilePath,
+                fullPath,
+                fileDiffPromises,
+                changes
+            );
+        }
+    }
+};
+const BINARY_FILE_EXTENSIONS: string[] = ['.tga', '.til', '.pdf'];
+const MAX_LINE_COUNT: number = 400;
+
+const isBinaryFile = (filePath: string): boolean =>
+    BINARY_FILE_EXTENSIONS.some((ext) => filePath.endsWith(ext));
+
+const processFileEntries = (
+    oldFilePath: string,
+    newFilePath: string,
+    fullPath: string,
+    fileDiffPromises: Promise<FileDiff>[],
+    changes: FileChange[]
+): void => {
+    if (isBinaryFile(newFilePath) && isBinaryFile(oldFilePath)) {
+        const oldFileStats = fs.statSync(oldFilePath);
+        const newFileStats = fs.statSync(newFilePath);
+
+        if (oldFileStats.size !== newFileStats.size) {
+            changes.push({
+                fileName: fullPath,
+                isBinary: true,
+            });
+        }
+        return;
+    }
+
+    const oldFileContent = fs.readFileSync(oldFilePath, 'utf-8');
+    const newFileContent = fs.readFileSync(newFilePath, 'utf-8');
+
+    if (oldFileContent === newFileContent) {
+        // These are the same
+        return;
+    } else if (newFileContent.split('\n').length > MAX_LINE_COUNT) {
+        const diffs = diffLineDiffMatchPatch(oldFileContent, newFileContent);
+        fileDiffPromises.push(
+            new Promise((resolve) => {
+                const converted = diffs.map((dmpDiff) => ({
+                    count: diffs.length,
+                    value: dmpDiff[1],
+                }));
+                resolve({
+                    fileName: fullPath,
+                    changeDiffs: [...converted],
+                });
+            })
+        );
+    } else {
+        // If both are files, push to promise list to resolve later
+        fileDiffPromises.push(
+            new Promise<FileDiff>((resolve) => {
+                getFileDiff(
+                    oldFileContent,
+                    newFileContent,
+                    fullPath,
+                    (value) => {
+                        resolve({
+                            fileName: fullPath,
+                            changeDiffs: value,
+                        });
+                    }
+                );
+            })
+        );
+    }
+};
 
 async function compareDirectories(
     oldDir: DirectoryContents,

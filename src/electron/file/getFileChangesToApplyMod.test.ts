@@ -10,10 +10,12 @@ import {
 import {
     diffTexts,
     getFileChangesToApplyMod,
+    processDirectory,
     processFileEntries,
     readDirectory,
 } from './getFileChangesToApplyMod';
 import fs, { readFile, StatSyncFn } from 'node:fs';
+import path from 'node:path';
 
 vi.mock('electron', () => ({
     app: {
@@ -388,5 +390,168 @@ describe('processFileEntries', () => {
 
         mockStat.mockRestore();
         mockRead.mockRestore();
+    });
+});
+vi.mock('node:fs');
+
+describe('processDirectory', () => {
+    beforeEach(() => {
+        vi.resetAllMocks();
+    });
+
+    it('should return an empty array for two empty directories', async () => {
+        vi.spyOn(fs, 'readdirSync').mockReturnValue([]);
+        vi.spyOn(fs, 'readFileSync').mockReturnValue('');
+
+        const oldDir = {};
+        const newDir = {};
+        const result = await (processDirectory as any)(oldDir, newDir);
+        expect(result).toEqual([]);
+    });
+
+    it('should detect added text file in new directory', async () => {
+        vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
+            if (dirPath === '/mock/newDir') {
+                return ['file.txt'];
+            }
+            return [];
+        });
+        vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: string) => {
+            if (filePath === path.join('/mock/newDir', 'file.txt')) {
+                return 'Some content';
+            }
+            return '';
+        });
+
+        const oldDir = {};
+        const newDir = {
+            'file.txt': 'Some content',
+        };
+        const result = await (processDirectory as any)(oldDir, newDir);
+        expect(result).toHaveLength(1);
+        expect(result[0].lineChangeGroups).toHaveLength(1);
+        expect(result[0].lineChangeGroups[0].change).toBe('Some content');
+        expect(result[0].lineChangeGroups[0].contentBeforeChange).toBe('');
+    });
+
+    it('should detect modified text and return correct line groups', async () => {
+        vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
+            if (dirPath === '/mock/oldDir') {
+                return ['README.md'];
+            }
+            if (dirPath === '/mock/newDir') {
+                return ['README.md'];
+            }
+            return [];
+        });
+        vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: string) => {
+            if (filePath === path.join('/mock/oldDir', 'README.md')) {
+                return 'Line1\nLine2\nLine3';
+            }
+            if (filePath === path.join('/mock/newDir', 'README.md')) {
+                return 'Line1\nLine2 changed\nLine3';
+            }
+            return '';
+        });
+
+        const oldDir = { 'README.md': 'Line1\nLine2\nLine3' };
+        const newDir = { 'README.md': 'Line1\nLine2 changed\nLine3' };
+        const result = await (processDirectory as any)(oldDir, newDir);
+        expect(result).toHaveLength(1);
+        expect(result[0].fileName).toBe('README.md');
+        expect(result[0].lineChangeGroups).toHaveLength(1);
+        expect(result[0].lineChangeGroups[0].change).toContain('Line2 changed');
+        expect(result[0].lineChangeGroups[0].contentBeforeChange).toContain(
+            'Line2'
+        );
+    });
+
+    it('should handle nested directories with changes', async () => {
+        vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
+            const structure: Record<string, string[]> = {
+                '/mock/oldDir/src': ['index.js', 'utils'],
+                '/mock/oldDir/src/utils': ['helper.js'],
+                '/mock/newDir/src': ['index.js', 'utils'],
+                '/mock/newDir/src/utils': ['helper.js'],
+            };
+            return structure[dirPath] || [];
+        });
+        vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: string) => {
+            if (filePath === path.join('/mock/oldDir/src', 'index.js')) {
+                return 'console.log("old");';
+            }
+            if (filePath === path.join('/mock/newDir/src', 'index.js')) {
+                return 'console.log("new");';
+            }
+            if (filePath === path.join('/mock/oldDir/src/utils', 'helper.js')) {
+                return 'function helper() {}';
+            }
+            if (filePath === path.join('/mock/newDir/src/utils', 'helper.js')) {
+                return 'function helper() { console.log("updated"); }';
+            }
+            return '';
+        });
+
+        const oldDir = {
+            src: {
+                'index.js': 'console.log("old");',
+                utils: {
+                    'helper.js': 'function helper() {}',
+                },
+            },
+        };
+        const newDir = {
+            src: {
+                'index.js': 'console.log("new");',
+                utils: {
+                    'helper.js':
+                        'function helper() { console.log("updated"); }',
+                },
+            },
+        };
+        const result = await (processDirectory as any)(oldDir, newDir);
+        expect(result.length).toBe(2);
+
+        const indexChange = result.find(
+            (r: any) => r.fileName === 'src/index.js'
+        );
+        const helperChange = result.find(
+            (r: any) => r.fileName === 'src/utils/helper.js'
+        );
+
+        expect(indexChange.lineChangeGroups).toHaveLength(1);
+        expect(helperChange.lineChangeGroups).toHaveLength(1);
+        expect(indexChange.lineChangeGroups[0].contentBeforeChange).toContain(
+            'old'
+        );
+        expect(helperChange.lineChangeGroups[0].change).toContain('updated');
+    });
+
+    it('should detect no changes if files and nested dirs are identical', async () => {
+        vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
+            const structure: Record<string, string[]> = {
+                '/mock/oldDir/src': ['app.txt', 'assets'],
+                '/mock/newDir/src': ['app.txt', 'assets'],
+            };
+            return structure[dirPath] || [];
+        });
+        vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: string) => {
+            return 'same content';
+        });
+
+        const oldDir = {
+            src: {
+                'app.txt': 'same content',
+                assets: {},
+            },
+        };
+        const newDir = {
+            src: {
+                'app.txt': 'same content',
+                assets: {},
+            },
+        };
+        const result = await (processDirectory as any)(oldDir, newDir);
+        expect(result).toEqual([]);
     });
 });

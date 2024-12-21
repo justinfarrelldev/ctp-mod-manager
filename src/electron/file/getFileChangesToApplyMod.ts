@@ -100,7 +100,7 @@ export const diffTexts = (
  * @param prefix - An optional prefix to prepend to file paths.
  * @returns A promise that resolves to an array of file changes.
  */
-const processDirectory = async (
+export const processDirectory = async (
     oldContent: DirectoryContents,
     newContent: DirectoryContents,
     prefix: string = ''

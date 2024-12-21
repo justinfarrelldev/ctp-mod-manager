@@ -15,6 +15,7 @@ type LineChangeGroup = {
     endLineNumber: number;
     change: string; // The change, including everything between startLineNumber and endLineNumber (including newlines)
     contentBeforeChange: string; // The content before it was replaced by the mod
+    changeType: 'add' | 'remove' | 'replace';
 };
 
 // Wish there was a way to share this type, but alas... it's also found in App.tsx
@@ -133,6 +134,8 @@ export const processDirectory = async (
     // Wait for all file diffs to be resolved
     const fileDiffs = await Promise.all(fileDiffPromises);
 
+    console.log(`Got ${fileDiffs.length} file diffs with value: ${fileDiffs}`);
+
     // Convert file diffs to file changes
     for (const diff of fileDiffs) {
         changes.push(getFileChanges(diff));
@@ -165,6 +168,70 @@ const processDirectoryEntries = (
     fileDiffPromises: Promise<FileDiff>[],
     changes: FileChange[]
 ): void => {
+    if (
+        Object.keys(oldContent).length === 0 &&
+        Object.keys(newContent).length > 0
+    ) {
+        for (const key of Object.keys(newContent)) {
+            const newFilePath = newContent[key];
+            const fullPath = prefix + key;
+
+            if (typeof newFilePath === 'object') {
+                stack.push({
+                    oldContent: {},
+                    newContent: newFilePath,
+                    prefix: fullPath + '/',
+                });
+            } else if (typeof newFilePath === 'string') {
+                changes.push({
+                    fileName: fullPath,
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: newFilePath.split('\n').length,
+                            change: newFilePath,
+                            contentBeforeChange: '',
+                            changeType: 'add',
+                        },
+                    ],
+                });
+            }
+        }
+        return;
+    }
+
+    if (
+        Object.keys(newContent).length === 0 &&
+        Object.keys(oldContent).length > 0
+    ) {
+        for (const key of Object.keys(oldContent)) {
+            const oldFilePath = oldContent[key];
+            const fullPath = prefix + key;
+
+            if (typeof oldFilePath === 'object') {
+                stack.push({
+                    oldContent: oldFilePath,
+                    newContent: {},
+                    prefix: fullPath + '/',
+                });
+            } else if (typeof oldFilePath === 'string') {
+                changes.push({
+                    fileName: fullPath,
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: oldFilePath.split('\n').length,
+                            change: '',
+                            contentBeforeChange: oldFilePath,
+                            changeType: 'remove',
+                        },
+                    ],
+                });
+            }
+        }
+        return;
+    }
+
     for (const key of Object.keys(newContent)) {
         const oldFilePath = oldContent[key];
         const newFilePath = newContent[key];
@@ -330,6 +397,11 @@ function getFileChanges(fileDiff: FileDiff): FileChange {
                 endLineNumber: endLine,
                 change: part.added ? part.value : '',
                 contentBeforeChange: part.removed ? part.value : '',
+                changeType: part.added
+                    ? 'add'
+                    : part.removed
+                      ? 'remove'
+                      : 'replace',
             });
         }
         lineIndex += part.count;

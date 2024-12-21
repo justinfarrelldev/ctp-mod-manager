@@ -24,6 +24,15 @@ export const selectivelyAddBackupsFolder = async (): Promise<void> => {
     }
 };
 
+/**
+ * Creates a backup of the specified installation directory by zipping its contents
+ * and saving the zip file in the backups folder.
+ *
+ * @param installDir - The directory to back up.
+ * @returns A promise that resolves when the backup is complete.
+ *
+ * @throws Will log an error message if an error occurs during the zipping process.
+ */
 export const makeBackup = async (installDir: string): Promise<void> => {
     await selectivelyAddBackupsFolder();
     const zip = new AdmZip();

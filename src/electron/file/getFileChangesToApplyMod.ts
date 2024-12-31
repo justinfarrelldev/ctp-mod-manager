@@ -146,6 +146,7 @@ export const getFileChanges = (fileDiff: FileDiff): FileChange => {
     const final = {
         fileName: fileDiff.fileName,
         lineChangeGroups,
+        isBinary: isBinaryFile(fileDiff.fileName),
     };
 
     return final;

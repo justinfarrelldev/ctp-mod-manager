@@ -147,8 +147,6 @@ const getFileChanges = (fileDiff: FileDiff): FileChange => {
     //     lineIndex += part.count;
     // }
 
-    console.log('line change groups: ', lineChangeGroups);
-
     return {
         fileName: fileDiff.fileName,
         lineChangeGroups,
@@ -181,7 +179,6 @@ export const processDirectory = async (
 
     while (stack.length > 0) {
         const { oldContent, newContent, prefix } = stack.pop()!;
-        console.log('prefix: ', prefix);
 
         processDirectoryEntries(
             oldContent,
@@ -195,8 +192,6 @@ export const processDirectory = async (
 
     // Wait for all file diffs to be resolved
     const fileDiffs = await Promise.all(fileDiffPromises);
-
-    console.log(`Got ${fileDiffs.length} file diffs with value: ${fileDiffs}`);
 
     // Convert file diffs to file changes
     for (const diff of fileDiffs) {
@@ -295,14 +290,8 @@ const processDirectoryEntries = (
     }
 
     for (const key of Object.keys(newContent)) {
-        console.log('new content:', newContent);
-        console.log('old content: ', oldContent);
         const oldFilePath = Object.keys(oldContent)[0];
         const fullPath = prefix + key;
-
-        console.log('now processing: ', fullPath);
-        console.log('old file path in processDirectoryEntries: ', oldFilePath);
-
         if (typeof key === 'object' && typeof oldFilePath === 'object') {
             // If both are directories, push to stack to process later
             stack.push({
@@ -358,7 +347,6 @@ export const processFileEntries = (
     fileDiffPromises: Promise<FileDiff>[],
     changes: FileChange[]
 ): void => {
-    console.log('Processing file entry');
     if (isSpecialFile(newFilePath) && isSpecialFile(oldFilePath)) {
         const oldFileStats = fs.statSync(oldFilePath);
         const newFileStats = fs.statSync(newFilePath);
@@ -372,16 +360,10 @@ export const processFileEntries = (
         return;
     }
 
-    console.log('old file path: ', oldFilePath);
-    console.log('new file path: ', newFilePath);
     const oldFileContent = fs.readFileSync(oldFilePath, 'utf-8');
     const newFileContent = fs.readFileSync(newFilePath, 'utf-8');
 
-    console.log('old file content: ', oldFileContent);
-    console.log('new file content: ', newFileContent);
-
     if (oldFileContent === newFileContent) {
-        console.log('Same');
         // These are the same
         return;
     } else if (newFileContent.split('\n').length > MAX_LINE_COUNT) {
@@ -399,8 +381,6 @@ export const processFileEntries = (
             })
         );
     } else {
-        console.log('Pushing to promise list');
-
         // If both are files, push to promise list to resolve later
         fileDiffPromises.push(
             new Promise<FileDiff>((resolve) => {
@@ -437,9 +417,6 @@ const getFileDiff = (
                 `An error occurred while diffing the file ${fileName}: ${err}`
             );
         }
-
-        console.log(`Got value for ${fileName}`);
-
         onValueGotten(value);
     });
 };
@@ -455,8 +432,6 @@ export const getFileChangesToApplyMod = async (
     mod: string,
     installDir: string
 ): Promise<FileChange[]> => {
-    console.log('Running code!');
-
     let statsOfFile: fs.Stats | undefined;
     try {
         statsOfFile = fs.statSync(`${DEFAULT_MOD_DIR}\\${mod}`);
@@ -475,13 +450,10 @@ export const getFileChangesToApplyMod = async (
             return;
         }
 
-        console.log('reading mod dir structure!');
         const modDirStructure = readDirectory(`${DEFAULT_MOD_DIR}\\${mod}`);
 
-        console.log('reading game dir structure!');
         const gameDirStructure = readDirectory(installDir);
 
-        console.log('comparing dirs!');
         /*
             This compares the game's structure to the mod's structure. To extrapolate this into other
             mods, we need to compare the other mods to the game's structure as well and then use the line 

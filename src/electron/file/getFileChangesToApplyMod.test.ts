@@ -526,6 +526,400 @@ describe('processDirectory', () => {
         expect(helperChange.lineChangeGroups[0].change).toContain('updated');
     });
 
+    it('should handle deeply nested directories with mixed changes', async () => {
+        // @ts-expect-error This is a mock
+        vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
+            const structure: Record<string, string[]> = {
+                '/mock/oldDir': ['src', 'docs', 'README.md'],
+                '/mock/oldDir/src': ['index.ts', 'utils', 'components'],
+                '/mock/oldDir/src/utils': ['helper.ts'],
+                '/mock/oldDir/src/components': ['Button.tsx'],
+                '/mock/oldDir/docs': ['intro.md'],
+                '/mock/newDir': ['src', 'docs', 'LICENSE.md'],
+                '/mock/newDir/src': [
+                    'index.ts',
+                    'utils',
+                    'components',
+                    'services',
+                ],
+                '/mock/newDir/src/utils': ['helper.ts', 'format.ts'],
+                '/mock/newDir/src/components': ['Button.tsx', 'Input.tsx'],
+                '/mock/newDir/src/services': ['api.ts'],
+                '/mock/newDir/docs': ['intro.md', 'setup.md'],
+            };
+            return structure[dirPath] || [];
+        });
+        vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: string) => {
+            const contents: Record<string, string> = {
+                '/mock/oldDir/README.md': 'Old README content',
+                '/mock/newDir/LICENSE.md': 'MIT License',
+                '/mock/oldDir/src/index.ts': 'console.log("Old Index");',
+                '/mock/newDir/src/index.ts': 'console.log("New Index");',
+                '/mock/oldDir/src/utils/helper.ts':
+                    'export const helper = () => {};',
+                '/mock/newDir/src/utils/helper.ts':
+                    'export const helper = () => { console.log("helper"); };',
+                '/mock/newDir/src/utils/format.ts':
+                    'export const format = () => {};',
+                '/mock/oldDir/src/components/Button.tsx':
+                    '<button>Click me</button>',
+                '/mock/newDir/src/components/Button.tsx':
+                    '<button>Click me!</button>',
+                '/mock/newDir/src/components/Input.tsx': '<input />',
+                '/mock/src/services/api.ts': 'export const api = () => {};',
+                '/mock/oldDir/docs/intro.md': '# Introduction',
+                '/mock/newDir/docs/intro.md': '# Introduction Updated',
+                '/mock/newDir/docs/setup.md': '# Setup Guide',
+            };
+            return contents[filePath] || '';
+        });
+
+        const oldDir = {
+            src: {
+                'index.ts': 'console.log("Old Index");',
+                utils: {
+                    'helper.ts': 'export const helper = () => {};',
+                },
+                components: {
+                    'Button.tsx': '<button>Click me</button>',
+                },
+            },
+            docs: {
+                'intro.md': '# Introduction',
+            },
+            'README.md': 'Old README content',
+        };
+        const newDir = {
+            src: {
+                'index.ts': 'console.log("New Index");',
+                utils: {
+                    'helper.ts':
+                        'export const helper = () => { console.log("helper"); };',
+                    'format.ts': 'export const format = () => {};',
+                },
+                components: {
+                    'Button.tsx': '<button>Click me!</button>',
+                    'Input.tsx': '<input />',
+                },
+                services: {
+                    'api.ts': 'export const api = () => {};',
+                },
+            },
+            docs: {
+                'intro.md': '# Introduction Updated',
+                'setup.md': '# Setup Guide',
+            },
+            'LICENSE.md': 'MIT License',
+        };
+        const result = await (processDirectory as any)(oldDir, newDir);
+        expect(result.length).toBe(7);
+
+        const changes = {
+            'README.md': ['Old README content', ''],
+            'src/index.ts': ['Old Index', 'New Index'],
+            'src/utils/helper.ts': [
+                'export const helper = () => {};',
+                'export const helper = () => { console.log("helper"); };',
+            ],
+            'src/components/Button.tsx': [
+                '<button>Click me</button>',
+                '<button>Click me!</button>',
+            ],
+            'docs/intro.md': ['# Introduction', '# Introduction Updated'],
+            'LICENSE.md': ['', 'MIT License'],
+            'src/services/api.ts': ['', 'export const api = () => {};'],
+        };
+
+        for (const change of result) {
+            const expectedChange = changes[change.fileName];
+            expect(expectedChange).toBeDefined();
+            if (expectedChange) {
+                if (expectedChange[0] === '' || expectedChange[1] === '') {
+                    expect(change.isBinary).toBeUndefined();
+                } else {
+                    expect(change.lineChangeGroups.length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
+
+    it('should handle multiple additions, deletions, and modifications across various nested directories', async () => {
+        // @ts-expect-error This is a mock
+        vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
+            const structure: Record<string, string[]> = {
+                '/mock/oldDir': ['app', 'config', 'assets'],
+                '/mock/oldDir/app': ['main.js', 'helpers.js'],
+                '/mock/oldDir/config': ['default.json'],
+                '/mock/oldDir/assets': ['images', 'styles'],
+                '/mock/oldDir/assets/images': ['logo.png'],
+                '/mock/newDir': ['app', 'config', 'assets', 'README.md'],
+                '/mock/newDir/app': ['main.js', 'helpers.js', 'utils.js'],
+                '/mock/newDir/config': ['default.json', 'production.json'],
+                '/mock/newDir/assets': ['images', 'styles', 'scripts'],
+                '/mock/newDir/assets/images': ['logo.png', 'banner.png'],
+                '/mock/newDir/assets/styles': ['main.css'],
+                '/mock/newDir/assets/scripts': ['app.js'],
+            };
+            return structure[dirPath] || [];
+        });
+        vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: string) => {
+            const contents: Record<string, string> = {
+                '/mock/oldDir/app/main.js': 'console.log("App Main");',
+                '/mock/newDir/app/main.js': 'console.log("App Main Updated");',
+                '/mock/oldDir/app/helpers.js':
+                    'export const helper = () => {};',
+                '/mock/newDir/app/helpers.js':
+                    'export const helper = () => { return true; };',
+                '/mock/newDir/app/utils.js': 'export const utils = () => {};',
+                '/mock/oldDir/config/default.json': '{"env": "development"}',
+                '/mock/newDir/config/default.json': '{"env": "production"}',
+                '/mock/newDir/config/production.json': '{"debug": false}',
+                '/mock/oldDir/assets/images/logo.png': 'binarycontent',
+                '/mock/newDir/assets/images/logo.png': 'binarycontent',
+                '/mock/newDir/assets/images/banner.png': 'binarycontent',
+                '/mock/oldDir/assets/styles': {}, // Directory
+                '/mock/newDir/assets/styles/main.css': 'body { margin: 0; }',
+                '/mock/newDir/assets/scripts/app.js':
+                    'console.log("App Script");',
+            };
+            return contents[filePath] || '';
+        });
+
+        const oldDir = {
+            app: {
+                'main.js': 'console.log("App Main");',
+                'helpers.js': 'export const helper = () => {};',
+            },
+            config: {
+                'default.json': '{"env": "development"}',
+            },
+            assets: {
+                images: {
+                    'logo.png': 'binarycontent',
+                },
+                styles: {},
+            },
+        };
+        const newDir = {
+            app: {
+                'main.js': 'console.log("App Main Updated");',
+                'helpers.js': 'export const helper = () => { return true; };',
+                'utils.js': 'export const utils = () => {};',
+            },
+            config: {
+                'default.json': '{"env": "production"}',
+                'production.json': '{"debug": false}',
+            },
+            assets: {
+                images: {
+                    'logo.png': 'binarycontent',
+                    'banner.png': 'binarycontent',
+                },
+                styles: {
+                    'main.css': 'body { margin: 0; }',
+                },
+                scripts: {
+                    'app.js': 'console.log("App Script");',
+                },
+            },
+            'README.md': '# Project README',
+        };
+        const result = await (processDirectory as any)(oldDir, newDir);
+        expect(result.length).toBe(7);
+
+        const changes = {
+            'app/main.js': ['App Main', 'App Main Updated'],
+            'app/helpers.js': [
+                'export const helper = () => {};',
+                'export const helper = () => { return true; };',
+            ],
+            'app/utils.js': ['', 'export const utils = () => {};'],
+            'config/default.json': [
+                '{"env": "development"}',
+                '{"env": "production"}',
+            ],
+            'config/production.json': ['', '{"debug": false}'],
+            'assets/images/banner.png': ['', 'binarycontent'],
+            'assets/styles/main.css': ['', 'body { margin: 0; }'],
+            'assets/scripts/app.js': ['', 'console.log("App Script");'],
+            'README.md': ['', '# Project README'],
+        };
+
+        for (const change of result) {
+            const expectedChange = changes[change.fileName];
+            expect(expectedChange).toBeDefined();
+            if (expectedChange) {
+                if (expectedChange[0] === '' || expectedChange[1] === '') {
+                    expect(change.isBinary).toBeUndefined();
+                } else if (change.fileName.endsWith('.png')) {
+                    expect(change.isBinary).toBe(true);
+                } else {
+                    expect(change.lineChangeGroups.length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
+
+    it('should correctly process directories with multiple file types and varying depths', async () => {
+        // @ts-expect-error This is a mock
+        vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
+            const structure: Record<string, string[]> = {
+                '/mock/oldDir': ['bin', 'lib', 'src'],
+                '/mock/oldDir/bin': ['execute'],
+                '/mock/oldDir/lib': ['moduleA.js', 'moduleB.js'],
+                '/mock/oldDir/src': ['index.ts', 'utils', 'components'],
+                '/mock/oldDir/src/utils': ['util1.ts', 'util2.ts'],
+                '/mock/oldDir/src/components': ['Header.tsx'],
+                '/mock/newDir': ['bin', 'lib', 'src', 'tests'],
+                '/mock/newDir/bin': ['execute', 'deploy'],
+                '/mock/newDir/lib': ['moduleA.js', 'moduleC.js'],
+                '/mock/newDir/src': [
+                    'index.ts',
+                    'utils',
+                    'components',
+                    'services',
+                ],
+                '/mock/newDir/src/utils': ['util1.ts', 'util2.ts', 'util3.ts'],
+                '/mock/newDir/src/components': ['Header.tsx', 'Footer.tsx'],
+                '/mock/newDir/src/services': ['service1.ts'],
+                '/mock/newDir/tests': ['index.test.ts'],
+            };
+            return structure[dirPath] || [];
+        });
+        vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: string) => {
+            const contents: Record<string, string> = {
+                '/mock/oldDir/bin/execute': 'binary execute',
+                '/mock/newDir/bin/execute': 'binary execute',
+                '/mock/newDir/bin/deploy': 'binary deploy',
+                '/mock/oldDir/lib/moduleA.js': 'export const A = () => {};',
+                '/mock/newDir/lib/moduleA.js':
+                    'export const A = () => { console.log("A"); };',
+                '/mock/oldDir/lib/moduleB.js': 'export const B = () => {};',
+                '/mock/newDir/lib/moduleC.js': 'export const C = () => {};',
+                '/mock/oldDir/src/index.ts':
+                    'import { A } from "../lib/moduleA";',
+                '/mock/newDir/src/index.ts':
+                    'import { A } from "../lib/moduleA";\nimport { C } from "../lib/moduleC";',
+                '/mock/oldDir/src/utils/util1.ts':
+                    'export const util1 = () => {};',
+                '/mock/newDir/src/utils/util1.ts':
+                    'export const util1 = () => { return true; };',
+                '/mock/oldDir/src/utils/util2.ts':
+                    'export const util2 = () => {};',
+                '/mock/newDir/src/utils/util3.ts':
+                    'export const util3 = () => {};',
+                '/mock/oldDir/src/components/Header.tsx':
+                    '<header>Header</header>',
+                '/mock/newDir/src/components/Header.tsx':
+                    '<header>Header Updated</header>',
+                '/mock/newDir/src/components/Footer.tsx':
+                    '<footer>Footer</footer>',
+                '/mock/newDir/src/services/service1.ts':
+                    'export const service1 = () => {};',
+                '/mock/newDir/tests/index.test.ts':
+                    'test("example", () => {});',
+            };
+            return contents[filePath] || '';
+        });
+
+        const oldDir = {
+            bin: {
+                execute: 'binary execute',
+            },
+            lib: {
+                'moduleA.js': 'export const A = () => {};',
+                'moduleB.js': 'export const B = () => {};',
+            },
+            src: {
+                'index.ts': 'import { A } from "../lib/moduleA";',
+                utils: {
+                    'util1.ts': 'export const util1 = () => {};',
+                    'util2.ts': 'export const util2 = () => {};',
+                },
+                components: {
+                    'Header.tsx': '<header>Header</header>',
+                },
+            },
+        };
+        const newDir = {
+            bin: {
+                execute: 'binary execute',
+                deploy: 'binary deploy',
+            },
+            lib: {
+                'moduleA.js': 'export const A = () => { console.log("A"); };',
+                'moduleC.js': 'export const C = () => {};',
+            },
+            src: {
+                'index.ts':
+                    'import { A } from "../lib/moduleA";\nimport { C } from "../lib/moduleC";',
+                utils: {
+                    'util1.ts': 'export const util1 = () => { return true; };',
+                    'util2.ts': 'export const util2 = () => {};',
+                    'util3.ts': 'export const util3 = () => {};',
+                },
+                components: {
+                    'Header.tsx': '<header>Header Updated</header>',
+                    'Footer.tsx': '<footer>Footer</footer>',
+                },
+                services: {
+                    'service1.ts': 'export const service1 = () => {};',
+                },
+            },
+            tests: {
+                'index.test.ts': 'test("example", () => {});',
+            },
+        };
+        const result = await (processDirectory as any)(oldDir, newDir);
+        expect(result.length).toBe(8);
+
+        const changes = {
+            'bin/deploy': ['', 'binary deploy'],
+            'lib/moduleA.js': [
+                'export const A = () => {};',
+                'export const A = () => { console.log("A"); };',
+            ],
+            'lib/moduleB.js': ['export const B = () => {};', ''],
+            'lib/moduleC.js': ['', 'export const C = () => {};'],
+            'src/index.ts': [
+                'import { A } from "../lib/moduleA";',
+                'import { A } from "../lib/moduleA";\nimport { C } from "../lib/moduleC";',
+            ],
+            'src/utils/util1.ts': [
+                'export const util1 = () => {};',
+                'export const util1 = () => { return true; };',
+            ],
+            'src/utils/util3.ts': ['', 'export const util3 = () => {};'],
+            'src/components/Header.tsx': [
+                '<header>Header</header>',
+                '<header>Header Updated</header>',
+            ],
+            'src/components/Footer.tsx': ['', '<footer>Footer</footer>'],
+            'src/services/service1.ts': [
+                '',
+                'export const service1 = () => {};',
+            ],
+            'tests/index.test.ts': ['', 'test("example", () => {});'],
+        };
+
+        for (const change of result) {
+            const expectedChange = changes[change.fileName];
+            expect(expectedChange).toBeDefined();
+            if (expectedChange) {
+                if (expectedChange[0] === '' || expectedChange[1] === '') {
+                    expect(change.isBinary).toBeFalsy();
+                } else if (
+                    change.fileName.endsWith('.png') ||
+                    change.fileName === 'bin/deploy'
+                ) {
+                    expect(change.isBinary).toBe(true);
+                } else {
+                    expect(change.lineChangeGroups.length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
+
     it('should detect no changes if files and nested dirs are identical', async () => {
         // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {

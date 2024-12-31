@@ -5,21 +5,34 @@ import * as diff from 'diff';
 import diff_match_patch from 'diff-match-patch';
 
 // Define the type for the nested object structure
-type DirectoryContents = {
+export type DirectoryContents = {
     [key: string]: string | DirectoryContents;
 };
 
 // Wish there was a way to share this type, but alas... it's also found in App.tsx
-type LineChangeGroup = {
-    startLineNumber: number;
-    endLineNumber: number;
-    change: string; // The change, including everything between startLineNumber and endLineNumber (including newlines)
-    contentBeforeChange: string; // The content before it was replaced by the mod
-    changeType: 'add' | 'remove' | 'replace';
-};
+export type LineChangeGroup =
+    | {
+          startLineNumber: number;
+          endLineNumber: number;
+          newContent: string;
+          changeType: 'add';
+      }
+    | {
+          startLineNumber: number;
+          endLineNumber: number;
+          oldContent: string;
+          changeType: 'remove';
+      }
+    | {
+          startLineNumber: number;
+          endLineNumber: number;
+          newContent: string;
+          oldContent: string;
+          changeType: 'replace';
+      };
 
 // Wish there was a way to share this type, but alas... it's also found in App.tsx
-type FileChange =
+export type FileChange =
     | {
           fileName: string;
           lineChangeGroups: LineChangeGroup[];
@@ -93,7 +106,7 @@ export const diffTexts = (
     return diffs;
 };
 
-const getFileChanges = (fileDiff: FileDiff): FileChange => {
+export const getFileChanges = (fileDiff: FileDiff): FileChange => {
     const lineChangeGroups: LineChangeGroup[] = [];
 
     let oldLineNumber = 1;
@@ -105,8 +118,7 @@ const getFileChanges = (fileDiff: FileDiff): FileChange => {
             lineChangeGroups.push({
                 startLineNumber: newLineNumber,
                 endLineNumber: newLineNumber + length - 1,
-                change: diffPart.value,
-                contentBeforeChange: '',
+                newContent: diffPart.value,
                 changeType: 'add',
             });
             newLineNumber += length;
@@ -114,21 +126,29 @@ const getFileChanges = (fileDiff: FileDiff): FileChange => {
             lineChangeGroups.push({
                 startLineNumber: oldLineNumber,
                 endLineNumber: oldLineNumber + length - 1,
-                change: '',
-                contentBeforeChange: diffPart.value,
+                oldContent: diffPart.value,
                 changeType: 'remove',
             });
             oldLineNumber += length;
         } else {
+            lineChangeGroups.push({
+                startLineNumber: oldLineNumber,
+                endLineNumber: oldLineNumber + length - 1,
+                newContent: diffPart.value,
+                oldContent: diffPart.value,
+                changeType: 'replace',
+            });
             oldLineNumber += length;
             newLineNumber += length;
         }
     }
 
-    return {
+    const final = {
         fileName: fileDiff.fileName,
         lineChangeGroups,
     };
+
+    return final;
 };
 
 /**
@@ -387,7 +407,7 @@ const MAX_LINE_COUNT: number = 400;
  * @param filePath - The path of the file to check.
  * @returns `true` if the file has a special extension, otherwise `false`.
  */
-const isSpecialFile = (filePath: string): boolean =>
+export const isBinaryFile = (filePath: string): boolean =>
     SPECIAL_FILE_EXTENSIONS.some((ext) => filePath.endsWith(ext));
 
 /**
@@ -414,7 +434,7 @@ export const processFileEntries = (
     fileDiffPromises: Promise<FileDiff>[],
     changes: FileChange[]
 ): void => {
-    if (isSpecialFile(newFilePath) && isSpecialFile(oldFilePath)) {
+    if (isBinaryFile(newFilePath) && isBinaryFile(oldFilePath)) {
         const oldFileStats = fs.statSync(oldFilePath);
         const newFileStats = fs.statSync(newFilePath);
 
@@ -467,7 +487,7 @@ export const processFileEntries = (
     }
 };
 
-type FileDiff = {
+export type FileDiff = {
     fileName: string;
     changeDiffs: diff.Change[];
 };

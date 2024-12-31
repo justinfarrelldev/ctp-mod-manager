@@ -28,7 +28,7 @@ const TEST_NEW_DIR = {
     },
 };
 
-describe.only('diffDirectories', () => {
+describe('diffDirectories', () => {
     it(`should be able to diff nested directories`, () => {
         // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {

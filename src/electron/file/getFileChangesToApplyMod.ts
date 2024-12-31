@@ -125,28 +125,6 @@ const getFileChanges = (fileDiff: FileDiff): FileChange => {
         }
     }
 
-    // console.log('file diff: ', fileDiff);
-    // for (const part of fileDiff.changeDiffs) {
-    //     if (!part.added && !part.removed) {
-    //         continue;
-    //     }
-    //     const startLine = lineIndex;
-    //     const endLine = lineIndex + part.count - 1;
-    //     const changeType = part.added
-    //         ? 'add'
-    //         : part.removed
-    //           ? 'remove'
-    //           : 'replace';
-    //     lineChangeGroups.push({
-    //         startLineNumber: startLine,
-    //         endLineNumber: endLine,
-    //         change: part.added ? part.value : '',
-    //         contentBeforeChange: part.removed ? part.value : '',
-    //         changeType: changeType,
-    //     });
-    //     lineIndex += part.count;
-    // }
-
     return {
         fileName: fileDiff.fileName,
         lineChangeGroups,

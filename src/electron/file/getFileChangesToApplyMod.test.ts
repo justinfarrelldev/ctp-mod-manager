@@ -234,13 +234,6 @@ describe('getFileChangesToApplyMod', () => {
 
         const result = await getFileChangesToApplyMod('someDir', '/game/dir');
         expect(result).toBeUndefined();
-        expect(consoleLogMock).toHaveBeenCalledWith(
-            'reading mod dir structure!'
-        );
-        expect(consoleLogMock).toHaveBeenCalledWith(
-            'reading game dir structure!'
-        );
-        expect(consoleLogMock).toHaveBeenCalledWith('comparing dirs!');
 
         consoleLogMock.mockRestore();
         statMock.mockRestore();

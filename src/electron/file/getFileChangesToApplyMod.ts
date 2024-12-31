@@ -180,6 +180,57 @@ export const processDirectory = async (
 };
 
 /**
+ * Processes new content and updates the stack and changes arrays accordingly.
+ *
+ * @param params - The parameters for processing new content.
+ * @param params.newContent - The new directory contents to process.
+ * @param params.prefix - The prefix path for the current directory.
+ * @param params.stack - The stack used to keep track of directory contents and their prefixes.
+ * @param params.changes - The array to store file changes.
+ */
+export const processNewContent = ({
+    newContent,
+    prefix,
+    stack,
+    changes,
+}: {
+    newContent: DirectoryContents;
+    prefix: string;
+    stack: {
+        oldContent: DirectoryContents;
+        newContent: DirectoryContents;
+        prefix: string;
+    }[];
+    changes: FileChange[];
+}) => {
+    for (const key of Object.keys(newContent)) {
+        const newFilePath = newContent[key];
+        const fullPath = prefix + key;
+
+        if (typeof newFilePath === 'object') {
+            stack.push({
+                oldContent: {},
+                newContent: newFilePath,
+                prefix: fullPath + '/',
+            });
+        } else if (typeof newFilePath === 'string') {
+            changes.push({
+                fileName: fullPath,
+                lineChangeGroups: [
+                    {
+                        startLineNumber: 1,
+                        endLineNumber: newFilePath.split('\n').length,
+                        change: newFilePath,
+                        contentBeforeChange: '',
+                        changeType: 'add',
+                    },
+                ],
+            });
+        }
+    }
+};
+
+/**
  * Processes directory entries by comparing the old and new directory contents.
  * If both entries are directories, they are pushed to the stack for further processing.
  * If both entries are files, the file entries are processed to determine the differences.
@@ -207,31 +258,7 @@ const processDirectoryEntries = (
         Object.keys(oldContent).length === 0 &&
         Object.keys(newContent).length > 0
     ) {
-        for (const key of Object.keys(newContent)) {
-            const newFilePath = newContent[key];
-            const fullPath = prefix + key;
-
-            if (typeof newFilePath === 'object') {
-                stack.push({
-                    oldContent: {},
-                    newContent: newFilePath,
-                    prefix: fullPath + '/',
-                });
-            } else if (typeof newFilePath === 'string') {
-                changes.push({
-                    fileName: fullPath,
-                    lineChangeGroups: [
-                        {
-                            startLineNumber: 1,
-                            endLineNumber: newFilePath.split('\n').length,
-                            change: newFilePath,
-                            contentBeforeChange: '',
-                            changeType: 'add',
-                        },
-                    ],
-                });
-            }
-        }
+        processNewContent({ newContent, prefix, stack, changes });
         return;
     }
 

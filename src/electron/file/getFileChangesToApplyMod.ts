@@ -336,6 +336,20 @@ const processDirectoryEntries = (
     // Iterate over the keys of the new content and the old content
     for (const newPath of Object.keys(newContent)) {
         for (const oldPath of Object.keys(oldContent)) {
+            // Check if paths are the same with deep equality (to make sure objects don't pose an issue)
+            if (
+                JSON.stringify(newContent[newPath]) ===
+                JSON.stringify(oldContent[oldPath])
+            ) {
+                // If the contents are the same, continue to the next path
+                continue;
+            }
+            console.log(
+                `Processing newPath: ${newPath}, type: ${typeof newContent[newPath]}`
+            );
+            console.log(
+                `Processing oldPath: ${oldPath}, type: ${typeof oldContent[oldPath]}`
+            );
             const fullPath = prefix + newPath;
 
             // If both the newPath and old file path are objects (directories), push them to the stack for further processing

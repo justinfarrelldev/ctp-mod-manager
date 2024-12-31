@@ -31,17 +31,19 @@ export type LineChangeGroup =
           changeType: 'replace';
       };
 
+export type TextFileChange = {
+    fileName: string;
+    lineChangeGroups: LineChangeGroup[];
+    isBinary?: false;
+};
+
+export type BinaryFileChange = {
+    fileName: string;
+    isBinary: true;
+};
+
 // Wish there was a way to share this type, but alas... it's also found in App.tsx
-export type FileChange =
-    | {
-          fileName: string;
-          lineChangeGroups: LineChangeGroup[];
-          isBinary?: false;
-      }
-    | {
-          fileName: string;
-          isBinary: true;
-      };
+export type FileChange = TextFileChange | BinaryFileChange;
 
 /**
  * Recursively reads the contents of a directory and returns an object representing the directory structure.

@@ -2,6 +2,7 @@ import { describe, it, vi, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { diffDirectories } from './diffDirectories';
+import { TextFileChange } from './getFileChangesToApplyMod';
 
 vi.mock('electron', () => ({
     app: {
@@ -62,5 +63,10 @@ describe('diffDirectories', () => {
         expect(result.length).toBe(2);
         expect(result[0].isBinary).toBe(false);
         expect(result[1].isBinary).toBe(false);
+
+        // appease typescript
+        const resultTextChanges: TextFileChange[] = result as TextFileChange[];
+
+        console.log('resultTextChanges', resultTextChanges[0].lineChangeGroups);
     });
 });

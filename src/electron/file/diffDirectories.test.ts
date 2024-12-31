@@ -9,7 +9,6 @@ vi.mock('electron', () => ({
         getName: vi.fn().mockReturnValue('mock-name'),
     },
 }));
-
 describe('diffDirectories', () => {
     it(`should be able to diff nested directories`, () => {
         // @ts-expect-error This is a mock
@@ -61,5 +60,7 @@ describe('diffDirectories', () => {
         });
 
         expect(result.length).toBe(2);
+        expect(result[0].isBinary).toBe(false);
+        expect(result[1].isBinary).toBe(false);
     });
 });

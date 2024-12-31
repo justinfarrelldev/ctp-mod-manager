@@ -339,7 +339,8 @@ const processDirectoryEntries = (
             // Check if paths are the same with deep equality (to make sure objects don't pose an issue)
             if (
                 JSON.stringify(newContent[newPath]) ===
-                JSON.stringify(oldContent[oldPath])
+                    JSON.stringify(oldContent[oldPath]) ||
+                newPath === oldPath
             ) {
                 // If the contents are the same, continue to the next path
                 continue;

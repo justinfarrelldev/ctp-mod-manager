@@ -1,5 +1,4 @@
-import { afterEach, describe, it, vi, expect } from 'vitest';
-import { DirectoryContents } from './getFileChangesToApplyMod';
+import { describe, it, vi, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { diffDirectories } from './diffDirectories';
@@ -10,23 +9,6 @@ vi.mock('electron', () => ({
         getName: vi.fn().mockReturnValue('mock-name'),
     },
 }));
-
-const TEST_OLD_DIR = {
-    src: {
-        'index.js': 'console.log("old");',
-        utils: {
-            'helper.js': 'function helper() {}',
-        },
-    },
-};
-const TEST_NEW_DIR = {
-    src: {
-        'index.js': 'console.log("new");',
-        utils: {
-            'helper.js': 'function helper() { console.log("updated"); }',
-        },
-    },
-};
 
 describe('diffDirectories', () => {
     it(`should be able to diff nested directories`, () => {
@@ -79,19 +61,5 @@ describe('diffDirectories', () => {
         });
 
         expect(result.length).toBe(2);
-
-        const indexChange = result.find(
-            (r: any) => r.fileName === 'src/index.js'
-        );
-        const helperChange = result.find(
-            (r: any) => r.fileName === 'src/utils/helper.js'
-        );
-
-        // expect(indexChange.lineChangeGroups).toHaveLength(1);
-        // expect(helperChange.lineChangeGroups).toHaveLength(1);
-        // expect(indexChange.lineChangeGroups[0].contentBeforeChange).toContain(
-        //     'old'
-        // );
-        // expect(helperChange.lineChangeGroups[0].change).toContain('updated');
     });
 });

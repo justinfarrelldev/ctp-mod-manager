@@ -231,6 +231,67 @@ export const processNewContent = ({
 };
 
 /**
+ * Processes the old content of a directory in-place.
+ *
+ * @param params - The parameters for processing old content.
+ * @param params.oldContent - The old content of the directory.
+ * @param params.prefix - The prefix path for the current directory.
+ * @param params.stack - The stack used to keep track of directory contents and their prefixes.
+ * @param params.stack[].oldContent - The old content of a subdirectory.
+ * @param params.stack[].newContent - The new content of a subdirectory (initially empty).
+ * @param params.stack[].prefix - The prefix path for the subdirectory.
+ * @param params.changes - The list of file changes to be populated.
+ * @param params.changes[].fileName - The name of the file that has changed.
+ * @param params.changes[].lineChangeGroups - The groups of line changes for the file.
+ * @param params.changes[].lineChangeGroups[].startLineNumber - The starting line number of the change.
+ * @param params.changes[].lineChangeGroups[].endLineNumber - The ending line number of the change.
+ * @param params.changes[].lineChangeGroups[].change - The change to be applied (empty for removal).
+ * @param params.changes[].lineChangeGroups[].contentBeforeChange - The content of the file before the change.
+ * @param params.changes[].lineChangeGroups[].changeType - The type of change.
+ */
+export const processOldContent = ({
+    oldContent,
+    prefix,
+    stack,
+    changes,
+}: {
+    oldContent: DirectoryContents;
+    prefix: string;
+    stack: {
+        oldContent: DirectoryContents;
+        newContent: DirectoryContents;
+        prefix: string;
+    }[];
+    changes: FileChange[];
+}) => {
+    for (const key of Object.keys(oldContent)) {
+        const oldFilePath = oldContent[key];
+        const fullPath = prefix + key;
+
+        if (typeof oldFilePath === 'object') {
+            stack.push({
+                oldContent: oldFilePath,
+                newContent: {},
+                prefix: fullPath + '/',
+            });
+        } else if (typeof oldFilePath === 'string') {
+            changes.push({
+                fileName: fullPath,
+                lineChangeGroups: [
+                    {
+                        startLineNumber: 1,
+                        endLineNumber: oldFilePath.split('\n').length,
+                        change: '',
+                        contentBeforeChange: oldFilePath,
+                        changeType: 'remove',
+                    },
+                ],
+            });
+        }
+    }
+};
+
+/**
  * Processes directory entries by comparing the old and new directory contents.
  * If both entries are directories, they are pushed to the stack for further processing.
  * If both entries are files, the file entries are processed to determine the differences.
@@ -266,31 +327,7 @@ const processDirectoryEntries = (
         Object.keys(newContent).length === 0 &&
         Object.keys(oldContent).length > 0
     ) {
-        for (const key of Object.keys(oldContent)) {
-            const oldFilePath = oldContent[key];
-            const fullPath = prefix + key;
-
-            if (typeof oldFilePath === 'object') {
-                stack.push({
-                    oldContent: oldFilePath,
-                    newContent: {},
-                    prefix: fullPath + '/',
-                });
-            } else if (typeof oldFilePath === 'string') {
-                changes.push({
-                    fileName: fullPath,
-                    lineChangeGroups: [
-                        {
-                            startLineNumber: 1,
-                            endLineNumber: oldFilePath.split('\n').length,
-                            change: '',
-                            contentBeforeChange: oldFilePath,
-                            changeType: 'remove',
-                        },
-                    ],
-                });
-            }
-        }
+        processOldContent({ oldContent, prefix, stack, changes });
         return;
     }
 

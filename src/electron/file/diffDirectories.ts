@@ -27,7 +27,6 @@ import {
     DirectoryContents,
     FileChange,
     FileDiff,
-    getFileChanges,
     isBinaryFile,
     LineChangeGroup,
 } from './getFileChangesToApplyMod';
@@ -118,7 +117,7 @@ export const diffDirectories = ({
                 changeDiffs: changeDiffs,
             };
 
-            const fileChanges = getFileChanges(fileDiff);
+            const fileChanges = convertFileDiffToFileChange(fileDiff);
 
             changes.push(fileChanges);
             continue;
@@ -126,4 +125,56 @@ export const diffDirectories = ({
     }
 
     return changes;
+};
+
+/**
+ * Analyzes the differences between two versions of a file and returns the changes.
+ *
+ * @param fileDiff - An object representing the differences between two versions of a file.
+ * @returns An object representing the changes in the file, including the file name, line change groups, and a flag indicating if the file is binary.
+ */
+export const convertFileDiffToFileChange = (fileDiff: FileDiff): FileChange => {
+    const lineChangeGroups: LineChangeGroup[] = [];
+
+    let oldLineNumber = 1;
+    let newLineNumber = 1;
+
+    for (const diffPart of fileDiff.changeDiffs) {
+        const length = diffPart.count;
+        if (diffPart.added) {
+            lineChangeGroups.push({
+                startLineNumber: newLineNumber,
+                endLineNumber: newLineNumber + length - 1,
+                newContent: diffPart.value,
+                changeType: 'add',
+            });
+            newLineNumber += length;
+        } else if (diffPart.removed) {
+            lineChangeGroups.push({
+                startLineNumber: oldLineNumber,
+                endLineNumber: oldLineNumber + length - 1,
+                oldContent: diffPart.value,
+                changeType: 'remove',
+            });
+            oldLineNumber += length;
+        } else {
+            lineChangeGroups.push({
+                startLineNumber: oldLineNumber,
+                endLineNumber: oldLineNumber + length - 1,
+                newContent: diffPart.value,
+                oldContent: diffPart.value,
+                changeType: 'replace',
+            });
+            oldLineNumber += length;
+            newLineNumber += length;
+        }
+    }
+
+    const final = {
+        fileName: fileDiff.fileName,
+        lineChangeGroups,
+        isBinary: isBinaryFile(fileDiff.fileName),
+    };
+
+    return final;
 };

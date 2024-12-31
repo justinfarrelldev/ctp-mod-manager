@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as diff from 'diff';
 import diff_match_patch from 'diff-match-patch';
+import { convertFileDiffToFileChange } from './diffDirectories';
 
 // Define the type for the nested object structure
 export type DirectoryContents = {
@@ -108,52 +109,6 @@ export const diffTexts = (
     return diffs;
 };
 
-export const getFileChanges = (fileDiff: FileDiff): FileChange => {
-    const lineChangeGroups: LineChangeGroup[] = [];
-
-    let oldLineNumber = 1;
-    let newLineNumber = 1;
-
-    for (const diffPart of fileDiff.changeDiffs) {
-        const length = diffPart.count;
-        if (diffPart.added) {
-            lineChangeGroups.push({
-                startLineNumber: newLineNumber,
-                endLineNumber: newLineNumber + length - 1,
-                newContent: diffPart.value,
-                changeType: 'add',
-            });
-            newLineNumber += length;
-        } else if (diffPart.removed) {
-            lineChangeGroups.push({
-                startLineNumber: oldLineNumber,
-                endLineNumber: oldLineNumber + length - 1,
-                oldContent: diffPart.value,
-                changeType: 'remove',
-            });
-            oldLineNumber += length;
-        } else {
-            lineChangeGroups.push({
-                startLineNumber: oldLineNumber,
-                endLineNumber: oldLineNumber + length - 1,
-                newContent: diffPart.value,
-                oldContent: diffPart.value,
-                changeType: 'replace',
-            });
-            oldLineNumber += length;
-            newLineNumber += length;
-        }
-    }
-
-    const final = {
-        fileName: fileDiff.fileName,
-        lineChangeGroups,
-        isBinary: isBinaryFile(fileDiff.fileName),
-    };
-
-    return final;
-};
-
 /**
  * Processes the differences between two directory contents and generates a list of file changes to apply a mod.
  *
@@ -196,7 +151,7 @@ export const processDirectory = async (
 
     // Convert file diffs to file changes
     for (const diff of fileDiffs) {
-        changes.push(getFileChanges(diff));
+        changes.push(convertFileDiffToFileChange(diff));
     }
 
     return changes;

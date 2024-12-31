@@ -315,6 +315,7 @@ const processDirectoryEntries = (
     fileDiffPromises: Promise<FileDiff>[],
     changes: FileChange[]
 ): void => {
+    // If the old content is empty and the new content is not, process the new content
     if (
         Object.keys(oldContent).length === 0 &&
         Object.keys(newContent).length > 0
@@ -323,6 +324,7 @@ const processDirectoryEntries = (
         return;
     }
 
+    // If the new content is empty and the old content is not, process the old content
     if (
         Object.keys(newContent).length === 0 &&
         Object.keys(oldContent).length > 0
@@ -331,24 +333,32 @@ const processDirectoryEntries = (
         return;
     }
 
-    for (const key of Object.keys(newContent)) {
-        const oldFilePath = Object.keys(oldContent)[0];
-        const fullPath = prefix + key;
-        if (typeof key === 'object' && typeof oldFilePath === 'object') {
-            // If both are directories, push to stack to process later
-            stack.push({
-                oldContent: oldFilePath,
-                newContent: key,
-                prefix: fullPath + '/',
-            });
-        } else if (typeof key === 'string' && typeof oldFilePath === 'string') {
-            processFileEntries(
-                oldFilePath,
-                key,
-                fullPath,
-                fileDiffPromises,
-                changes
-            );
+    // Iterate over the keys of the new content and the old content
+    for (const newPath of Object.keys(newContent)) {
+        for (const oldPath of Object.keys(oldContent)) {
+            const fullPath = prefix + newPath;
+
+            // If both the newPath and old file path are objects (directories), push them to the stack for further processing
+            if (typeof newPath === 'object' && typeof oldPath === 'object') {
+                stack.push({
+                    oldContent: oldPath,
+                    newContent: newPath,
+                    prefix: fullPath + '/',
+                });
+            }
+            // If both the newPath and old file path are strings (files), process the file entries
+            else if (
+                typeof newPath === 'string' &&
+                typeof oldPath === 'string'
+            ) {
+                processFileEntries(
+                    oldPath,
+                    newPath,
+                    fullPath,
+                    fileDiffPromises,
+                    changes
+                );
+            }
         }
     }
 };

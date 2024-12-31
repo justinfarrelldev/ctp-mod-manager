@@ -67,6 +67,15 @@ describe('diffDirectories', () => {
         // appease typescript
         const resultTextChanges: TextFileChange[] = result as TextFileChange[];
 
+        expect(resultTextChanges[0].lineChangeGroups[0].startLineNumber).toBe(
+            1
+        );
+        expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(1);
+        expect(resultTextChanges[1].lineChangeGroups[0].startLineNumber).toBe(
+            1
+        );
+        expect(resultTextChanges[1].lineChangeGroups[0].endLineNumber).toBe(1);
+
         console.log('resultTextChanges', resultTextChanges[0].lineChangeGroups);
     });
 });

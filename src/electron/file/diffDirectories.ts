@@ -40,7 +40,12 @@ export const diffDirectories = ({
 }): FileChange[] => {
     const changes: FileChange[] = [];
 
+    // Every time we see a file, we will remove it from this list
+    // so that we can determine which files were deleted
+    const oldDirFileNames: string[] = Object.keys(oldDir);
+
     for (const [k, v] of Object.entries(newDir)) {
+        oldDirFileNames.splice(oldDirFileNames.indexOf(k), 1);
         let fileName = k;
         const newFileContents = v;
         const oldFileContents = oldDir[fileName];
@@ -148,6 +153,26 @@ export const diffDirectories = ({
             });
 
             continue;
+        }
+    }
+
+    for (const fileName of oldDirFileNames) {
+        const oldFileContents = oldDir[fileName];
+        const oldIsFile = typeof oldFileContents === 'string';
+
+        if (oldIsFile) {
+            // This is a file that is being removed
+            let changeGroup: LineChangeGroup = {
+                startLineNumber: 0,
+                endLineNumber: oldFileContents.split(/\r\n|\r|\n/).length,
+                changeType: 'remove',
+                oldContent: oldFileContents,
+            };
+            changes.push({
+                fileName: fileName,
+                lineChangeGroups: [changeGroup],
+                isBinary: isBinaryFile(fileName),
+            });
         }
     }
 

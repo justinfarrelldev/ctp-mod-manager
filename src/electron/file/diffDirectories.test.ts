@@ -78,4 +78,104 @@ describe('diffDirectories', () => {
 
         console.log('resultTextChanges', resultTextChanges[0].lineChangeGroups);
     });
+
+    it(`should handle multi-line file changes`, () => {
+        const oldDir = {
+            src: {
+                'index.js': `console.log("old line 1");
+    console.log("old line 2");`,
+            },
+        };
+        const newDir = {
+            src: {
+                'index.js': `console.log("new line 1");
+    console.log("new line 2");`,
+            },
+        };
+        const result = diffDirectories({
+            oldDir,
+            newDir,
+        });
+
+        expect(result.length).toBe(4);
+        expect(result[0].isBinary).toBe(false);
+
+        const resultTextChanges: TextFileChange[] = result as TextFileChange[];
+
+        expect(resultTextChanges[0].lineChangeGroups[0].startLineNumber).toBe(
+            1
+        );
+        expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(1);
+        expect(resultTextChanges[1].lineChangeGroups[0].startLineNumber).toBe(
+            1
+        );
+        expect(resultTextChanges[1].lineChangeGroups[0].endLineNumber).toBe(1);
+        expect(resultTextChanges[1].lineChangeGroups[0].changeType).toBe('add');
+
+        expect(resultTextChanges[2].lineChangeGroups[0].startLineNumber).toBe(
+            2
+        );
+        expect(resultTextChanges[2].lineChangeGroups[0].endLineNumber).toBe(2);
+        expect(resultTextChanges[2].lineChangeGroups[0].changeType).toBe(
+            'remove'
+        );
+
+        expect(resultTextChanges[3].lineChangeGroups[0].startLineNumber).toBe(
+            2
+        );
+        expect(resultTextChanges[3].lineChangeGroups[0].endLineNumber).toBe(2);
+        expect(resultTextChanges[3].lineChangeGroups[0].changeType).toBe('add');
+    });
+
+    it(`should handle added multi-line files`, () => {
+        const oldDir = {
+            src: {},
+        };
+        const newDir = {
+            src: {
+                'index.js': `console.log("new line 1");
+    console.log("new line 2");`,
+            },
+        };
+        const result = diffDirectories({
+            oldDir,
+            newDir,
+        });
+
+        expect(result.length).toBe(1);
+        expect(result[0].isBinary).toBe(false);
+
+        const resultTextChanges: TextFileChange[] = result as TextFileChange[];
+
+        expect(resultTextChanges[0].lineChangeGroups[0].startLineNumber).toBe(
+            0
+        );
+        expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(2);
+    });
+
+    it(`should handle removed multi-line files`, () => {
+        const oldDir = {
+            src: {
+                'index.js': `console.log("old line 1");
+    console.log("old line 2");`,
+            },
+        };
+        const newDir = {
+            src: {},
+        };
+        const result = diffDirectories({
+            oldDir,
+            newDir,
+        });
+
+        expect(result.length).toBe(1);
+        expect(result[0].isBinary).toBe(false);
+
+        const resultTextChanges: TextFileChange[] = result as TextFileChange[];
+
+        expect(resultTextChanges[0].lineChangeGroups[0].startLineNumber).toBe(
+            0
+        );
+        expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(2);
+    });
 });

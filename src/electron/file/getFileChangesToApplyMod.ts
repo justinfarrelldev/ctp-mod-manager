@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as diff from 'diff';
 import diff_match_patch from 'diff-match-patch';
-import { convertFileDiffToFileChange } from './diffDirectories';
+import { diffLines, Change, diffChars } from 'diff';
 
 // Define the type for the nested object structure
 export type DirectoryContents = {
@@ -105,13 +105,12 @@ export const readDirectory = (dirPath: string): DirectoryContents => {
  *          object with a `0` (equal), `-1` (delete), or `1` (insert) operation
  *          and the associated text.
  */
-export const diffTexts = (
-    text1: string,
-    text2: string
-): diff_match_patch.Diff[] => {
-    const dmp = new diff_match_patch();
-    const diffs = dmp.diff_main(text1, text2);
-    dmp.diff_cleanupSemantic(diffs);
+export const diffTexts = (text1: string, text2: string): Change[] => {
+    const diffs = diffChars(text1, text2);
+
+    // const dmp = new diff_match_patch();
+    // const diffs = dmp.diff_main(text1, text2);
+    // dmp.diff_cleanupSemantic(diffs);
     return diffs;
 };
 

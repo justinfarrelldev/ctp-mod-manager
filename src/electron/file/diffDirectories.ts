@@ -104,77 +104,46 @@ export const diffDirectories = ({
         }
 
         if (existsInOldDir && existsInNewDir && newIsFile && oldIsFile) {
-            const dmpDiffs = diffTexts(oldFileContents, newFileContents);
+            const diffs = diffTexts(oldFileContents, newFileContents);
 
-            const converted = dmpDiffs.map((dmpDiff) => ({
-                count: dmpDiffs.length,
-                value: dmpDiff[1],
-            }));
+            let lineCount = 1;
+            diffs.forEach((diff) => {
+                if (diff.added) {
+                    const changeGroup: LineChangeGroup = {
+                        startLineNumber: lineCount,
+                        endLineNumber: lineCount,
+                        changeType: 'add',
+                        newContent: diff.value,
+                    };
+                    changes.push({
+                        fileName: fileName,
+                        lineChangeGroups: [changeGroup],
+                        isBinary: isBinaryFile(fileName),
+                    });
+                } else if (diff.removed) {
+                    const changeGroup: LineChangeGroup = {
+                        startLineNumber: lineCount,
+                        endLineNumber: lineCount,
+                        changeType: 'remove',
+                        oldContent: diff.value,
+                    };
+                    changes.push({
+                        fileName: fileName,
+                        lineChangeGroups: [changeGroup],
+                        isBinary: isBinaryFile(fileName),
+                    });
+                } else {
+                    // Do nothing here, this library handles replace as a remove then an add
+                }
+                if (diff.value.includes('\n')) {
+                    console.log('diff.value', diff.value);
+                    lineCount++;
+                }
+            });
 
-            const changeDiffs: Diff.Change[] = [...converted];
-            const fileDiff: FileDiff = {
-                fileName: fileName,
-                changeDiffs: changeDiffs,
-            };
-
-            const fileChanges = convertFileDiffToFileChange(fileDiff);
-
-            changes.push(fileChanges);
             continue;
         }
     }
 
     return changes;
-};
-
-/**
- * Analyzes the differences between two versions of a file and returns the changes.
- *
- * @param fileDiff - An object representing the differences between two versions of a file.
- * @returns An object representing the changes in the file, including the file name, line change groups, and a flag indicating if the file is binary.
- */
-export const convertFileDiffToFileChange = (fileDiff: FileDiff): FileChange => {
-    const lineChangeGroups: LineChangeGroup[] = [];
-
-    let oldLineNumber = 1;
-    let newLineNumber = 1;
-
-    for (const diffPart of fileDiff.changeDiffs) {
-        const length = diffPart.count;
-        if (diffPart.added) {
-            lineChangeGroups.push({
-                startLineNumber: newLineNumber,
-                endLineNumber: newLineNumber + length - 1,
-                newContent: diffPart.value,
-                changeType: 'add',
-            });
-            newLineNumber += length;
-        } else if (diffPart.removed) {
-            lineChangeGroups.push({
-                startLineNumber: oldLineNumber,
-                endLineNumber: oldLineNumber + length - 1,
-                oldContent: diffPart.value,
-                changeType: 'remove',
-            });
-            oldLineNumber += length;
-        } else {
-            lineChangeGroups.push({
-                startLineNumber: oldLineNumber,
-                endLineNumber: oldLineNumber + length - 1,
-                newContent: diffPart.value,
-                oldContent: diffPart.value,
-                changeType: 'replace',
-            });
-            oldLineNumber += length;
-            newLineNumber += length;
-        }
-    }
-
-    const final = {
-        fileName: fileDiff.fileName,
-        lineChangeGroups,
-        isBinary: isBinaryFile(fileDiff.fileName),
-    };
-
-    return final;
 };

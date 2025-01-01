@@ -359,7 +359,26 @@ const processDirectoryEntries = (
     }
 };
 
-const SPECIAL_FILE_EXTENSIONS: string[] = ['.tga', '.til', '.pdf'];
+const SPECIAL_FILE_EXTENSIONS: string[] = [
+    '.tga',
+    '.til',
+    '.pdf',
+    '.spr',
+    '.zfs',
+    '.tif',
+    '.db',
+    '.ico',
+    '.c2g',
+    '.scc',
+    '.htm',
+    '.html',
+    '.rtf',
+    '.jpg',
+    '.gif',
+    '.dll',
+    '.ogg',
+    '.exe',
+];
 const MAX_LINE_COUNT: number = 400;
 
 /**
@@ -369,7 +388,7 @@ const MAX_LINE_COUNT: number = 400;
  * @returns `true` if the file has a special extension, otherwise `false`.
  */
 export const isBinaryFile = (filePath: string): boolean =>
-    SPECIAL_FILE_EXTENSIONS.some((ext) => filePath.endsWith(ext));
+    SPECIAL_FILE_EXTENSIONS.some((ext) => filePath.toLowerCase().endsWith(ext));
 
 /**
  * Processes file entries to determine changes between old and new file versions.

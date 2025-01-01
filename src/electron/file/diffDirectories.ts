@@ -117,6 +117,8 @@ export const diffDirectories = ({
         if (existsInOldDir && existsInNewDir && newIsFile && oldIsFile) {
             const diffs = diffTexts(oldFileContents, newFileContents);
 
+            console.log('diffs: ', diffs);
+
             let lineCount = 1;
 
             for (const diff of diffs) {
@@ -151,38 +153,6 @@ export const diffDirectories = ({
                     lineCount++;
                 }
             }
-            diffs.forEach((diff) => {
-                if (diff.added) {
-                    const changeGroup: LineChangeGroup = {
-                        startLineNumber: lineCount,
-                        endLineNumber: lineCount,
-                        changeType: 'add',
-                        newContent: diff.value,
-                    };
-                    changes.push({
-                        fileName: fileName,
-                        lineChangeGroups: [changeGroup],
-                        isBinary: isBinaryFile(fileName),
-                    });
-                } else if (diff.removed) {
-                    const changeGroup: LineChangeGroup = {
-                        startLineNumber: lineCount,
-                        endLineNumber: lineCount,
-                        changeType: 'remove',
-                        oldContent: diff.value,
-                    };
-                    changes.push({
-                        fileName: fileName,
-                        lineChangeGroups: [changeGroup],
-                        isBinary: isBinaryFile(fileName),
-                    });
-                } else {
-                    // Do nothing here, this library handles replace as a remove then an add
-                }
-                if (diff.value.includes('\n')) {
-                    lineCount++;
-                }
-            });
 
             continue;
         }

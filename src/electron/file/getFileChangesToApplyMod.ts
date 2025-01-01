@@ -107,7 +107,9 @@ export const readDirectory = (dirPath: string): DirectoryContents => {
  *          and the associated text.
  */
 export const diffTexts = (text1: string, text2: string): Change[] => {
-    const diffs = diffChars(text1, text2);
+    const diffs = diffLines(text1, text2, {
+        newlineIsToken: true,
+    });
 
     // const dmp = new diff_match_patch();
     // const diffs = dmp.diff_main(text1, text2);

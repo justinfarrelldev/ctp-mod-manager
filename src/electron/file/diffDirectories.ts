@@ -90,13 +90,16 @@ export const diffDirectories = ({
             continue;
         }
 
-        if (existsInOldDir && !existsInNewDir && newIsFile) {
+        console.log(
+            `existsInOldDir: ${existsInOldDir}, existsInNewDir: ${existsInNewDir}, oldIsFile: ${oldIsFile}, newIsFile: ${newIsFile}`
+        );
+        if (existsInOldDir && !existsInNewDir && oldIsFile) {
             // This is a file that is being removed
             let changeGroup: LineChangeGroup = {
                 startLineNumber: 0,
-                endLineNumber: newFileContents.split(/\r\n|\r|\n/).length,
+                endLineNumber: oldFileContents.split(/\r\n|\r|\n/).length,
                 changeType: 'remove',
-                oldContent: newFileContents,
+                oldContent: oldFileContents,
             };
             changes.push({
                 fileName: fileName,

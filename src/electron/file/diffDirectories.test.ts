@@ -1,6 +1,7 @@
 import { describe, it, vi, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import { afterEach } from 'vitest';
 import { diffDirectories } from './diffDirectories';
 import { TextFileChange } from './getFileChangesToApplyMod';
 
@@ -11,6 +12,9 @@ vi.mock('electron', () => ({
     },
 }));
 describe('diffDirectories', () => {
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
     it(`should be able to diff nested directories`, () => {
         // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
@@ -167,6 +171,8 @@ describe('diffDirectories', () => {
             oldDir,
             newDir,
         });
+
+        console.log('result', result);
 
         expect(result.length).toBe(1);
         expect(result[0].isBinary).toBe(false);

@@ -41,6 +41,19 @@ export const diffDirectories = ({
     ignoreRemovedFiles?: boolean; // This is for the case where we don't want to include removed files (because the "new" dir is the mod, and the old one
     // is the game data)
 }): FileChange[] => {
+    console.log('old dir: ', oldDir);
+    console.log('new dir: ', newDir);
+    console.log('old dir is: ', typeof oldDir);
+    console.log('new dir is: ', typeof newDir);
+
+    if (oldDir === undefined) {
+        oldDir = {};
+    }
+
+    if (newDir === undefined) {
+        newDir = {};
+    }
+
     const changes: FileChange[] = [];
 
     // Every time we see a file, we will remove it from this list

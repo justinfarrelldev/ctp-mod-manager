@@ -114,10 +114,35 @@ export const diffDirectories = ({
             continue;
         }
 
+        if (
+            existsInOldDir &&
+            existsInNewDir &&
+            newIsFile &&
+            oldIsFile &&
+            isBinaryFile(fileName)
+        ) {
+            // This is a binary file that is being changed
+            const changeGroup: LineChangeGroup = {
+                startLineNumber: 1,
+                endLineNumber: newFileContents.split(/\r\n|\r|\n/).length,
+                changeType: 'replace',
+                newContent: newFileContents,
+                oldContent: oldFileContents,
+            };
+            changes.push({
+                fileName: fileName,
+                lineChangeGroups: [changeGroup],
+                isBinary: isBinaryFile(fileName),
+            });
+            console.log(
+                'added binary file to change list as a replace: ',
+                fileName
+            );
+            continue;
+        }
+
         if (existsInOldDir && existsInNewDir && newIsFile && oldIsFile) {
             const diffs = diffTexts(oldFileContents, newFileContents);
-
-            console.log('diffs: ', diffs);
 
             let lineCount = 1;
 

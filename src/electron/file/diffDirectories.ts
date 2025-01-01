@@ -65,7 +65,10 @@ export const diffDirectories = ({
             );
         }
 
-        if ((oldIsFile && !newIsFile) || (newIsFile && !oldIsFile)) {
+        if (
+            (oldIsFile && !newIsFile && existsInOldDir && existsInNewDir) ||
+            (newIsFile && !oldIsFile && existsInOldDir && existsInNewDir)
+        ) {
             throw new Error(
                 `File ${fileName} exists in one directory but not the other`
             );

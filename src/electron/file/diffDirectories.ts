@@ -34,9 +34,12 @@ import {
 export const diffDirectories = ({
     oldDir,
     newDir,
+    ignoreRemovedFiles = false,
 }: {
     oldDir: DirectoryContents;
     newDir: DirectoryContents;
+    ignoreRemovedFiles?: boolean; // This is for the case where we don't want to include removed files (because the "new" dir is the mod, and the old one
+    // is the game data)
 }): FileChange[] => {
     const changes: FileChange[] = [];
 
@@ -95,9 +98,6 @@ export const diffDirectories = ({
             continue;
         }
 
-        console.log(
-            `existsInOldDir: ${existsInOldDir}, existsInNewDir: ${existsInNewDir}, oldIsFile: ${oldIsFile}, newIsFile: ${newIsFile}`
-        );
         if (existsInOldDir && !existsInNewDir && oldIsFile) {
             // This is a file that is being removed
             let changeGroup: LineChangeGroup = {
@@ -118,6 +118,39 @@ export const diffDirectories = ({
             const diffs = diffTexts(oldFileContents, newFileContents);
 
             let lineCount = 1;
+
+            for (const diff of diffs) {
+                if (diff.added) {
+                    const changeGroup: LineChangeGroup = {
+                        startLineNumber: lineCount,
+                        endLineNumber: lineCount,
+                        changeType: 'add',
+                        newContent: diff.value,
+                    };
+                    changes.push({
+                        fileName: fileName,
+                        lineChangeGroups: [changeGroup],
+                        isBinary: isBinaryFile(fileName),
+                    });
+                } else if (diff.removed) {
+                    const changeGroup: LineChangeGroup = {
+                        startLineNumber: lineCount,
+                        endLineNumber: lineCount,
+                        changeType: 'remove',
+                        oldContent: diff.value,
+                    };
+                    changes.push({
+                        fileName: fileName,
+                        lineChangeGroups: [changeGroup],
+                        isBinary: isBinaryFile(fileName),
+                    });
+                } else {
+                    // Do nothing here, this library handles replace as a remove then an add
+                }
+                if (diff.value.includes('\n')) {
+                    lineCount++;
+                }
+            }
             diffs.forEach((diff) => {
                 if (diff.added) {
                     const changeGroup: LineChangeGroup = {
@@ -147,7 +180,6 @@ export const diffDirectories = ({
                     // Do nothing here, this library handles replace as a remove then an add
                 }
                 if (diff.value.includes('\n')) {
-                    console.log('diff.value', diff.value);
                     lineCount++;
                 }
             });
@@ -155,6 +187,8 @@ export const diffDirectories = ({
             continue;
         }
     }
+
+    if (ignoreRemovedFiles) return changes;
 
     for (const fileName of oldDirFileNames) {
         const oldFileContents = oldDir[fileName];

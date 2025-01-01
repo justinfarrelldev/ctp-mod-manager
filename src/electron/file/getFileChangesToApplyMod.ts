@@ -4,6 +4,7 @@ import path from 'node:path';
 import * as diff from 'diff';
 import diff_match_patch from 'diff-match-patch';
 import { diffLines, Change, diffChars } from 'diff';
+import { diffDirectories } from './diffDirectories';
 
 // Define the type for the nested object structure
 export type DirectoryContents = {
@@ -328,12 +329,7 @@ const processDirectoryEntries = (
                 // If the contents are the same, continue to the next path
                 continue;
             }
-            console.log(
-                `Processing newPath: ${newPath}, type: ${typeof newContent[newPath]}`
-            );
-            console.log(
-                `Processing oldPath: ${oldPath}, type: ${typeof oldContent[oldPath]}`
-            );
+
             const fullPath = prefix + newPath;
 
             // If both the newPath and old file path are objects (directories), push them to the stack for further processing
@@ -475,7 +471,7 @@ async function compareDirectories(
     oldDir: DirectoryContents,
     newDir: DirectoryContents
 ): Promise<FileChange[]> {
-    return processDirectory(oldDir, newDir);
+    return diffDirectories({ oldDir, newDir, ignoreRemovedFiles: true });
 }
 
 export const getFileChangesToApplyMod = async (
@@ -509,10 +505,11 @@ export const getFileChangesToApplyMod = async (
             mods, we need to compare the other mods to the game's structure as well and then use the line 
             changes to deduce incompatible files. This can be done with as many mods as we like...
         */
-        compareDirectories(gameDirStructure, modDirStructure).then(
-            (fileChanges) => {
-                console.log('file changes: ', JSON.stringify(fileChanges));
-            }
+        const result = await compareDirectories(
+            gameDirStructure,
+            modDirStructure
         );
+
+        console.log('result:', result);
     }
 };

@@ -65,11 +65,6 @@ export const diffTexts = (text1: string, text2: string): Change[] => {
     return diffs;
 };
 
-export type FileDiff = {
-    fileName: string;
-    changeDiffs: diff.Change[];
-};
-
 export const getFileChangesToApplyMod = async (
     mod: string,
     installDir: string

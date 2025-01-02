@@ -25,7 +25,6 @@
 import {
     diffTexts,
     FileChange,
-    FileDiff,
     LineChangeGroup,
 } from './getFileChangesToApplyMod';
 import { isBinaryFile } from './isBinaryFile';

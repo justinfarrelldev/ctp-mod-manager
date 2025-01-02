@@ -152,7 +152,7 @@ describe('diffDirectories', () => {
         const resultTextChanges: TextFileChange[] = result as TextFileChange[];
 
         expect(resultTextChanges[0].lineChangeGroups[0].startLineNumber).toBe(
-            0
+            1
         );
         expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(2);
     });
@@ -185,7 +185,7 @@ describe('diffDirectories', () => {
         expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(2);
     });
 
-    it.only(`should handle multiple files in different folders`, () => {
+    it(`should handle multiple files in different folders`, () => {
         const oldDir = {
             src: {
                 'file1.slc': 'old content 1',
@@ -213,17 +213,12 @@ describe('diffDirectories', () => {
             newDir,
         });
 
-        console.log(
-            'Changes: ',
-            result.map((change) => change.lineChangeGroups)
-        );
-
         expect(result.length).toBe(7);
         expect(result[0].isBinary).toBe(false);
         expect(result[1].isBinary).toBe(false);
         expect(result[2].isBinary).toBe(true);
-        expect(result[3].isBinary).toBe(false);
-        expect(result[4].isBinary).toBe(true);
+        expect(result[3].isBinary).toBe(true);
+        expect(result[4].isBinary).toBe(false);
 
         const resultTextChanges: TextFileChange[] = result as TextFileChange[];
 
@@ -232,21 +227,21 @@ describe('diffDirectories', () => {
         );
         expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(1);
         expect(resultTextChanges[0].lineChangeGroups[0].changeType).toBe(
-            'modify'
+            'remove'
         );
 
         expect(resultTextChanges[1].lineChangeGroups[0].startLineNumber).toBe(
-            0
+            1
         );
         expect(resultTextChanges[1].lineChangeGroups[0].endLineNumber).toBe(1);
         expect(resultTextChanges[1].lineChangeGroups[0].changeType).toBe('add');
 
         expect(resultTextChanges[2].lineChangeGroups[0].startLineNumber).toBe(
-            0
+            1
         );
         expect(resultTextChanges[2].lineChangeGroups[0].endLineNumber).toBe(1);
         expect(resultTextChanges[2].lineChangeGroups[0].changeType).toBe(
-            'remove'
+            'replace'
         );
 
         expect(resultTextChanges[3].lineChangeGroups[0].startLineNumber).toBe(
@@ -254,13 +249,27 @@ describe('diffDirectories', () => {
         );
         expect(resultTextChanges[3].lineChangeGroups[0].endLineNumber).toBe(1);
         expect(resultTextChanges[3].lineChangeGroups[0].changeType).toBe(
-            'modify'
+            'replace'
         );
 
         expect(resultTextChanges[4].lineChangeGroups[0].startLineNumber).toBe(
-            0
+            1
         );
         expect(resultTextChanges[4].lineChangeGroups[0].endLineNumber).toBe(1);
-        expect(resultTextChanges[4].lineChangeGroups[0].changeType).toBe('add');
+        expect(resultTextChanges[4].lineChangeGroups[0].changeType).toBe(
+            'remove'
+        );
+
+        expect(resultTextChanges[5].lineChangeGroups[0].startLineNumber).toBe(
+            1
+        );
+        expect(resultTextChanges[5].lineChangeGroups[0].endLineNumber).toBe(1);
+        expect(resultTextChanges[5].lineChangeGroups[0].changeType).toBe('add');
+
+        expect(resultTextChanges[6].lineChangeGroups[0].startLineNumber).toBe(
+            1
+        );
+        expect(resultTextChanges[6].lineChangeGroups[0].endLineNumber).toBe(1);
+        expect(resultTextChanges[6].lineChangeGroups[0].changeType).toBe('add');
     });
 });

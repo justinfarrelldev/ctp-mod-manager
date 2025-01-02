@@ -22,12 +22,9 @@
     - Return the FileChange[]
 */
 
-import {
-    diffTexts,
-    FileChange,
-    LineChangeGroup,
-} from './getFileChangesToApplyMod';
+import { diffTexts, FileChange } from './getFileChangesToApplyMod';
 import { isBinaryFile } from './isBinaryFile';
+import { LineChangeGroup } from './lineChangeGroup';
 import { DirectoryContents } from './readDirectory';
 
 const countLines = (str: string): number => {

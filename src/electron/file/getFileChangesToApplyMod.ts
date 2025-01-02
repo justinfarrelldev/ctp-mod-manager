@@ -1,38 +1,9 @@
 import { DEFAULT_MOD_DIR } from '../constants';
 import fs from 'node:fs';
-import path from 'node:path';
-import * as diff from 'diff';
 import { diffLines, Change } from 'diff';
 import { diffDirectories } from './diffDirectories';
-import { DirectoryContents, readDirectory } from './readDirectory';
-
-export type LineChangeGroupAdd = {
-    startLineNumber: number;
-    endLineNumber: number;
-    newContent: string;
-    changeType: 'add';
-};
-
-export type LineChangeGroupRemove = {
-    startLineNumber: number;
-    endLineNumber: number;
-    oldContent: string;
-    changeType: 'remove';
-};
-
-export type LineChangeGroupReplace = {
-    startLineNumber: number;
-    endLineNumber: number;
-    newContent: string;
-    oldContent: string;
-    changeType: 'replace';
-};
-
-// Wish there was a way to share this type, but alas... it's also found in App.tsx
-export type LineChangeGroup =
-    | LineChangeGroupAdd
-    | LineChangeGroupRemove
-    | LineChangeGroupReplace;
+import { readDirectory } from './readDirectory';
+import { LineChangeGroup } from './lineChangeGroup';
 
 export type TextFileChange = {
     fileName: string;

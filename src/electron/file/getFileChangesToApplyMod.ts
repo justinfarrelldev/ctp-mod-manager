@@ -89,9 +89,6 @@ export const diffTexts = (text1: string, text2: string): Change[] => {
         newlineIsToken: true,
     });
 
-    // const dmp = new diff_match_patch();
-    // const diffs = dmp.diff_main(text1, text2);
-    // dmp.diff_cleanupSemantic(diffs);
     return diffs;
 };
 
@@ -174,6 +171,9 @@ export const getFileChangesToApplyMod = async (
             gameDirStructure,
             modDirStructure
         );
+
+        // Now we have the comparison ready, we need to apply the changes to the game directory
+        // Before we do that, we need to save the changes we will do to a file so that we can go backwards later to un-apply the changes
 
         console.log('result:', result);
     }

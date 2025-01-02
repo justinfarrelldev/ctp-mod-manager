@@ -27,9 +27,9 @@ import {
     DirectoryContents,
     FileChange,
     FileDiff,
-    isBinaryFile,
     LineChangeGroup,
 } from './getFileChangesToApplyMod';
+import { isBinaryFile } from './isBinaryFile';
 
 const countLines = (str: string): number => {
     let count = 1; // Start with 1, as the last line may not end with '\n'

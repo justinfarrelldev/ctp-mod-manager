@@ -70,13 +70,6 @@ export type FileDiff = {
     changeDiffs: diff.Change[];
 };
 
-async function compareDirectories(
-    oldDir: DirectoryContents,
-    newDir: DirectoryContents
-): Promise<FileChange[]> {
-    return diffDirectories({ oldDir, newDir, ignoreRemovedFiles: true });
-}
-
 export const getFileChangesToApplyMod = async (
     mod: string,
     installDir: string
@@ -108,10 +101,10 @@ export const getFileChangesToApplyMod = async (
             mods, we need to compare the other mods to the game's structure as well and then use the line 
             changes to deduce incompatible files. This can be done with as many mods as we like...
         */
-        const result = await compareDirectories(
-            gameDirStructure,
-            modDirStructure
-        );
+        const result = diffDirectories({
+            oldDir: gameDirStructure,
+            newDir: modDirStructure,
+        });
 
         // Now we have the comparison ready, we need to apply the changes to the game directory
         // Before we do that, we need to save the changes we will do to a file so that we can go backwards later to un-apply the changes

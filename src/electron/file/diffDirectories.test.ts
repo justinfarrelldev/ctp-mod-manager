@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { afterEach } from 'vitest';
 import { diffDirectories } from './diffDirectories';
-import { TextFileChange } from './getFileChangesToApplyMod';
+import { TextFileChange } from './fileChange';
 
 vi.mock('electron', () => ({
     app: {

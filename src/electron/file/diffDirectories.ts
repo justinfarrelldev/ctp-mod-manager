@@ -22,7 +22,8 @@
     - Return the FileChange[]
 */
 
-import { diffTexts, FileChange } from './getFileChangesToApplyMod';
+import { FileChange } from './fileChange';
+import { diffTexts } from './getFileChangesToApplyMod';
 import { isBinaryFile } from './isBinaryFile';
 import { LineChangeGroup } from './lineChangeGroup';
 import { DirectoryContents } from './readDirectory';

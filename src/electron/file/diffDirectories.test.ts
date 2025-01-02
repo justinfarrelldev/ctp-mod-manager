@@ -527,80 +527,84 @@ describe('diffDirectories', () => {
         console.log('result: ', result);
 
         expect(result.length).toBeGreaterThan(0);
-
         // Check for added files
         expect(result).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    path: 'src/newFeature.ts',
+                    fileName: 'src/newFeature.ts',
                     isBinary: false,
+                    lineChangeGroups: expect.any(Array),
                 }),
                 expect.objectContaining({
-                    path: 'assets/theme-dark.css',
+                    fileName: 'assets/theme-dark.css',
                     isBinary: false,
+                    lineChangeGroups: expect.any(Array),
                 }),
                 expect.objectContaining({
-                    path: 'assets/background-new.png',
+                    fileName: 'assets/background-new.png',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'docs/API_v2.pdf',
+                    fileName: 'docs/API_v2.pdf',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'scripts/migrate.sh',
+                    fileName: 'scripts/migrate.sh',
                     isBinary: false,
+                    lineChangeGroups: expect.any(Array),
                 }),
                 expect.objectContaining({
-                    path: 'images/banner_new.png',
+                    fileName: 'images/banner_new.png',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'images/sidebar_new.png',
+                    fileName: 'images/sidebar_new.png',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'config/env.production.json',
+                    fileName: 'config/env.production.json',
                     isBinary: false,
+                    lineChangeGroups: expect.any(Array),
                 }),
                 expect.objectContaining({
-                    path: 'tests/e2e.test.ts',
+                    fileName: 'tests/e2e.test.ts',
                     isBinary: false,
+                    lineChangeGroups: expect.any(Array),
                 }),
                 expect.objectContaining({
-                    path: 'libs/library2_updated.pdf',
+                    fileName: 'libs/library2_updated.pdf',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'libs/library6.pdf',
+                    fileName: 'libs/library6.pdf',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'libs/library7.pdf',
+                    fileName: 'libs/library7.pdf',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'bin/deploy.exe',
+                    fileName: 'bin/deploy.exe',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'logs/app.log',
+                    fileName: 'logs/app.log',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'logs/error.log',
+                    fileName: 'logs/error.log',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'logs/access.log',
+                    fileName: 'logs/access.log',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'logs/debug.log',
+                    fileName: 'logs/debug.log',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'logs/audit.log',
+                    fileName: 'logs/audit.log',
                     isBinary: true,
                 }),
             ])
@@ -610,39 +614,41 @@ describe('diffDirectories', () => {
         expect(result).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    path: 'assets/theme.css',
+                    fileName: 'assets/theme.css',
                     isBinary: false,
+                    lineChangeGroups: expect.any(Array),
                 }),
                 expect.objectContaining({
-                    path: 'assets/background.png',
+                    fileName: 'assets/background.png',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'docs/API.pdf',
+                    fileName: 'docs/API.pdf',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'scripts/cleanup.sh',
+                    fileName: 'scripts/cleanup.sh',
                     isBinary: false,
+                    lineChangeGroups: expect.any(Array),
                 }),
                 expect.objectContaining({
-                    path: 'images/banner.png',
+                    fileName: 'images/banner.png',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'images/sidebar.png',
+                    fileName: 'images/sidebar.png',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'libs/library4.pdf',
+                    fileName: 'libs/library4.pdf',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'libs/library5.pdf',
+                    fileName: 'libs/library5.pdf',
                     isBinary: true,
                 }),
                 expect.objectContaining({
-                    path: 'bin/restart.exe',
+                    fileName: 'bin/restart.exe',
                     isBinary: true,
                 }),
             ])
@@ -652,11 +658,12 @@ describe('diffDirectories', () => {
         expect(result).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    path: 'src/utils.ts',
+                    fileName: 'src/utils.ts',
                     isBinary: false,
+                    lineChangeGroups: expect.any(Array),
                 }),
                 expect.objectContaining({
-                    path: 'libs/library2.pdf',
+                    fileName: 'libs/library2.pdf',
                     isBinary: true,
                 }),
             ])

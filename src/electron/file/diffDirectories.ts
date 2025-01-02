@@ -34,10 +34,12 @@ import {
 export const diffDirectories = ({
     oldDir,
     newDir,
+    parentPath,
     ignoreRemovedFiles = false,
 }: {
     oldDir: DirectoryContents;
     newDir: DirectoryContents;
+    parentPath?: string;
     ignoreRemovedFiles?: boolean; // This is for the case where we don't want to include removed files (because the "new" dir is the mod, and the old one
     // is the game data)
 }): FileChange[] => {
@@ -65,6 +67,7 @@ export const diffDirectories = ({
         let fileName = k;
         const newFileContents = v;
         const oldFileContents = oldDir[fileName];
+        const fullPath = parentPath ? `${parentPath}/${fileName}` : fileName;
 
         const oldIsFile = typeof oldFileContents === 'string';
         const newIsFile = typeof newFileContents === 'string';
@@ -76,6 +79,7 @@ export const diffDirectories = ({
             const subChanges = diffDirectories({
                 oldDir: oldDir[fileName] as DirectoryContents,
                 newDir: newDir[fileName] as DirectoryContents,
+                parentPath: fullPath,
             });
             changes.push(...subChanges);
         }
@@ -104,7 +108,7 @@ export const diffDirectories = ({
                 newContent: newFileContents,
             };
             changes.push({
-                fileName: fileName,
+                fileName: fullPath,
                 lineChangeGroups: [changeGroup],
                 isBinary: isBinaryFile(fileName),
             });
@@ -120,7 +124,7 @@ export const diffDirectories = ({
                 oldContent: oldFileContents,
             };
             changes.push({
-                fileName: fileName,
+                fileName: fullPath,
                 lineChangeGroups: [changeGroup],
                 isBinary: isBinaryFile(fileName),
             });
@@ -143,13 +147,13 @@ export const diffDirectories = ({
                 oldContent: oldFileContents,
             };
             changes.push({
-                fileName: fileName,
+                fileName: fullPath,
                 lineChangeGroups: [changeGroup],
                 isBinary: isBinaryFile(fileName),
             });
             console.log(
                 'added binary file to change list as a replace: ',
-                fileName
+                fullPath
             );
             continue;
         }
@@ -168,7 +172,7 @@ export const diffDirectories = ({
                         newContent: diff.value,
                     };
                     changes.push({
-                        fileName: fileName,
+                        fileName: fullPath,
                         lineChangeGroups: [changeGroup],
                         isBinary: isBinaryFile(fileName),
                     });
@@ -180,7 +184,7 @@ export const diffDirectories = ({
                         oldContent: diff.value,
                     };
                     changes.push({
-                        fileName: fileName,
+                        fileName: fullPath,
                         lineChangeGroups: [changeGroup],
                         isBinary: isBinaryFile(fileName),
                     });
@@ -201,6 +205,7 @@ export const diffDirectories = ({
     for (const fileName of oldDirFileNames) {
         const oldFileContents = oldDir[fileName];
         const oldIsFile = typeof oldFileContents === 'string';
+        const fullPath = parentPath ? `${parentPath}/${fileName}` : fileName;
 
         if (oldIsFile) {
             // This is a file that is being removed
@@ -211,7 +216,7 @@ export const diffDirectories = ({
                 oldContent: oldFileContents,
             };
             changes.push({
-                fileName: fileName,
+                fileName: fullPath,
                 lineChangeGroups: [changeGroup],
                 isBinary: isBinaryFile(fileName),
             });

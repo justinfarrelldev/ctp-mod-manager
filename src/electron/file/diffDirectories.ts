@@ -31,6 +31,16 @@ import {
     LineChangeGroup,
 } from './getFileChangesToApplyMod';
 
+const countLines = (str: string): number => {
+    let count = 1; // Start with 1, as the last line may not end with '\n'
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] === '\n') {
+            count++;
+        }
+    }
+    return count;
+};
+
 export const diffDirectories = ({
     oldDir,
     newDir,
@@ -103,7 +113,7 @@ export const diffDirectories = ({
             // This is a file that is being added
             let changeGroup: LineChangeGroup = {
                 startLineNumber: 1,
-                endLineNumber: newFileContents.split(/\r\n|\r|\n/).length,
+                endLineNumber: countLines(newFileContents),
                 changeType: 'add',
                 newContent: newFileContents,
             };
@@ -119,7 +129,7 @@ export const diffDirectories = ({
             // This is a file that is being removed
             let changeGroup: LineChangeGroup = {
                 startLineNumber: 0,
-                endLineNumber: oldFileContents.split(/\r\n|\r|\n/).length,
+                endLineNumber: countLines(oldFileContents),
                 changeType: 'remove',
                 oldContent: oldFileContents,
             };
@@ -141,7 +151,7 @@ export const diffDirectories = ({
             // This is a binary file that is being changed
             const changeGroup: LineChangeGroup = {
                 startLineNumber: 1,
-                endLineNumber: newFileContents.split(/\r\n|\r|\n/).length,
+                endLineNumber: countLines(newFileContents),
                 changeType: 'replace',
                 newContent: newFileContents,
                 oldContent: oldFileContents,
@@ -211,7 +221,7 @@ export const diffDirectories = ({
             // This is a file that is being removed
             let changeGroup: LineChangeGroup = {
                 startLineNumber: 0,
-                endLineNumber: oldFileContents.split(/\r\n|\r|\n/).length,
+                endLineNumber: countLines(oldFileContents),
                 changeType: 'remove',
                 oldContent: oldFileContents,
             };

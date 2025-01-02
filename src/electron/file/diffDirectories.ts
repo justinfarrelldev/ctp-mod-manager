@@ -102,7 +102,7 @@ export const diffDirectories = ({
         if (!existsInOldDir && existsInNewDir && newIsFile) {
             // This is a file that is being added
             let changeGroup: LineChangeGroup = {
-                startLineNumber: 0,
+                startLineNumber: 1,
                 endLineNumber: newFileContents.split(/\r\n|\r|\n/).length,
                 changeType: 'add',
                 newContent: newFileContents,

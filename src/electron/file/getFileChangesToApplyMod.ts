@@ -122,8 +122,10 @@ const SPECIAL_FILE_EXTENSIONS: string[] = [
  * @param filePath - The path of the file to check.
  * @returns `true` if the file has a special extension, otherwise `false`.
  */
-export const isBinaryFile = (filePath: string): boolean =>
-    SPECIAL_FILE_EXTENSIONS.some((ext) => filePath.toLowerCase().endsWith(ext));
+export const isBinaryFile = (filePath: string): boolean => {
+    const lowerCasePath = filePath.toLowerCase();
+    return SPECIAL_FILE_EXTENSIONS.some((ext) => lowerCasePath.endsWith(ext));
+};
 
 export type FileDiff = {
     fileName: string;

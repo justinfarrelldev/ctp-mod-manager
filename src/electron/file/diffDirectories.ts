@@ -24,12 +24,12 @@
 
 import {
     diffTexts,
-    DirectoryContents,
     FileChange,
     FileDiff,
     LineChangeGroup,
 } from './getFileChangesToApplyMod';
 import { isBinaryFile } from './isBinaryFile';
+import { DirectoryContents } from './readDirectory';
 
 const countLines = (str: string): number => {
     let count = 1; // Start with 1, as the last line may not end with '\n'

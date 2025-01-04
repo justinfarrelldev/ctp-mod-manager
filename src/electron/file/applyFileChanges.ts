@@ -132,21 +132,14 @@ export const addLinesToFile = ({
     const newContentSplit = newContent.split('\n');
 
     if (endLineNumber > lines.length) {
-        // Don't care if the start line number is still within the file, just add it to the end
-        // Maybe this is a mistake?
         lines.push(...newContentSplit);
     } else {
-        let j = 0;
-        for (let i = startLineNumber - 1; i < endLineNumber; i++) {
-            console.log(
-                'Adding line at index: ',
-                i,
-                ' with content: ',
-                newContentSplit[j]
-            );
-            lines.splice(i, 0, newContentSplit[j]);
-            lineMap.set(i, j);
-            j++;
+        lines.splice(startLineNumber - 1, 0, ...newContentSplit);
+    }
+
+    for (const [origLine, currLine] of lineMap.entries()) {
+        if (currLine >= startLineNumber - 1) {
+            lineMap.set(origLine, currLine + newContentSplit.length);
         }
     }
 

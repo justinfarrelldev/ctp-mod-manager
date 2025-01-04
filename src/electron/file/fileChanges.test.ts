@@ -83,7 +83,7 @@ describe('addLinesToFile', () => {
         expect(lineMap).toEqual(
             new Map<number, number>([
                 [0, 0],
-                [1, 1],
+                [1, 3],
                 [2, 4],
                 [3, 5],
             ])

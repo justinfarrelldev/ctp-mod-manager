@@ -102,6 +102,29 @@ export const applyFileChanges = ({
     applyModFileChanges({ modFileChanges });
 };
 
+/**
+ * Applies modifications to files based on the provided mod file changes.
+ *
+ * This function iterates through each item in the `modFileChanges` array and processes
+ * the line change groups within each file change. Depending on the type of change
+ * (add, remove, replace), it will call the appropriate function to handle the modification.
+ *
+ * @param {Object} params - The parameters for the function.
+ * @param {ModFileChanges[]} params.modFileChanges - An array of mod file changes to be applied.
+ *
+ * @typedef {Object} ModFileChanges - Represents the changes to be applied to a mod file.
+ * @property {FileChange[]} fileChanges - An array of file changes.
+ * @property {string} mod - The name or identifier of the mod.
+ *
+ * @typedef {Object} FileChange - Represents a change to a file.
+ * @property {LineChangeGroup[]} lineChangeGroups - An array of line change groups.
+ *
+ * @typedef {Object} LineChangeGroup - Represents a group of line changes.
+ * @property {string} changeType - The type of change ('add', 'remove', 'replace').
+ *
+ * @typedef {Object} TextFileChange - Represents a text file change.
+ * @property {LineChangeGroup[]} lineChangeGroups - An array of line change groups.
+ */
 const applyModFileChanges = ({
     modFileChanges,
 }: {

@@ -22,6 +22,15 @@ export class ModApplicationError extends Error {
     }
 }
 
+/**
+ * Checks if there are any conflicting line change groups.
+ *
+ * A conflict occurs if any two line change groups overlap, meaning that
+ * the start line number of one group is within the range of another group.
+ *
+ * @param lineChangeGroups - An array of line change groups to check for conflicts.
+ * @returns `true` if there are conflicting line change groups, otherwise `false`.
+ */
 const lineChangesAreConflicting = (
     lineChangeGroups: LineChangeGroup[]
 ): boolean => {

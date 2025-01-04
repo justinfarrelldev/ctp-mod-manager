@@ -1,6 +1,7 @@
 // Applies the file changes that are passed to it
 
 import { FileChange, TextFileChange } from './fileChange';
+import { LineChangeGroup } from './lineChangeGroup';
 
 type ModFileChanges = {
     mod: string;
@@ -21,31 +22,31 @@ class ModsIncompatibleError extends Error {
  * @param {ModFileChanges[]} params.modFileChanges - An array of file changes to be validated.
  * @returns {boolean} - Returns `true` if the file changes are valid and can be applied without conflicts, otherwise `false`.
  */
+
 export const areFileChangesValid = ({
     modFileChanges,
 }: {
     modFileChanges: ModFileChanges[];
 }): boolean => {
-    for (const change of modFileChanges) {
-        // Validate that the file changes can be applied successfully
-        const lineChangeGroups = change.fileChanges.map(
-            (fc) => (fc as TextFileChange).lineChangeGroups
-        );
-        const allChanges = lineChangeGroups.flat();
+    const allLineChangeGroups: LineChangeGroup[] = [];
 
-        for (let i = 0; i < allChanges.length; i++) {
-            for (let j = i + 1; j < allChanges.length; j++) {
-                const changeA = allChanges[i];
-                const changeB = allChanges[j];
+    for (const { fileChanges } of modFileChanges) {
+        for (const fileChange of fileChanges) {
+            allLineChangeGroups.push(
+                ...(fileChange as TextFileChange).lineChangeGroups
+            );
+        }
+    }
 
-                if (
-                    (changeA.startLineNumber <= changeB.endLineNumber &&
-                        changeA.endLineNumber >= changeB.startLineNumber) ||
-                    (changeB.startLineNumber <= changeA.endLineNumber &&
-                        changeB.endLineNumber >= changeA.startLineNumber)
-                ) {
-                    return false;
-                }
+    for (let i = 0; i < allLineChangeGroups.length; i++) {
+        for (let j = i + 1; j < allLineChangeGroups.length; j++) {
+            if (
+                allLineChangeGroups[i].startLineNumber <=
+                    allLineChangeGroups[j].endLineNumber &&
+                allLineChangeGroups[j].startLineNumber <=
+                    allLineChangeGroups[i].endLineNumber
+            ) {
+                return false;
             }
         }
     }

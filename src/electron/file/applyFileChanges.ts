@@ -1,7 +1,8 @@
 // Applies the file changes that are passed to it
 
 import { FileChange, TextFileChange } from './fileChange';
-import { LineChangeGroup } from './lineChangeGroup';
+import { LineChangeGroup, LineChangeGroupAdd } from './lineChangeGroup';
+import * as fs from 'fs';
 
 type ModFileChanges = {
     mod: string;
@@ -103,6 +104,33 @@ export const applyFileChanges = ({
 };
 
 /**
+ * Adds lines to a file at the specified line numbers.
+ *
+ * @param {string} fileName - The name of the file to modify.
+ * @param {LineChangeGroupAdd} lineChangeGroup - The line change group containing the lines to add.
+ */
+export const addLinesToFile = (
+    fileName: string,
+    lineChangeGroup: LineChangeGroupAdd
+): void => {
+    const { startLineNumber, newContent } = lineChangeGroup;
+
+    const fileContent = fs.readFileSync(fileName, 'utf-8');
+
+    console.log('File content: ', fileContent);
+
+    const lines = fileContent.split('\n');
+
+    if (startLineNumber > lines.length) {
+        lines.push(newContent);
+    } else {
+        lines.splice(startLineNumber - 1, 0, newContent);
+    }
+
+    fs.writeFileSync(fileName, lines.join('\n'), 'utf-8');
+};
+
+/**
  * Applies modifications to files based on the provided mod file changes.
  *
  * This function iterates through each item in the `modFileChanges` array and processes
@@ -125,7 +153,7 @@ export const applyFileChanges = ({
  * @typedef {Object} TextFileChange - Represents a text file change.
  * @property {LineChangeGroup[]} lineChangeGroups - An array of line change groups.
  */
-const applyModFileChanges = ({
+export const applyModFileChanges = ({
     modFileChanges,
 }: {
     modFileChanges: ModFileChanges[];
@@ -137,8 +165,17 @@ const applyModFileChanges = ({
             for (const lineChangeGroup of textFileChange.lineChangeGroups) {
                 switch (lineChangeGroup.changeType) {
                     case 'add':
-                        // Call function to handle line additions
-                        // addLinesToFile(lineChangeGroup);
+                        try {
+                            addLinesToFile(
+                                fileChange.fileName,
+                                lineChangeGroup
+                            );
+                        } catch (error) {
+                            throw new ModApplicationError(
+                                `Failed to add lines to file ${fileChange.fileName}: ${error.message}`
+                            );
+                        }
+
                         break;
                     case 'remove':
                         // Call function to handle line removals

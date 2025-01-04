@@ -53,11 +53,11 @@ export const areFileChangesValid = ({
     return true;
 };
 
-export const applyFileChanges = async ({
+export const applyFileChanges = ({
     modFileChanges,
 }: {
     modFileChanges: ModFileChanges[];
-}): Promise<void> => {
+}): void => {
     // First, we must validate that the file changes can be applied successfully
     // Additionally, once that step is done, we must back up the changes to a backup file so that they can be reversed in the future
 

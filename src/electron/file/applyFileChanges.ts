@@ -4,6 +4,7 @@ import { FileChange, TextFileChange } from './fileChange';
 import {
     LineChangeGroup,
     LineChangeGroupAdd,
+    LineChangeGroupRemove,
     LineChangeGroupReplace,
 } from './lineChangeGroup';
 import * as fs from 'fs';
@@ -106,6 +107,7 @@ export const applyFileChanges = ({
 
     applyModFileChanges({ modFileChanges });
 };
+
 /**
  * Adds lines to a file at the specified line numbers.
  *
@@ -141,7 +143,7 @@ export const addLinesToFile = ({
  *
  * @param {Object} params - The parameters for the function.
  * @param {string} params.fileName - The name of the file to modify.
- * @param {LineChangeGroup} params.lineChangeGroup - The line change group containing the lines to remove.
+ * @param {LineChangeGroupRemove} params.lineChangeGroup - The line change group containing the lines to remove.
  * @param {string} params.fileData - The current content of the file.
  */
 export const removeLinesFromFile = ({
@@ -150,7 +152,7 @@ export const removeLinesFromFile = ({
     fileData,
 }: {
     fileName: string;
-    lineChangeGroup: LineChangeGroup;
+    lineChangeGroup: LineChangeGroupRemove;
     fileData: string;
 }): void => {
     const { startLineNumber, endLineNumber } = lineChangeGroup;

@@ -5,7 +5,7 @@ import { LineChangeGroupAdd } from './lineChangeGroup';
 
 vi.mock('fs');
 
-describe.only('addLinesToFile', () => {
+describe('addLinesToFile', () => {
     it('should add lines to the end of the file if endLineNumber is greater than file length', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {

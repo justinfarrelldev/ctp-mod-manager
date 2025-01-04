@@ -137,9 +137,15 @@ export const addLinesToFile = ({
         lines.push(...newContentSplit);
     } else {
         let j = 0;
-        for (let i = startLineNumber - 1; i <= endLineNumber; i++) {
-            lines.splice(i + j, 0, newContentSplit[j]);
-            lineMap.set(i, i + j);
+        for (let i = startLineNumber - 1; i < endLineNumber; i++) {
+            console.log(
+                'Adding line at index: ',
+                i,
+                ' with content: ',
+                newContentSplit[j]
+            );
+            lines.splice(i, 0, newContentSplit[j]);
+            lineMap.set(i, j);
             j++;
         }
     }

@@ -14,6 +14,13 @@ class ModsIncompatibleError extends Error {
     }
 }
 
+/**
+ * Validates whether the provided file changes for all of the provided mods can be applied successfully without conflicts.
+ *
+ * @param {Object} params - The parameters object.
+ * @param {ModFileChanges[]} params.modFileChanges - An array of file changes to be validated.
+ * @returns {boolean} - Returns `true` if the file changes are valid and can be applied without conflicts, otherwise `false`.
+ */
 export const areFileChangesValid = ({
     modFileChanges,
 }: {

@@ -131,6 +131,31 @@ export const addLinesToFile = (
 };
 
 /**
+ * Removes lines from a file at the specified line numbers.
+ *
+ * @param {string} fileName - The name of the file to modify.
+ * @param {LineChangeGroup} lineChangeGroup - The line change group containing the lines to remove.
+ */
+export const removeLinesFromFile = (
+    fileName: string,
+    lineChangeGroup: LineChangeGroup
+): void => {
+    const { startLineNumber, endLineNumber } = lineChangeGroup;
+
+    const fileContent = fs.readFileSync(fileName, 'utf-8');
+
+    console.log('File content: ', fileContent);
+
+    const lines = fileContent.split('\n');
+
+    if (startLineNumber <= lines.length && endLineNumber <= lines.length) {
+        lines.splice(startLineNumber - 1, endLineNumber - startLineNumber + 1);
+    }
+
+    fs.writeFileSync(fileName, lines.join('\n'), 'utf-8');
+};
+
+/**
  * Applies modifications to files based on the provided mod file changes.
  *
  * This function iterates through each item in the `modFileChanges` array and processes
@@ -178,8 +203,16 @@ export const applyModFileChanges = ({
 
                         break;
                     case 'remove':
-                        // Call function to handle line removals
-                        // removeLinesFromFile(lineChangeGroup);
+                        try {
+                            removeLinesFromFile(
+                                fileChange.fileName,
+                                lineChangeGroup
+                            );
+                        } catch (error) {
+                            throw new ModApplicationError(
+                                `Failed to remove lines from file ${fileChange.fileName}: ${error.message}`
+                            );
+                        }
                         break;
                     case 'replace':
                         // Call function to handle line replacements

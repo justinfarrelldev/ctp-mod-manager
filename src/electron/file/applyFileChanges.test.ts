@@ -3,6 +3,7 @@ import {
     areFileChangesValid,
     applyFileChanges,
     ModApplicationError,
+    ModsIncompatibleError,
 } from './applyFileChanges';
 import { FileChange } from './fileChange';
 import { LineChangeGroup } from './lineChangeGroup';
@@ -306,5 +307,106 @@ describe('areFileChangesValid', () => {
         ];
 
         expect(areFileChangesValid({ modFileChanges })).toBe(false);
+    });
+});
+describe('applyFileChanges', () => {
+    it('should throw ModsIncompatibleError when mod file changes are invalid', () => {
+        const changeGroup1: LineChangeGroup[] = [
+            {
+                startLineNumber: 1,
+                endLineNumber: 3,
+                newContent: 'new content',
+                changeType: 'add',
+            },
+        ];
+
+        const changeGroup2: LineChangeGroup[] = [
+            {
+                startLineNumber: 2,
+                endLineNumber: 4,
+                oldContent: 'old content',
+                changeType: 'remove',
+            },
+        ];
+
+        const fileChanges1: FileChange[] = [
+            {
+                fileName: 'file1.txt',
+                lineChangeGroups: changeGroup1,
+                isBinary: false,
+            },
+        ];
+
+        const fileChanges2: FileChange[] = [
+            {
+                fileName: 'file1.txt',
+                lineChangeGroups: changeGroup2,
+                isBinary: false,
+            },
+        ];
+
+        const modFileChanges = [
+            {
+                mod: 'mod1',
+                fileChanges: fileChanges1,
+            },
+            {
+                mod: 'mod2',
+                fileChanges: fileChanges2,
+            },
+        ];
+
+        expect(() => applyFileChanges({ modFileChanges })).toThrow(
+            ModsIncompatibleError
+        );
+    });
+
+    it('should not throw when mod file changes are valid', () => {
+        const changeGroup1: LineChangeGroup[] = [
+            {
+                startLineNumber: 1,
+                endLineNumber: 2,
+                newContent: 'new content',
+                changeType: 'add',
+            },
+        ];
+
+        const changeGroup2: LineChangeGroup[] = [
+            {
+                startLineNumber: 3,
+                endLineNumber: 4,
+                oldContent: 'old content',
+                changeType: 'remove',
+            },
+        ];
+
+        const fileChanges1: FileChange[] = [
+            {
+                fileName: 'file1.txt',
+                lineChangeGroups: changeGroup1,
+                isBinary: false,
+            },
+        ];
+
+        const fileChanges2: FileChange[] = [
+            {
+                fileName: 'file1.txt',
+                lineChangeGroups: changeGroup2,
+                isBinary: false,
+            },
+        ];
+
+        const modFileChanges = [
+            {
+                mod: 'mod1',
+                fileChanges: fileChanges1,
+            },
+            {
+                mod: 'mod2',
+                fileChanges: fileChanges2,
+            },
+        ];
+
+        expect(() => applyFileChanges({ modFileChanges })).not.toThrow();
     });
 });

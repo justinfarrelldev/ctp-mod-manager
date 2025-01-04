@@ -8,7 +8,7 @@ type ModFileChanges = {
     fileChanges: FileChange[];
 };
 
-class ModsIncompatibleError extends Error {
+export class ModsIncompatibleError extends Error {
     constructor(message: string) {
         super(message);
         this.name = 'ModsIncompatibleError';

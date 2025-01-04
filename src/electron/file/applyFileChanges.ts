@@ -98,4 +98,35 @@ export const applyFileChanges = ({
             'The mods are incompatible with each other.'
         );
     }
+
+    applyModFileChanges({ modFileChanges });
+};
+
+const applyModFileChanges = ({
+    modFileChanges,
+}: {
+    modFileChanges: ModFileChanges[];
+}): void => {
+    for (const { fileChanges, mod } of modFileChanges) {
+        console.log('Applying mod: ', mod);
+        for (const fileChange of fileChanges) {
+            const textFileChange = fileChange as TextFileChange;
+            for (const lineChangeGroup of textFileChange.lineChangeGroups) {
+                switch (lineChangeGroup.changeType) {
+                    case 'add':
+                        // Call function to handle line additions
+                        // addLinesToFile(lineChangeGroup);
+                        break;
+                    case 'remove':
+                        // Call function to handle line removals
+                        // removeLinesFromFile(lineChangeGroup);
+                        break;
+                    case 'replace':
+                        // Call function to handle line replacements
+                        // replaceLinesInFile(lineChangeGroup);
+                        break;
+                }
+            }
+        }
+    }
 };

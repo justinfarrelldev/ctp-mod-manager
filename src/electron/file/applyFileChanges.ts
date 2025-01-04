@@ -15,6 +15,13 @@ class ModsIncompatibleError extends Error {
     }
 }
 
+export class ModApplicationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'ModsApplicationError';
+    }
+}
+
 /**
  * Validates whether the provided file changes for all of the provided mods can be applied successfully without conflicts.
  *
@@ -28,6 +35,32 @@ export const areFileChangesValid = ({
 }: {
     modFileChanges: ModFileChanges[];
 }): boolean => {
+    if (modFileChanges.length === 1) {
+        const { fileChanges } = modFileChanges[0];
+        const lineChangeGroups: LineChangeGroup[] = [];
+
+        for (const fileChange of fileChanges) {
+            lineChangeGroups.push(
+                ...(fileChange as TextFileChange).lineChangeGroups
+            );
+        }
+
+        for (let i = 0; i < lineChangeGroups.length; i++) {
+            for (let j = i + 1; j < lineChangeGroups.length; j++) {
+                if (
+                    lineChangeGroups[i].startLineNumber <=
+                        lineChangeGroups[j].endLineNumber &&
+                    lineChangeGroups[j].startLineNumber <=
+                        lineChangeGroups[i].endLineNumber
+                ) {
+                    throw new ModApplicationError(
+                        'The mod could not be applied due to an error.'
+                    );
+                }
+            }
+        }
+    }
+
     const allLineChangeGroups: LineChangeGroup[] = [];
 
     for (const { fileChanges } of modFileChanges) {

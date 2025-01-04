@@ -107,27 +107,24 @@ export const applyFileChanges = ({
 
     applyModFileChanges({ modFileChanges });
 };
-
 /**
  * Adds lines to a file at the specified line numbers.
  *
  * @param {Object} params - The parameters for the function.
  * @param {string} params.fileName - The name of the file to modify.
  * @param {LineChangeGroupAdd} params.lineChangeGroup - The line change group containing the lines to add.
- * @param {string} params.fileData - The current content of the file.
+ * @param {string[]} params.lines - The current content of the file as an array of lines.
  */
 export const addLinesToFile = ({
     fileName,
     lineChangeGroup,
-    fileData,
+    lines,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupAdd;
-    fileData: string;
+    lines: string[];
 }): void => {
     const { startLineNumber, newContent } = lineChangeGroup;
-
-    const lines = fileData.split('\n');
 
     if (startLineNumber > lines.length) {
         lines.push(newContent);
@@ -144,20 +141,18 @@ export const addLinesToFile = ({
  * @param {Object} params - The parameters for the function.
  * @param {string} params.fileName - The name of the file to modify.
  * @param {LineChangeGroupRemove} params.lineChangeGroup - The line change group containing the lines to remove.
- * @param {string} params.fileData - The current content of the file.
+ * @param {string[]} params.lines - The current content of the file as an array of lines.
  */
 export const removeLinesFromFile = ({
     fileName,
     lineChangeGroup,
-    fileData,
+    lines,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupRemove;
-    fileData: string;
+    lines: string[];
 }): void => {
     const { startLineNumber, endLineNumber } = lineChangeGroup;
-
-    const lines = fileData.split('\n');
 
     if (startLineNumber <= lines.length && endLineNumber <= lines.length) {
         lines.splice(startLineNumber - 1, endLineNumber - startLineNumber + 1);
@@ -172,20 +167,18 @@ export const removeLinesFromFile = ({
  * @param {Object} params - The parameters for the function.
  * @param {string} params.fileName - The name of the file to modify.
  * @param {LineChangeGroupReplace} params.lineChangeGroup - The line change group containing the lines to replace.
- * @param {string} params.fileData - The current content of the file.
+ * @param {string[]} params.lines - The current content of the file as an array of lines.
  */
 export const replaceLinesInFile = ({
     fileName,
     lineChangeGroup,
-    fileData,
+    lines,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupReplace;
-    fileData: string;
+    lines: string[];
 }): void => {
     const { startLineNumber, endLineNumber, newContent } = lineChangeGroup;
-
-    const lines = fileData.split('\n');
 
     if (startLineNumber <= lines.length && endLineNumber <= lines.length) {
         lines.splice(
@@ -235,6 +228,8 @@ export const applyModFileChanges = ({
                 fileChange.fileName,
                 'utf-8'
             );
+            const lines: string[] = fileData.split('\n');
+
             for (const lineChangeGroup of textFileChange.lineChangeGroups) {
                 switch (lineChangeGroup.changeType) {
                     case 'add':
@@ -243,7 +238,7 @@ export const applyModFileChanges = ({
                                 fileName: fileChange.fileName,
                                 lineChangeGroup:
                                     lineChangeGroup as LineChangeGroupAdd,
-                                fileData,
+                                lines,
                             });
                         } catch (error) {
                             throw new ModApplicationError(
@@ -257,7 +252,7 @@ export const applyModFileChanges = ({
                             removeLinesFromFile({
                                 fileName: fileChange.fileName,
                                 lineChangeGroup,
-                                fileData,
+                                lines,
                             });
                         } catch (error) {
                             throw new ModApplicationError(
@@ -271,7 +266,7 @@ export const applyModFileChanges = ({
                                 fileName: fileChange.fileName,
                                 lineChangeGroup:
                                     lineChangeGroup as LineChangeGroupReplace,
-                                fileData,
+                                lines,
                             });
                         } catch (error) {
                             throw new ModApplicationError(

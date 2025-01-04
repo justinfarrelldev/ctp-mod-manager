@@ -22,6 +22,24 @@ export class ModApplicationError extends Error {
     }
 }
 
+const lineChangesAreConflicting = (
+    lineChangeGroups: LineChangeGroup[]
+): boolean => {
+    for (let i = 0; i < lineChangeGroups.length; i++) {
+        for (let j = i + 1; j < lineChangeGroups.length; j++) {
+            if (
+                lineChangeGroups[i].startLineNumber <=
+                    lineChangeGroups[j].endLineNumber &&
+                lineChangeGroups[j].startLineNumber <=
+                    lineChangeGroups[i].endLineNumber
+            ) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
 /**
  * Validates whether the provided file changes for all of the provided mods can be applied successfully without conflicts.
  *
@@ -37,54 +55,25 @@ export const areFileChangesValid = ({
 }): boolean => {
     if (modFileChanges.length === 1) {
         const { fileChanges } = modFileChanges[0];
-        const lineChangeGroups: LineChangeGroup[] = [];
+        const lineChangeGroups: LineChangeGroup[] = fileChanges.flatMap(
+            (fileChange) => (fileChange as TextFileChange).lineChangeGroups
+        );
 
-        for (const fileChange of fileChanges) {
-            lineChangeGroups.push(
-                ...(fileChange as TextFileChange).lineChangeGroups
-            );
-        }
-
-        for (let i = 0; i < lineChangeGroups.length; i++) {
-            for (let j = i + 1; j < lineChangeGroups.length; j++) {
-                if (
-                    lineChangeGroups[i].startLineNumber <=
-                        lineChangeGroups[j].endLineNumber &&
-                    lineChangeGroups[j].startLineNumber <=
-                        lineChangeGroups[i].endLineNumber
-                ) {
-                    throw new ModApplicationError(
-                        'The mod could not be applied due to an error.'
-                    );
-                }
-            }
-        }
-    }
-
-    const allLineChangeGroups: LineChangeGroup[] = [];
-
-    for (const { fileChanges } of modFileChanges) {
-        for (const fileChange of fileChanges) {
-            allLineChangeGroups.push(
-                ...(fileChange as TextFileChange).lineChangeGroups
+        if (lineChangesAreConflicting(lineChangeGroups)) {
+            throw new ModApplicationError(
+                'The mod could not be applied due to an error.'
             );
         }
     }
 
-    for (let i = 0; i < allLineChangeGroups.length; i++) {
-        for (let j = i + 1; j < allLineChangeGroups.length; j++) {
-            if (
-                allLineChangeGroups[i].startLineNumber <=
-                    allLineChangeGroups[j].endLineNumber &&
-                allLineChangeGroups[j].startLineNumber <=
-                    allLineChangeGroups[i].endLineNumber
-            ) {
-                return false;
-            }
-        }
-    }
+    const allLineChangeGroups: LineChangeGroup[] = modFileChanges.flatMap(
+        ({ fileChanges }) =>
+            fileChanges.flatMap(
+                (fileChange) => (fileChange as TextFileChange).lineChangeGroups
+            )
+    );
 
-    return true;
+    return !lineChangesAreConflicting(allLineChangeGroups);
 };
 
 export const applyFileChanges = ({

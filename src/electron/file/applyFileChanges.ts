@@ -1,7 +1,11 @@
 // Applies the file changes that are passed to it
 
 import { FileChange, TextFileChange } from './fileChange';
-import { LineChangeGroup, LineChangeGroupAdd } from './lineChangeGroup';
+import {
+    LineChangeGroup,
+    LineChangeGroupAdd,
+    LineChangeGroupReplace,
+} from './lineChangeGroup';
 import * as fs from 'fs';
 
 type ModFileChanges = {
@@ -156,6 +160,35 @@ export const removeLinesFromFile = (
 };
 
 /**
+ * Replaces lines in a file at the specified line numbers with new content.
+ *
+ * @param {string} fileName - The name of the file to modify.
+ * @param {LineChangeGroup} lineChangeGroup - The line change group containing the lines to replace.
+ */
+export const replaceLinesInFile = (
+    fileName: string,
+    lineChangeGroup: LineChangeGroupReplace
+): void => {
+    const { startLineNumber, endLineNumber, newContent } = lineChangeGroup;
+
+    const fileContent = fs.readFileSync(fileName, 'utf-8');
+
+    console.log('File content: ', fileContent);
+
+    const lines = fileContent.split('\n');
+
+    if (startLineNumber <= lines.length && endLineNumber <= lines.length) {
+        lines.splice(
+            startLineNumber - 1,
+            endLineNumber - startLineNumber + 1,
+            newContent
+        );
+    }
+
+    fs.writeFileSync(fileName, lines.join('\n'), 'utf-8');
+};
+
+/**
  * Applies modifications to files based on the provided mod file changes.
  *
  * This function iterates through each item in the `modFileChanges` array and processes
@@ -215,8 +248,10 @@ export const applyModFileChanges = ({
                         }
                         break;
                     case 'replace':
-                        // Call function to handle line replacements
-                        // replaceLinesInFile(lineChangeGroup);
+                        replaceLinesInFile(
+                            fileChange.fileName,
+                            lineChangeGroup
+                        );
                         break;
                 }
             }

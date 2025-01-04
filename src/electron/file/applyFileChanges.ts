@@ -107,6 +107,7 @@ export const applyFileChanges = ({
 
     applyModFileChanges({ modFileChanges });
 };
+
 /**
  * Adds lines to a file at the specified line numbers.
  *
@@ -127,12 +128,20 @@ export const addLinesToFile = ({
     lines: string[];
     lineMap: Map<number, number>;
 }): void => {
-    const { startLineNumber, newContent } = lineChangeGroup;
+    const { startLineNumber, endLineNumber, newContent } = lineChangeGroup;
+    const newContentSplit = newContent.split('\n');
 
-    if (startLineNumber > lines.length) {
-        lines.push(newContent);
+    if (endLineNumber > lines.length) {
+        // Don't care if the start line number is still within the file, just add it to the end
+        // Maybe this is a mistake?
+        lines.push(...newContentSplit);
     } else {
-        lines.splice(startLineNumber - 1, 0, newContent);
+        let j = 0;
+        for (let i = startLineNumber - 1; i <= endLineNumber; i++) {
+            lines.splice(i + j, 0, newContentSplit[j]);
+            lineMap.set(i, i + j);
+            j++;
+        }
     }
 
     fs.writeFileSync(fileName, lines.join('\n'), 'utf-8');
@@ -237,6 +246,7 @@ export const applyModFileChanges = ({
                 'utf-8'
             );
             const lines: string[] = fileData.split('\n');
+            // Key is original line number, value is current line number (adjusted for additions, removals)
             const lineMap = new Map<number, number>(
                 lines.map((_, index) => [index, index])
             );

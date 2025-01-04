@@ -114,15 +114,18 @@ export const applyFileChanges = ({
  * @param {string} params.fileName - The name of the file to modify.
  * @param {LineChangeGroupAdd} params.lineChangeGroup - The line change group containing the lines to add.
  * @param {string[]} params.lines - The current content of the file as an array of lines.
+ * @param {Map<number, number>} params.lineMap - A map of original line numbers to current line numbers.
  */
 export const addLinesToFile = ({
     fileName,
     lineChangeGroup,
     lines,
+    lineMap,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupAdd;
     lines: string[];
+    lineMap: Map<number, number>;
 }): void => {
     const { startLineNumber, newContent } = lineChangeGroup;
 
@@ -142,15 +145,18 @@ export const addLinesToFile = ({
  * @param {string} params.fileName - The name of the file to modify.
  * @param {LineChangeGroupRemove} params.lineChangeGroup - The line change group containing the lines to remove.
  * @param {string[]} params.lines - The current content of the file as an array of lines.
+ * @param {Map<number, number>} params.lineMap - A map of original line numbers to current line numbers.
  */
 export const removeLinesFromFile = ({
     fileName,
     lineChangeGroup,
     lines,
+    lineMap,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupRemove;
     lines: string[];
+    lineMap: Map<number, number>;
 }): void => {
     const { startLineNumber, endLineNumber } = lineChangeGroup;
 
@@ -168,15 +174,18 @@ export const removeLinesFromFile = ({
  * @param {string} params.fileName - The name of the file to modify.
  * @param {LineChangeGroupReplace} params.lineChangeGroup - The line change group containing the lines to replace.
  * @param {string[]} params.lines - The current content of the file as an array of lines.
+ * @param {Map<number, number>} params.lineMap - A map of original line numbers to current line numbers.
  */
 export const replaceLinesInFile = ({
     fileName,
     lineChangeGroup,
     lines,
+    lineMap,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupReplace;
     lines: string[];
+    lineMap: Map<number, number>;
 }): void => {
     const { startLineNumber, endLineNumber, newContent } = lineChangeGroup;
 
@@ -223,12 +232,14 @@ export const applyModFileChanges = ({
         console.log('Applying mod: ', mod);
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;
-            const lineMap = new Map<number, number>();
             const fileData: string = fs.readFileSync(
                 fileChange.fileName,
                 'utf-8'
             );
             const lines: string[] = fileData.split('\n');
+            const lineMap = new Map<number, number>(
+                lines.map((_, index) => [index, index])
+            );
 
             for (const lineChangeGroup of textFileChange.lineChangeGroups) {
                 switch (lineChangeGroup.changeType) {
@@ -239,6 +250,7 @@ export const applyModFileChanges = ({
                                 lineChangeGroup:
                                     lineChangeGroup as LineChangeGroupAdd,
                                 lines,
+                                lineMap,
                             });
                         } catch (error) {
                             throw new ModApplicationError(
@@ -253,6 +265,7 @@ export const applyModFileChanges = ({
                                 fileName: fileChange.fileName,
                                 lineChangeGroup,
                                 lines,
+                                lineMap,
                             });
                         } catch (error) {
                             throw new ModApplicationError(
@@ -267,6 +280,7 @@ export const applyModFileChanges = ({
                                 lineChangeGroup:
                                     lineChangeGroup as LineChangeGroupReplace,
                                 lines,
+                                lineMap,
                             });
                         } catch (error) {
                             throw new ModApplicationError(

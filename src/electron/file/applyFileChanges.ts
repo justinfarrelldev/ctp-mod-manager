@@ -134,7 +134,7 @@ export const addLinesToFile = ({
     if (endLineNumber > lines.length) {
         lines.push(...newContentSplit);
     } else {
-        lines.splice(startLineNumber - 1, 0, ...newContentSplit);
+        lines.splice(startLineNumber, 0, ...newContentSplit);
     }
 
     for (const [origLine, currLine] of lineMap.entries()) {

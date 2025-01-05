@@ -147,7 +147,7 @@ export const addLinesToFile = ({
 };
 
 /**
- * Removes lines from a file at the specified line numbers.
+ * Removes lines from a file at the specified line numbers and updates the lineMap accordingly.
  *
  * @param {Object} params - The parameters for the function.
  * @param {string} params.fileName - The name of the file to modify.
@@ -167,9 +167,29 @@ export const removeLinesFromFile = ({
     lineMap: Map<number, number>;
 }): void => {
     const { startLineNumber, endLineNumber } = lineChangeGroup;
+    const numberOfLinesRemoved = endLineNumber - startLineNumber + 1;
+
+    console.log(
+        'endLineNumber: ',
+        endLineNumber,
+        'lines.length: ',
+        lines.length
+    );
+
+    if (endLineNumber > lines.length) {
+        throw new ModApplicationError(
+            `Attempted to remove lines beyond the end of the file ${fileName}.`
+        );
+    }
 
     if (startLineNumber <= lines.length && endLineNumber <= lines.length) {
-        lines.splice(startLineNumber - 1, endLineNumber - startLineNumber + 1);
+        lines.splice(startLineNumber - 1, numberOfLinesRemoved);
+    }
+
+    for (const [origLine, currLine] of lineMap.entries()) {
+        if (currLine > endLineNumber - 1) {
+            lineMap.set(origLine, currLine - numberOfLinesRemoved);
+        }
     }
 
     fs.writeFileSync(fileName, lines.join('\n'), 'utf-8');

@@ -238,7 +238,7 @@ describe('removeLinesFromFile', () => {
         );
     });
 
-    it('should remove lines from the end of the file if endLineNumber exceeds file length', () => {
+    it('should throw an error if endLineNumber exceeds file length', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
             startLineNumber: 3,
@@ -254,13 +254,10 @@ describe('removeLinesFromFile', () => {
             [3, 3],
         ]);
 
-        removeLinesFromFile({ fileName, lineChangeGroup, lines, lineMap });
-
-        expect(lines).toEqual(['line 1', 'line 2']);
-        expect(fs.writeFileSync).toHaveBeenCalledWith(
-            fileName,
-            lines.join('\n'),
-            'utf-8'
+        expect(() => {
+            removeLinesFromFile({ fileName, lineChangeGroup, lines, lineMap });
+        }).toThrowError(
+            'Attempted to remove lines beyond the end of the file testFile.txt.'
         );
     });
 

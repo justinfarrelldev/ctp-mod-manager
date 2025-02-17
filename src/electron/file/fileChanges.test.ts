@@ -257,7 +257,7 @@ describe('removeLinesFromFile', () => {
         expect(() => {
             removeLinesFromFile({ fileName, lineChangeGroup, lines, lineMap });
         }).toThrowError(
-            'Attempted to remove lines beyond the end of the file testFile.txt.'
+            `endLineNumber (${lineChangeGroup.endLineNumber}) does not exist in the lineMap`
         );
     });
 
@@ -320,6 +320,7 @@ describe('removeLinesFromFile', () => {
             startLineNumber: 3,
             endLineNumber: 3,
             changeType: 'remove',
+            oldContent: 'line 4',
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([

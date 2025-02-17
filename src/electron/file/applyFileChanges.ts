@@ -166,29 +166,52 @@ export const removeLinesFromFile = ({
     lines: string[];
     lineMap: Map<number, number>;
 }): void => {
-    const { startLineNumber, endLineNumber } = lineChangeGroup;
-    const numberOfLinesRemoved = endLineNumber - startLineNumber + 1;
+    // Just need to remove all the lines specified in the line change groups.
+    // If there are lines that are removed from the end in the line change groups but that does
+    // not exist in the lines, we throw an error.
+    // If we remove lines, then we have to move up all of the lines in the line map that are below
+    // the removed lines by the amount of lines that were removed.
+    // For example, if there were the following lines:
+    // 1. This is
+    // 2. a
+    // 3. test
+    // 4. file
+    // 5. test file
+    //
+    // ... then if we removed the lines 3-4, we would be left with this in the line map:
+    //
+    // 1. This is
+    // 2. a
+    // 3. test file
 
-    console.log(
-        'endLineNumber: ',
-        endLineNumber,
-        'lines.length: ',
-        lines.length
-    );
-
-    if (endLineNumber > lines.length) {
-        throw new ModApplicationError(
-            `Attempted to remove lines beyond the end of the file ${fileName}.`
+    // If the start or the end line number do not exist in the lineMap, throw
+    if (!lineMap.get(lineChangeGroup.startLineNumber)) {
+        throw new Error(
+            `startLineNumber (${lineChangeGroup.startLineNumber}) does not exist in the lineMap`
         );
     }
 
-    if (startLineNumber <= lines.length && endLineNumber <= lines.length) {
-        lines.splice(startLineNumber - 1, numberOfLinesRemoved);
+    if (!lineMap.get(lineChangeGroup.endLineNumber)) {
+        throw new Error(
+            `endLineNumber (${lineChangeGroup.endLineNumber}) does not exist in the lineMap`
+        );
     }
 
+    const { startLineNumber, endLineNumber } = lineChangeGroup;
+
+    const numberOfLinesToRemove = endLineNumber - startLineNumber + 1;
+    lines.splice(startLineNumber - 1, numberOfLinesToRemove);
+
     for (const [origLine, currLine] of lineMap.entries()) {
-        if (currLine > endLineNumber - 1) {
-            lineMap.set(origLine, currLine - numberOfLinesRemoved);
+        if (currLine >= startLineNumber - 1) {
+            if (
+                currLine >= startLineNumber - 1 &&
+                currLine <= endLineNumber - 1
+            ) {
+                lineMap.delete(origLine);
+            } else if (currLine > endLineNumber - 1) {
+                lineMap.set(origLine, currLine - numberOfLinesToRemove);
+            }
         }
     }
 

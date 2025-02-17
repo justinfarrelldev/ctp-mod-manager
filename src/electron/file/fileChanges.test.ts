@@ -347,11 +347,13 @@ describe('removeLinesFromFile', () => {
             startLineNumber: 2,
             endLineNumber: 2,
             changeType: 'remove',
+            oldContent: 'line 2',
         };
         const lineChangeGroup2: LineChangeGroupRemove = {
             startLineNumber: 4,
             endLineNumber: 5,
             changeType: 'remove',
+            oldContent: 'line 4\nline 5',
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4', 'line 5'];
         const lineMap = new Map<number, number>([

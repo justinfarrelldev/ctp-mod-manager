@@ -1,4 +1,6 @@
 import { DEFAULT_MOD_DIR } from '../constants';
+import { applyFileChanges, ModFileChanges } from './applyFileChanges';
+import { getFileChangesToApplyMod } from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
 import * as fs from 'fs';
 
@@ -18,7 +20,7 @@ import * as fs from 'fs';
  * @throws Will log an error if a mod is not a directory.
  * @throws Will log an error if there is an issue copying the mod directory.
  */
-export const applyModsToInstall = (
+export const applyModsToInstall = async (
     installDir: string,
     queuedMods: string[]
 ) => {
@@ -28,6 +30,8 @@ export const applyModsToInstall = (
         );
         return;
     }
+
+    let changesArr: ModFileChanges[] = [];
 
     // apply mods in order
     for (const mod of queuedMods) {
@@ -56,8 +60,13 @@ export const applyModsToInstall = (
             console.log(
                 `copying ${DEFAULT_MOD_DIR}\\${mod} to the installation at ${installDir}`
             );
-            fs.cpSync(`${DEFAULT_MOD_DIR}\\${mod}`, `${installDir}`, {
-                recursive: true,
+            // fs.cpSync(`${DEFAULT_MOD_DIR}\\${mod}`, `${installDir}`, {
+            //     recursive: true,
+            // });
+
+            changesArr.push({
+                mod,
+                fileChanges: await getFileChangesToApplyMod(mod, installDir),
             });
         } catch (err) {
             console.error(
@@ -65,4 +74,10 @@ export const applyModsToInstall = (
             );
         }
     }
+
+    console.log(
+        `${changesArr.length} changes found for all ${queuedMods.length} mods. Applying changes...`
+    );
+
+    applyFileChanges({ modFileChanges: changesArr });
 };

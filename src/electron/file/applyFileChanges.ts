@@ -9,7 +9,7 @@ import {
 } from './lineChangeGroup';
 import * as fs from 'fs';
 
-type ModFileChanges = {
+export type ModFileChanges = {
     mod: string;
     fileChanges: FileChange[];
 };
@@ -342,6 +342,8 @@ export const applyModFileChanges = ({
                         break;
                 }
             }
+
+            fs.writeFileSync(fileChange.fileName, lines.join('\n'), 'utf-8');
         }
     }
 };

@@ -70,15 +70,25 @@ export const areFileChangesValid = ({
 }): boolean => {
     if (modFileChanges.length === 1) {
         const { fileChanges } = modFileChanges[0];
+        if (fileChanges === undefined) {
+            // There is no "fileChanges" field on the modFileChanges object
+            return false;
+        }
         const lineChangeGroups: LineChangeGroup[] = fileChanges.flatMap(
             (fileChange) => (fileChange as TextFileChange).lineChangeGroups
         );
 
         if (lineChangesAreConflicting(lineChangeGroups)) {
             throw new ModApplicationError(
-                'The mod could not be applied due to an error.'
+                'The mod could not be applied due to conflicting line changes.'
             );
         }
+    }
+
+    if (modFileChanges === undefined) {
+        throw new Error(
+            `modFileChanges passed to areFileChangesValid were undefined!`
+        );
     }
 
     const allLineChangeGroups: LineChangeGroup[] = modFileChanges.flatMap(
@@ -280,7 +290,6 @@ export const applyModFileChanges = ({
     modFileChanges: ModFileChanges[];
 }): void => {
     for (const { fileChanges, mod } of modFileChanges) {
-        console.log('Applying mod: ', mod);
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;
             const fileData: string = fs.readFileSync(

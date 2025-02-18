@@ -92,8 +92,9 @@ app.whenReady().then(() => {
 
     ipcMain.handle('file:makeBackup', (_, dir) => makeBackup(dir));
 
-    ipcMain.on('file:applyModsToInstall', (_, dir, mods) =>
-        applyModsToInstall(dir, mods)
+    ipcMain.handle(
+        'file:applyModsToInstall',
+        async (_, dir, mods) => await applyModsToInstall(dir, mods)
     );
 
     ipcMain.on('file:getFileChangesToApplyMod', (_, modName, installDir) => {

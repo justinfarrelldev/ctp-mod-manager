@@ -41,7 +41,7 @@ export const getFileChangesToApplyMod = async (
             console.error(
                 `Error: ${`${DEFAULT_MOD_DIR}\\${mod}`} is not a directory.`
             );
-            return;
+            return [];
         }
 
         const modDirStructure = readDirectory(`${DEFAULT_MOD_DIR}\\${mod}`);
@@ -58,9 +58,11 @@ export const getFileChangesToApplyMod = async (
             newDir: modDirStructure,
         });
 
+        return result;
+
         // Now we have the comparison ready, we need to apply the changes to the game directory
         // Before we do that, we need to save the changes we will do to a file so that we can go backwards later to un-apply the changes
 
-        console.log('result:', result);
+        // console.log('result:', result);
     }
 };

@@ -443,15 +443,25 @@ export const App: FC = (): React.ReactElement => {
                                                     'Setting applying mods to true'
                                                 );
                                                 setApplyingMods(true);
-                                                for await (const mod of checkedMods) {
-                                                    await (
-                                                        window as ElectronWindow
-                                                    ).api.getFileChangesToApplyMod(
-                                                        'file:getFileChangesToApplyMod',
-                                                        mod,
-                                                        installDirs[0].directory // FIXME make this a part of the GUI
-                                                    );
-                                                }
+
+                                                await (
+                                                    window as ElectronWindow
+                                                ).api.applyModsToInstall(
+                                                    'file:applyModsToInstall',
+                                                    installDirs[0].directory,
+                                                    checkedMods
+                                                );
+
+                                                // for await (const mod of checkedMods) {
+                                                //     await (
+                                                //         window as ElectronWindow
+                                                //     ).api.getFileChangesToApplyMod(
+                                                //         'file:getFileChangesToApplyMod',
+                                                //         mod,
+                                                //         installDirs[0].directory // FIXME make this a part of the GUI
+                                                //     );
+
+                                                // }
                                                 setApplyingMods(false);
                                             }}
                                         >

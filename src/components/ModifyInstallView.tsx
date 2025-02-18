@@ -23,25 +23,6 @@ export const ModifyInstallView: FC<Props> = ({
     onDequeueMod,
     onOpenModsDir,
 }): React.ReactElement => {
-    const applyMods = async (installDirToApplyTo: string): Promise<void> => {
-        (window as ElectronWindow).api.makeBackup(
-            'file:makeBackup',
-            installDirToApplyTo
-        );
-        (window as ElectronWindow).api
-            .applyModsToInstall(
-                'file:applyModsToInstall',
-                installDirToApplyTo,
-                queuedMods
-            )
-            .then(() => {
-                // Stop loading
-            })
-            .catch(() => {
-                // display the error
-            });
-    };
-
     return (
         <div>
             <InstallationPathText dir={dirBeingModified} />

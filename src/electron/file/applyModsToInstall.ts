@@ -34,7 +34,7 @@ export const applyModsToInstall = async (
     let changesArr: ModFileChanges[] = [];
 
     // apply mods in order
-    for (const mod of queuedMods) {
+    for await (const mod of queuedMods) {
         // Move the mod contents overtop the install and overwrite all files which occur in both
 
         let statsOfFile: fs.Stats | undefined;
@@ -64,9 +64,11 @@ export const applyModsToInstall = async (
             //     recursive: true,
             // });
 
+            const changes = await getFileChangesToApplyMod(mod, installDir); // TODO promisify this
+
             changesArr.push({
                 mod,
-                fileChanges: await getFileChangesToApplyMod(mod, installDir),
+                fileChanges: changes,
             });
         } catch (err) {
             console.error(
@@ -80,4 +82,15 @@ export const applyModsToInstall = async (
     );
 
     applyFileChanges({ modFileChanges: changesArr });
+
+    // console.log(
+    //     changesArr
+    //         .map(
+    //             (change) =>
+    //                 `Mod: ${change.mod}\nFile Changes:\n${change.fileChanges.join(
+    //                     '\n'
+    //                 )}`
+    //         )
+    //         .join('\n\n')
+    // );
 };

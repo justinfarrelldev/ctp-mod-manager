@@ -282,8 +282,7 @@ describe('removeLinesFromFile', () => {
         expect(lineMap).toEqual(
             new Map<number, number>([
                 [0, 0],
-                [1, 1],
-                [2, 3],
+                [3, 1],
             ])
         );
     });
@@ -308,8 +307,8 @@ describe('removeLinesFromFile', () => {
 
         expect(lineMap).toEqual(
             new Map<number, number>([
-                [0, 2],
-                [1, 3],
+                [2, 0],
+                [3, 1],
             ])
         );
     });
@@ -336,7 +335,7 @@ describe('removeLinesFromFile', () => {
             new Map<number, number>([
                 [0, 0],
                 [1, 1],
-                [2, 3],
+                [3, 2],
             ])
         );
     });
@@ -344,16 +343,16 @@ describe('removeLinesFromFile', () => {
     it('should correctly apply multiple remove changes and update the lineMap', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup1: LineChangeGroupRemove = {
-            startLineNumber: 2,
-            endLineNumber: 2,
+            startLineNumber: 1,
+            endLineNumber: 1,
             changeType: 'remove',
-            oldContent: 'line 2',
+            oldContent: 'line 1',
         };
         const lineChangeGroup2: LineChangeGroupRemove = {
-            startLineNumber: 4,
-            endLineNumber: 5,
+            startLineNumber: 2,
+            endLineNumber: 3,
             changeType: 'remove',
-            oldContent: 'line 4\nline 5',
+            oldContent: 'line 3\nline 4',
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4', 'line 5'];
         const lineMap = new Map<number, number>([
@@ -377,11 +376,11 @@ describe('removeLinesFromFile', () => {
             lineMap,
         });
 
-        expect(lines).toEqual(['line 1', 'line 3']);
+        expect(lines).toEqual(['line 2', 'line 5']);
         expect(lineMap).toEqual(
             new Map<number, number>([
-                [0, 0],
-                [1, 2],
+                [1, 0],
+                [4, 1],
             ])
         );
         expect(fs.writeFileSync).toHaveBeenCalledWith(

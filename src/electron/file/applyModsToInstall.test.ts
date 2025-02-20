@@ -87,7 +87,7 @@ describe('applyModsToInstall', () => {
         );
     });
 
-    it('should copy the mod directory to the install directory if valid and call getFileChangesToApplyMod', async () => {
+    it('should copy the mod directory and call getFileChangesToApplyMod if valid', async () => {
         // ensure the install directory is valid
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
 

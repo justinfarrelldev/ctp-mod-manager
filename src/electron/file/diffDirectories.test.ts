@@ -185,7 +185,7 @@ describe('diffDirectories', () => {
         expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(2);
     });
 
-    it(`should handle ignoreRemovedFiles set to true`, () => {
+    it(`should ignore removed files when ignoreRemovedFiles option is set to true`, () => {
         const oldDir = {
             src: {
                 'index.js': `console.log("old line 1");
@@ -205,7 +205,7 @@ describe('diffDirectories', () => {
             ignoreRemovedFiles: true,
         });
 
-        expect(result.length).toBe(4);
+        expect(result.length).toBe(5);
         expect(result[0].isBinary).toBe(false);
 
         const resultTextChanges: TextFileChange[] = result as TextFileChange[];

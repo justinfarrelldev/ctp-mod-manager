@@ -56,6 +56,34 @@ const lineChangesAreConflicting = (
 };
 
 /**
+ * Gets all conflicting line change groups.
+ *
+ * A conflict occurs if any two line change groups overlap, meaning that
+ * the start line number of one group is within the range of another group.
+ *
+ * @param lineChangeGroups - An array of line change groups to check for conflicts.
+ * @returns An array of arrays, where each inner array contains conflicting line change groups.
+ */
+const getAllConflictingLineChanges = (
+    lineChangeGroups: LineChangeGroup[]
+): LineChangeGroup[][] => {
+    const conflicts: LineChangeGroup[][] = [];
+    for (let i = 0; i < lineChangeGroups.length; i++) {
+        for (let j = i + 1; j < lineChangeGroups.length; j++) {
+            if (
+                lineChangeGroups[i].startLineNumber <=
+                    lineChangeGroups[j].endLineNumber &&
+                lineChangeGroups[j].startLineNumber <=
+                    lineChangeGroups[i].endLineNumber
+            ) {
+                conflicts.push([lineChangeGroups[i], lineChangeGroups[j]]);
+            }
+        }
+    }
+    return conflicts;
+};
+
+/**
  * Validates whether the provided file changes for all of the provided mods can be applied successfully without conflicts.
  *
  * @param {Object} params - The parameters object.
@@ -68,6 +96,13 @@ export const areFileChangesValid = ({
 }: {
     modFileChanges: ModFileChanges[];
 }): boolean => {
+    const uniqueMods = new Set(
+        modFileChanges.map((modFileChange) => modFileChange.mod)
+    );
+    if (uniqueMods.size === 1) {
+        return true;
+    }
+
     if (modFileChanges.length === 1) {
         const { fileChanges } = modFileChanges[0];
         if (fileChanges === undefined) {
@@ -79,6 +114,9 @@ export const areFileChangesValid = ({
         );
 
         if (lineChangesAreConflicting(lineChangeGroups)) {
+            const conflictingChanges =
+                getAllConflictingLineChanges(lineChangeGroups);
+            console.log('Conflicting line changes: ', conflictingChanges);
             throw new ModApplicationError(
                 'The mod could not be applied due to conflicting line changes.'
             );
@@ -103,8 +141,10 @@ export const areFileChangesValid = ({
 
 export const applyFileChanges = ({
     modFileChanges,
+    installDir,
 }: {
     modFileChanges: ModFileChanges[];
+    installDir: string;
 }): void => {
     // First, we must validate that the file changes can be applied successfully
     // Additionally, once that step is done, we must back up the changes to a backup file so that they can be reversed in the future
@@ -115,7 +155,7 @@ export const applyFileChanges = ({
         );
     }
 
-    applyModFileChanges({ modFileChanges });
+    applyModFileChanges({ modFileChanges, installDir });
 };
 
 /**
@@ -132,19 +172,24 @@ export const addLinesToFile = ({
     lineChangeGroup,
     lines,
     lineMap,
+    installDir,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupAdd;
     lines: string[];
     lineMap: Map<number, number>;
+    installDir: string;
 }): void => {
     const { startLineNumber, endLineNumber, newContent } = lineChangeGroup;
+
+    // TODO WHEN I GET BACK ON
+    // There is something that is making the first line of files not be written, I need to figure that out
     const newContentSplit = newContent.split('\n');
 
-    if (endLineNumber > lines.length) {
+    if (endLineNumber > lines.length + 1) {
         lines.push(...newContentSplit);
     } else {
-        lines.splice(startLineNumber, 0, ...newContentSplit);
+        lines.splice(startLineNumber - 1, 0, ...newContentSplit);
     }
 
     for (const [origLine, currLine] of lineMap.entries()) {
@@ -153,7 +198,7 @@ export const addLinesToFile = ({
         }
     }
 
-    fs.writeFileSync(fileName, lines.join('\n'), 'utf-8');
+    fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
 };
 
 /**
@@ -170,11 +215,13 @@ export const removeLinesFromFile = ({
     lineChangeGroup,
     lines,
     lineMap,
+    installDir,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupRemove;
     lines: string[];
     lineMap: Map<number, number>;
+    installDir: string;
 }): void => {
     // Just need to remove all the lines specified in the line change groups.
     // If there are lines that are removed from the end in the line change groups but that does
@@ -196,8 +243,12 @@ export const removeLinesFromFile = ({
 
     // If the start or the end line number do not exist in the lineMap, throw
     if (!lineMap.get(lineChangeGroup.startLineNumber)) {
+        console.error(
+            `startLineNumber (${lineChangeGroup.startLineNumber}) does not exist in the lineMap. Line map: `,
+            lineMap
+        );
         throw new Error(
-            `startLineNumber (${lineChangeGroup.startLineNumber}) does not exist in the lineMap`
+            `startLineNumber (${lineChangeGroup.startLineNumber}) does not exist in the lineMap.`
         );
     }
 
@@ -225,7 +276,7 @@ export const removeLinesFromFile = ({
         }
     }
 
-    fs.writeFileSync(fileName, lines.join('\n'), 'utf-8');
+    fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
 };
 
 /**
@@ -242,11 +293,13 @@ export const replaceLinesInFile = ({
     lineChangeGroup,
     lines,
     lineMap,
+    installDir,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupReplace;
     lines: string[];
     lineMap: Map<number, number>;
+    installDir: string;
 }): void => {
     const { startLineNumber, endLineNumber, newContent } = lineChangeGroup;
 
@@ -258,7 +311,7 @@ export const replaceLinesInFile = ({
         );
     }
 
-    fs.writeFileSync(fileName, lines.join('\n'), 'utf-8');
+    fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
 };
 
 /**
@@ -286,73 +339,116 @@ export const replaceLinesInFile = ({
  */
 export const applyModFileChanges = ({
     modFileChanges,
+    installDir,
 }: {
     modFileChanges: ModFileChanges[];
+    installDir: string;
 }): void => {
     for (const { fileChanges, mod } of modFileChanges) {
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;
-            const fileData: string = fs.readFileSync(
-                fileChange.fileName,
-                'utf-8'
-            );
-            const lines: string[] = fileData.split('\n');
-            // Key is original line number, value is current line number (adjusted for additions, removals)
-            const lineMap = new Map<number, number>(
-                lines.map((_, index) => [index, index])
-            );
 
-            for (const lineChangeGroup of textFileChange.lineChangeGroups) {
-                switch (lineChangeGroup.changeType) {
-                    case 'add':
-                        try {
-                            addLinesToFile({
-                                fileName: fileChange.fileName,
-                                lineChangeGroup:
-                                    lineChangeGroup as LineChangeGroupAdd,
-                                lines,
-                                lineMap,
-                            });
-                        } catch (error) {
-                            throw new ModApplicationError(
-                                `Failed to add lines to file ${fileChange.fileName}: ${error.message}`
-                            );
-                        }
-
-                        break;
-                    case 'remove':
-                        try {
-                            removeLinesFromFile({
-                                fileName: fileChange.fileName,
-                                lineChangeGroup,
-                                lines,
-                                lineMap,
-                            });
-                        } catch (error) {
-                            throw new ModApplicationError(
-                                `Failed to remove lines from file ${fileChange.fileName}: ${error.message}`
-                            );
-                        }
-                        break;
-                    case 'replace':
-                        try {
-                            replaceLinesInFile({
-                                fileName: fileChange.fileName,
-                                lineChangeGroup:
-                                    lineChangeGroup as LineChangeGroupReplace,
-                                lines,
-                                lineMap,
-                            });
-                        } catch (error) {
-                            throw new ModApplicationError(
-                                `Failed to replace lines in file ${fileChange.fileName}: ${error.message}`
-                            );
-                        }
-                        break;
+            if (!fs.existsSync(installDir + '\\' + fileChange.fileName)) {
+                if (
+                    textFileChange.lineChangeGroups.length !== 1 ||
+                    textFileChange.lineChangeGroups[0].changeType !== 'add'
+                ) {
+                    throw new ModApplicationError(
+                        `File ${fileChange.fileName} does not exist and the change is not a single 'add' operation.`
+                    );
                 }
-            }
 
-            fs.writeFileSync(fileChange.fileName, lines.join('\n'), 'utf-8');
+                const lines: string[] = [];
+                // Key is original line number, value is current line number (adjusted for additions, removals)
+                const lineMap = new Map<number, number>(
+                    lines.map((_, index) => [index, index])
+                );
+                for (const lineChangeGroup of textFileChange.lineChangeGroups) {
+                    try {
+                        addLinesToFile({
+                            fileName: fileChange.fileName,
+                            lineChangeGroup:
+                                lineChangeGroup as LineChangeGroupAdd,
+                            lines,
+                            lineMap,
+                            installDir,
+                        });
+                    } catch (error) {
+                        throw new ModApplicationError(
+                            `Failed to add lines to file ${fileChange.fileName}: ${error.message}`
+                        );
+                    }
+                }
+            } else {
+                const fileData: string = fs.readFileSync(
+                    installDir + '\\' + fileChange.fileName,
+                    'utf-8'
+                );
+                const lines: string[] = fileData.split('\n');
+                // Key is original line number, value is current line number (adjusted for additions, removals)
+                const lineMap = new Map<number, number>(
+                    lines.map((_, index) => [index + 1, index + 1])
+                );
+
+                for (const lineChangeGroup of textFileChange.lineChangeGroups) {
+                    switch (lineChangeGroup.changeType) {
+                        case 'add':
+                            try {
+                                addLinesToFile({
+                                    fileName: fileChange.fileName,
+                                    lineChangeGroup:
+                                        lineChangeGroup as LineChangeGroupAdd,
+                                    lines,
+                                    lineMap,
+                                    installDir,
+                                });
+                            } catch (error) {
+                                throw new ModApplicationError(
+                                    `Failed to add lines to file ${fileChange.fileName}: ${error.message}`
+                                );
+                            }
+
+                            break;
+                        case 'remove':
+                            try {
+                                removeLinesFromFile({
+                                    fileName: fileChange.fileName,
+                                    lineChangeGroup,
+                                    lines,
+                                    lineMap,
+                                    installDir,
+                                });
+                            } catch (error) {
+                                throw new ModApplicationError(
+                                    `Failed to remove lines from file ${fileChange.fileName}: ${error.message}`
+                                );
+                            }
+                            break;
+                        case 'replace':
+                            try {
+                                replaceLinesInFile({
+                                    fileName: fileChange.fileName,
+                                    lineChangeGroup:
+                                        lineChangeGroup as LineChangeGroupReplace,
+                                    lines,
+                                    lineMap,
+                                    installDir,
+                                });
+                            } catch (error) {
+                                throw new ModApplicationError(
+                                    `Failed to replace lines in file ${fileChange.fileName}: ${error.message}`
+                                );
+                            }
+                            break;
+                    }
+                }
+
+                // fs.writeFileSync(
+                //     installDir + '\\' + fileChange.fileName,
+                //     lines.join('\n'),
+                //     'utf-8'
+                // );
+            }
         }
     }
 };

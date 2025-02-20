@@ -64,7 +64,7 @@ export const applyModsToInstall = async (
             //     recursive: true,
             // });
 
-            const changes = await getFileChangesToApplyMod(mod, installDir); // TODO promisify this
+            const changes = await getFileChangesToApplyMod(mod, installDir); // TODO make this a Promise.allSettled call
 
             changesArr.push({
                 mod,
@@ -81,7 +81,7 @@ export const applyModsToInstall = async (
         `${changesArr.length} changes found for all ${queuedMods.length} mods. Applying changes...`
     );
 
-    applyFileChanges({ modFileChanges: changesArr });
+    applyFileChanges({ modFileChanges: changesArr, installDir });
 
     // console.log(
     //     changesArr

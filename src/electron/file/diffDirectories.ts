@@ -76,6 +76,17 @@ export const diffDirectories = ({
         const existsInOldDir = oldDir[fileName] !== undefined;
         const existsInNewDir = newDir[fileName] !== undefined;
 
+        if (fileName.includes('B1')) {
+            console.log(`fileName: ${fileName}`);
+            // console.log(`newFileContents: ${newFileContents}`);
+            // console.log(`oldFileContents: ${oldFileContents}`);
+            console.log(`fullPath: ${fullPath}`);
+            console.log(`oldIsFile: ${oldIsFile}`);
+            console.log(`newIsFile: ${newIsFile}`);
+            console.log(`existsInOldDir: ${existsInOldDir}`);
+            console.log(`existsInNewDir: ${existsInNewDir}`);
+        }
+
         if (!oldIsFile && !newIsFile) {
             // This is a directory, we want to recursively call this on it and append the results
             const subChanges = diffDirectories({
@@ -84,6 +95,7 @@ export const diffDirectories = ({
                 parentPath: fullPath,
             });
             changes.push(...subChanges);
+            continue;
         }
 
         if (!existsInOldDir && !existsInNewDir) {
@@ -118,18 +130,19 @@ export const diffDirectories = ({
         }
 
         if (existsInOldDir && !existsInNewDir && oldIsFile) {
-            // This is a file that is being removed
-            let changeGroup: LineChangeGroup = {
-                startLineNumber: 0,
-                endLineNumber: countLines(oldFileContents),
-                changeType: 'remove',
-                oldContent: oldFileContents,
-            };
-            changes.push({
-                fileName: fullPath,
-                lineChangeGroups: [changeGroup],
-                isBinary: isBinaryFile(fileName),
-            });
+            // This is a file that is being left in, there is no change required
+            // At first I made the assumption it is a file that is removed, however
+            // upon further thinking - by virtue of not having a file there, it
+            // should be assumed that the file is a main game file or
+            // untouched file in another mod.
+            // For example, if Age of Man did not have a file, but the "oldDir"
+            // (or the base game) did, then of course AOM is not removing it!
+            // So, we can safely skip these changes
+
+            console.log(
+                `Skipping file ${fullPath} as it exists in the old directory but not in the new directory`
+            );
+
             continue;
         }
 
@@ -212,7 +225,7 @@ export const diffDirectories = ({
         if (oldIsFile) {
             // This is a file that is being removed
             let changeGroup: LineChangeGroup = {
-                startLineNumber: 0,
+                startLineNumber: 1,
                 endLineNumber: countLines(oldFileContents),
                 changeType: 'remove',
                 oldContent: oldFileContents,

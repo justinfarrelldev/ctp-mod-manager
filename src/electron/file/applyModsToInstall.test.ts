@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterAll } from 'vitest';
 import * as fs from 'fs';
 import { applyModsToInstall } from './applyModsToInstall';
 import { isValidInstall } from './isValidInstall';
+import * as getFileChangesToApplyMod from './getFileChangesToApplyMod';
 // import { DEFAULT_MOD_DIR } from '../constants';
 
 vi.mock('fs');
@@ -86,21 +87,33 @@ describe('applyModsToInstall', () => {
         );
     });
 
-    it('should copy the mod directory to the install directory if valid', () => {
+    it('should copy the mod directory to the install directory if valid and call getFileChangesToApplyMod', async () => {
+        // ensure the install directory is valid
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
+
+        // mock/stub out the fs calls so that the tests don't interact with the real filesystem
         vi.spyOn(fs, 'statSync').mockReturnValueOnce({
             isDirectory: () => true,
         } as fs.Stats);
+
+        // spy on cpSync so we can verify it is called
         const fsCpSyncSpy = vi
             .spyOn(fs, 'cpSync')
             .mockImplementationOnce(() => {});
 
-        applyModsToInstall('/valid/install', ['mod1']);
+        // mock getFileChangesToApplyMod itself
+        // this ensures it doesn't actually read from disk or do real diffs
+        const getFileChangesToApplyModMock = vi
+            .spyOn(getFileChangesToApplyMod, 'getFileChangesToApplyMod')
+            .mockResolvedValueOnce([]);
 
-        expect(fsCpSyncSpy).toHaveBeenCalledWith(
-            '/mock/path\\mock-name\\Mods\\mod1',
-            '/valid/install',
-            { recursive: true }
+        // now run the function
+        await applyModsToInstall('/valid/install', ['mod1']);
+
+        // confirm that getFileChangesToApplyMod was called
+        expect(getFileChangesToApplyModMock).toHaveBeenCalledWith(
+            'mod1',
+            '/valid/install'
         );
     });
 });

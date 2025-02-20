@@ -1,3 +1,4 @@
 {
-    "cSpell.words": ["klaw"]
+    "cSpell.words": ["klaw"],
+    "terminal.integrated.defaultProfile.windows": "Git Bash"
 }

@@ -18,8 +18,15 @@ describe('addLinesToFile', () => {
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>();
+        const installDir = 'C:\\fakeInstallDir';
 
-        addLinesToFile({ fileName, lineChangeGroup, lines, lineMap });
+        addLinesToFile({
+            fileName,
+            lineChangeGroup,
+            lines,
+            lineMap,
+            installDir,
+        });
 
         expect(lines).toEqual([
             'line 1',
@@ -30,7 +37,7 @@ describe('addLinesToFile', () => {
             'line 4',
         ]);
         expect(fs.writeFileSync).toHaveBeenCalledWith(
-            fileName,
+            `${installDir}\\${fileName}`,
             lines.join('\n'),
             'utf-8'
         );
@@ -48,8 +55,15 @@ describe('addLinesToFile', () => {
         };
         const lines = ['line 1', 'line 2', 'line 3'];
         const lineMap = new Map<number, number>();
+        const installDir = 'C:\\fakeInstallDir';
 
-        addLinesToFile({ fileName, lineChangeGroup, lines, lineMap });
+        addLinesToFile({
+            fileName,
+            lineChangeGroup,
+            lines,
+            lineMap,
+            installDir,
+        });
 
         expect(lines).toEqual([
             'line 1',
@@ -60,7 +74,7 @@ describe('addLinesToFile', () => {
             'new line 3',
         ]);
         expect(fs.writeFileSync).toHaveBeenCalledWith(
-            fileName,
+            `${installDir}\\${fileName}`,
             lines.join('\n'),
             'utf-8'
         );
@@ -81,8 +95,15 @@ describe('addLinesToFile', () => {
             [2, 2],
             [3, 3],
         ]);
+        const installDir = 'C:\\fakeInstallDir';
 
-        addLinesToFile({ fileName, lineChangeGroup, lines, lineMap });
+        addLinesToFile({
+            fileName,
+            lineChangeGroup,
+            lines,
+            lineMap,
+            installDir,
+        });
 
         expect(lineMap).toEqual(
             new Map<number, number>([
@@ -91,6 +112,11 @@ describe('addLinesToFile', () => {
                 [2, 4],
                 [3, 5],
             ])
+        );
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+            `${installDir}\\${fileName}`,
+            lines.join('\n'),
+            'utf-8'
         );
     });
 
@@ -109,8 +135,15 @@ describe('addLinesToFile', () => {
             [2, 2],
             [3, 3],
         ]);
+        const installDir = 'C:\\fakeInstallDir';
 
-        addLinesToFile({ fileName, lineChangeGroup, lines, lineMap });
+        addLinesToFile({
+            fileName,
+            lineChangeGroup,
+            lines,
+            lineMap,
+            installDir,
+        });
 
         expect(lineMap).toEqual(
             new Map<number, number>([
@@ -119,6 +152,11 @@ describe('addLinesToFile', () => {
                 [2, 4],
                 [3, 5],
             ])
+        );
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+            `${installDir}\\${fileName}`,
+            lines.join('\n'),
+            'utf-8'
         );
     });
 
@@ -137,8 +175,15 @@ describe('addLinesToFile', () => {
             [2, 2],
             [3, 3],
         ]);
+        const installDir = 'C:\\fakeInstallDir';
 
-        addLinesToFile({ fileName, lineChangeGroup, lines, lineMap });
+        addLinesToFile({
+            fileName,
+            lineChangeGroup,
+            lines,
+            lineMap,
+            installDir,
+        });
 
         expect(lineMap).toEqual(
             new Map<number, number>([
@@ -148,8 +193,12 @@ describe('addLinesToFile', () => {
                 [3, 5],
             ])
         );
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+            `${installDir}\\${fileName}`,
+            lines.join('\n'),
+            'utf-8'
+        );
     });
-
     it('should correctly apply multiple add changes and update the lineMap', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup1: LineChangeGroupAdd = {
@@ -171,18 +220,21 @@ describe('addLinesToFile', () => {
             [2, 2],
             [3, 3],
         ]);
+        const installDir = 'C:\\fakeInstallDir';
 
         addLinesToFile({
             fileName,
             lineChangeGroup: lineChangeGroup1,
             lines,
             lineMap,
+            installDir,
         });
         addLinesToFile({
             fileName,
             lineChangeGroup: lineChangeGroup2,
             lines,
             lineMap,
+            installDir,
         });
 
         expect(lines).toEqual([
@@ -203,7 +255,7 @@ describe('addLinesToFile', () => {
             ])
         );
         expect(fs.writeFileSync).toHaveBeenCalledWith(
-            fileName,
+            `${installDir}\\${fileName}`,
             lines.join('\n'),
             'utf-8'
         );

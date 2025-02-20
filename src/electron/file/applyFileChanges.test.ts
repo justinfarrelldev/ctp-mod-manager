@@ -356,12 +356,13 @@ describe('applyFileChanges', () => {
             },
         ];
 
-        expect(() => applyFileChanges({ modFileChanges })).toThrow(
+        const installDir = 'C:\\fakeInstallDir';
+
+        expect(() => applyFileChanges({ modFileChanges, installDir })).toThrow(
             ModsIncompatibleError
         );
     });
 
-    // No idea why this can't be mocked out
     it.skip('should not throw when mod file changes are valid', () => {
         const changeGroup1: LineChangeGroup[] = [
             {
@@ -408,6 +409,10 @@ describe('applyFileChanges', () => {
             },
         ];
 
-        expect(() => applyFileChanges({ modFileChanges })).not.toThrow();
+        const installDir = 'C:\\fakeInstallDir';
+
+        expect(() =>
+            applyFileChanges({ modFileChanges, installDir })
+        ).not.toThrow();
     });
 });

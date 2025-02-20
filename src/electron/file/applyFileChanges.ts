@@ -166,6 +166,11 @@ export const applyFileChanges = ({
  * @param {LineChangeGroupAdd} params.lineChangeGroup - The line change group containing the lines to add.
  * @param {string[]} params.lines - The current content of the file as an array of lines.
  * @param {Map<number, number>} params.lineMap - A map of original line numbers to current line numbers.
+ * @param {string} params.installDir - The directory where the files are installed.
+ *
+ * This function adds the lines specified in the line change group to the file.
+ * If the specified lines exceed the current length of the file, the new lines are appended.
+ * After adding the lines, the function updates the lineMap to reflect the changes.
  */
 export const addLinesToFile = ({
     fileName,
@@ -209,6 +214,13 @@ export const addLinesToFile = ({
  * @param {LineChangeGroupRemove} params.lineChangeGroup - The line change group containing the lines to remove.
  * @param {string[]} params.lines - The current content of the file as an array of lines.
  * @param {Map<number, number>} params.lineMap - A map of original line numbers to current line numbers.
+ * @param {string} params.installDir - The directory where the files are installed.
+ *
+ * @throws {Error} If the start or end line number does not exist in the lineMap.
+ *
+ * This function removes the lines specified in the line change group from the file.
+ * If the specified lines do not exist in the file, an error is thrown.
+ * After removing the lines, the function updates the lineMap to reflect the changes.
  */
 export const removeLinesFromFile = ({
     fileName,
@@ -286,19 +298,17 @@ export const removeLinesFromFile = ({
  * @param {string} params.fileName - The name of the file to modify.
  * @param {LineChangeGroupReplace} params.lineChangeGroup - The line change group containing the lines to replace.
  * @param {string[]} params.lines - The current content of the file as an array of lines.
- * @param {Map<number, number>} params.lineMap - A map of original line numbers to current line numbers.
+ * @param {string} params.installDir - The directory where the files are installed.
  */
 export const replaceLinesInFile = ({
     fileName,
     lineChangeGroup,
     lines,
-    lineMap,
     installDir,
 }: {
     fileName: string;
     lineChangeGroup: LineChangeGroupReplace;
     lines: string[];
-    lineMap: Map<number, number>;
     installDir: string;
 }): void => {
     const { startLineNumber, endLineNumber, newContent } = lineChangeGroup;
@@ -320,19 +330,24 @@ export const replaceLinesInFile = ({
  * This function iterates through each item in the `modFileChanges` array and processes
  * the line change groups within each file change. Depending on the type of change
  * (add, remove, replace), it will call the appropriate function to handle the modification.
+ * If the file does not exist and the change is not a single 'add' operation, it throws an error.
  *
  * @param {Object} params - The parameters for the function.
  * @param {ModFileChanges[]} params.modFileChanges - An array of mod file changes to be applied.
+ * @param {string} params.installDir - The directory where the files are installed.
  *
  * @typedef {Object} ModFileChanges - Represents the changes to be applied to a mod file.
  * @property {FileChange[]} fileChanges - An array of file changes.
  * @property {string} mod - The name or identifier of the mod.
  *
  * @typedef {Object} FileChange - Represents a change to a file.
- * @property {LineChangeGroup[]} lineChangeGroups - An array of line change groups.
+ * @property {string} fileName - The name of the file to be changed.
  *
  * @typedef {Object} LineChangeGroup - Represents a group of line changes.
  * @property {string} changeType - The type of change ('add', 'remove', 'replace').
+ * @property {number} startLineNumber - The starting line number for the change.
+ * @property {number} endLineNumber - The ending line number for the change.
+ * @property {string} newContent - The new content to be added or replaced.
  *
  * @typedef {Object} TextFileChange - Represents a text file change.
  * @property {LineChangeGroup[]} lineChangeGroups - An array of line change groups.
@@ -431,7 +446,6 @@ export const applyModFileChanges = ({
                                     lineChangeGroup:
                                         lineChangeGroup as LineChangeGroupReplace,
                                     lines,
-                                    lineMap,
                                     installDir,
                                 });
                             } catch (error) {

@@ -180,9 +180,59 @@ describe('diffDirectories', () => {
         const resultTextChanges: TextFileChange[] = result as TextFileChange[];
 
         expect(resultTextChanges[0].lineChangeGroups[0].startLineNumber).toBe(
-            0
+            1
         );
         expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(2);
+    });
+
+    it(`should handle ignoreRemovedFiles set to true`, () => {
+        const oldDir = {
+            src: {
+                'index.js': `console.log("old line 1");
+    console.log("old line 2");`,
+                'removedFile.js': `console.log("this file will be removed");`,
+            },
+        };
+        const newDir = {
+            src: {
+                'index.js': `console.log("new line 1");
+    console.log("new line 2");`,
+            },
+        };
+        const result = diffDirectories({
+            oldDir,
+            newDir,
+            ignoreRemovedFiles: true,
+        });
+
+        expect(result.length).toBe(4);
+        expect(result[0].isBinary).toBe(false);
+
+        const resultTextChanges: TextFileChange[] = result as TextFileChange[];
+
+        expect(resultTextChanges[0].lineChangeGroups[0].startLineNumber).toBe(
+            1
+        );
+        expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(1);
+        expect(resultTextChanges[1].lineChangeGroups[0].startLineNumber).toBe(
+            1
+        );
+        expect(resultTextChanges[1].lineChangeGroups[0].endLineNumber).toBe(1);
+        expect(resultTextChanges[1].lineChangeGroups[0].changeType).toBe('add');
+
+        expect(resultTextChanges[2].lineChangeGroups[0].startLineNumber).toBe(
+            2
+        );
+        expect(resultTextChanges[2].lineChangeGroups[0].endLineNumber).toBe(2);
+        expect(resultTextChanges[2].lineChangeGroups[0].changeType).toBe(
+            'remove'
+        );
+
+        expect(resultTextChanges[3].lineChangeGroups[0].startLineNumber).toBe(
+            2
+        );
+        expect(resultTextChanges[3].lineChangeGroups[0].endLineNumber).toBe(2);
+        expect(resultTextChanges[3].lineChangeGroups[0].changeType).toBe('add');
     });
 
     it(`should handle multiple files in different folders`, () => {

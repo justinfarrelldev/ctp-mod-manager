@@ -99,7 +99,20 @@ export const areFileChangesValid = ({
     const uniqueMods = new Set(
         modFileChanges.map((modFileChange) => modFileChange.mod)
     );
+
+    const allLineChangeGroups: LineChangeGroup[] = modFileChanges.flatMap(
+        ({ fileChanges }) =>
+            fileChanges.flatMap(
+                (fileChange) => (fileChange as TextFileChange).lineChangeGroups
+            )
+    );
+
     if (uniqueMods.size === 1) {
+        if (lineChangesAreConflicting(allLineChangeGroups)) {
+            throw new ModApplicationError(
+                'Conflicts detected within a single mod'
+            );
+        }
         return true;
     }
 
@@ -128,13 +141,6 @@ export const areFileChangesValid = ({
             `modFileChanges passed to areFileChangesValid were undefined!`
         );
     }
-
-    const allLineChangeGroups: LineChangeGroup[] = modFileChanges.flatMap(
-        ({ fileChanges }) =>
-            fileChanges.flatMap(
-                (fileChange) => (fileChange as TextFileChange).lineChangeGroups
-            )
-    );
 
     return !lineChangesAreConflicting(allLineChangeGroups);
 };

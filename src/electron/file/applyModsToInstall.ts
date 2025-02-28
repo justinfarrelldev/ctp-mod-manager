@@ -45,6 +45,7 @@ export const applyModsToInstall = async (
             console.error(
                 `An error occurred while getting the stats for the file ${`${DEFAULT_MOD_DIR}\\${mod}`}: ${err}`
             );
+            return;
         }
 
         if (statsOfFile) {

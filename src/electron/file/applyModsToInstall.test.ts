@@ -52,7 +52,7 @@ describe('applyModsToInstall', () => {
         );
     });
 
-    it('should log an error if there is an issue getting the stats for a mod directory', () => {
+    it('should log an error if there is an issue getting the stats for a mod directory', async () => {
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('stat error');
@@ -61,7 +61,7 @@ describe('applyModsToInstall', () => {
             .spyOn(console, 'error')
             .mockImplementation(() => {});
 
-        applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstall('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'An error occurred while getting the stats for the file /mock/path\\mock-name\\Mods\\mod1: Error: stat error'

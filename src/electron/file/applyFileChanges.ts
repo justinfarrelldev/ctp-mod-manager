@@ -360,6 +360,7 @@ export const applyModFileChanges = ({
     installDir: string;
 }): void => {
     for (const { fileChanges, mod } of modFileChanges) {
+        console.log('file changes: ', fileChanges);
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;
 

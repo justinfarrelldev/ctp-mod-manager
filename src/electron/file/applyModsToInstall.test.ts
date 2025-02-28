@@ -36,7 +36,7 @@ describe('applyModsToInstall', () => {
         );
     });
 
-    it('should log an error if a mod is not a directory', () => {
+    it('should log an error if a mod is not a directory', async () => {
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
         vi.spyOn(fs, 'statSync').mockReturnValueOnce({
             isDirectory: () => false,
@@ -45,7 +45,7 @@ describe('applyModsToInstall', () => {
             .spyOn(console, 'error')
             .mockImplementation(() => {});
 
-        applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstall('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'Error: /mock/path\\mock-name\\Mods\\mod1 is not a directory.'
@@ -68,7 +68,7 @@ describe('applyModsToInstall', () => {
         );
     });
 
-    it('should log an error if there is an issue copying the mod directory', () => {
+    it('should log an error if there is an issue copying the mod directory', async () => {
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
         vi.spyOn(fs, 'statSync').mockReturnValueOnce({
             isDirectory: () => true,
@@ -80,7 +80,7 @@ describe('applyModsToInstall', () => {
             .spyOn(console, 'error')
             .mockImplementation(() => {});
 
-        applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstall('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'An error occurred while copying the directory /mock/path\\mock-name\\Mods\\mod1 to /mock/path\\mock-name\\Mods: Error: copy error'

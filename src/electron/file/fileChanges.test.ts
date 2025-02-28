@@ -11,8 +11,8 @@ describe('addLinesToFile', () => {
     it('should add lines at the specified line numbers', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
-            startLineNumber: 2,
-            endLineNumber: 3,
+            startLineNumber: 3,
+            endLineNumber: 4,
             newContent: 'new line 1\nnew line 2',
             changeType: 'add',
         };

@@ -68,14 +68,14 @@ describe('applyModsToInstall', () => {
         );
     });
 
-    it('should log an error if there is an issue copying the mod directory', async () => {
+    it('should log an error if getFileChangesToApplyMod throws an error', async () => {
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
         vi.spyOn(fs, 'statSync').mockReturnValueOnce({
             isDirectory: () => true,
         } as fs.Stats);
-        vi.spyOn(fs, 'cpSync').mockImplementationOnce(() => {
-            throw new Error('copy error');
-        });
+        const getFileChangesToApplyModMock = vi
+            .spyOn(getFileChangesToApplyMod, 'getFileChangesToApplyMod')
+            .mockRejectedValueOnce(new Error('getFileChangesToApplyMod error'));
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {});
@@ -83,7 +83,11 @@ describe('applyModsToInstall', () => {
         await applyModsToInstall('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'An error occurred while copying the directory /mock/path\\mock-name\\Mods\\mod1 to /mock/path\\mock-name\\Mods: Error: copy error'
+            'An error occurred while copying the directory /mock/path\\mock-name\\Mods\\mod1 to /mock/path\\mock-name\\Mods: Error: getFileChangesToApplyMod error'
+        );
+        expect(getFileChangesToApplyModMock).toHaveBeenCalledWith(
+            'mod1',
+            '/valid/install'
         );
     });
 

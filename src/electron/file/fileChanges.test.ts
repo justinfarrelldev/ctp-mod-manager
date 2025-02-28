@@ -201,24 +201,28 @@ describe('addLinesToFile', () => {
     });
     it('should correctly apply multiple add changes and update the lineMap', () => {
         const fileName = 'testFile.txt';
+        // Using 1-based indexing: the insertion point to insert after line 2 is 3
         const lineChangeGroup1: LineChangeGroupAdd = {
-            startLineNumber: 2,
-            endLineNumber: 2,
+            startLineNumber: 3,
+            endLineNumber: 3,
             newContent: 'new line 1',
             changeType: 'add',
         };
+        // For the second change, to insert between line 3 and 4 in the new file,
+        // we set startLineNumber to 5 (after the first insertion, line 4 becomes line 4)
         const lineChangeGroup2: LineChangeGroupAdd = {
-            startLineNumber: 4,
-            endLineNumber: 5,
+            startLineNumber: 5,
+            endLineNumber: 6,
             newContent: 'new line 2\nnew line 3',
             changeType: 'add',
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
+        // Create a 1-based map: key and value both start at 1
         const lineMap = new Map<number, number>([
-            [0, 0],
             [1, 1],
             [2, 2],
             [3, 3],
+            [4, 4],
         ]);
         const installDir = 'C:\\fakeInstallDir';
 
@@ -248,10 +252,10 @@ describe('addLinesToFile', () => {
         ]);
         expect(lineMap).toEqual(
             new Map<number, number>([
-                [0, 0],
-                [1, 2],
-                [2, 5],
+                [1, 1],
+                [2, 3],
                 [3, 6],
+                [4, 7],
             ])
         );
         expect(fs.writeFileSync).toHaveBeenCalledWith(

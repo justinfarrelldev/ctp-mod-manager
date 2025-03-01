@@ -40,28 +40,36 @@ export class ModApplicationError extends Error {
 export const textFileChangesAreConflicting = (
     fileChanges: TextFileChange[]
 ): boolean => {
-    const fileChangeMap: Map<string, LineChangeGroup[]> = new Map();
+    const fileChangeMap: Map<string, { position: number; isStart: boolean }[]> =
+        new Map();
 
-    // Group line change groups by file name
-    for (const fileChange of fileChanges) {
-        const { fileName, lineChangeGroups } = fileChange;
+    // Convert each line change group into start/end events
+    for (const { fileName, lineChangeGroups } of fileChanges) {
         if (!fileChangeMap.has(fileName)) {
             fileChangeMap.set(fileName, []);
         }
-        fileChangeMap.get(fileName)!.push(...lineChangeGroups);
+        for (const group of lineChangeGroups) {
+            fileChangeMap.get(fileName)!.push({
+                position: group.startLineNumber,
+                isStart: true,
+            });
+            fileChangeMap.get(fileName)!.push({
+                position: group.endLineNumber + 1,
+                isStart: false,
+            });
+        }
     }
 
-    // Check for conflicts within each file
-    for (const lineChangeGroups of fileChangeMap.values()) {
-        // Sort line change groups by start line number
-        lineChangeGroups.sort((a, b) => a.startLineNumber - b.startLineNumber);
-
-        for (let i = 0; i < lineChangeGroups.length - 1; i++) {
-            if (
-                lineChangeGroups[i].endLineNumber >=
-                lineChangeGroups[i + 1].startLineNumber
-            ) {
-                return true;
+    // Check for overlaps using a line sweep
+    for (const events of fileChangeMap.values()) {
+        events.sort((a, b) => a.position - b.position);
+        let openIntervals = 0;
+        for (const event of events) {
+            if (event.isStart) {
+                openIntervals++;
+                if (openIntervals > 1) return true;
+            } else {
+                openIntervals--;
             }
         }
     }

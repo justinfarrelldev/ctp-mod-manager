@@ -4,6 +4,11 @@ import { diffLines, Change } from 'diff';
 import { diffDirectories } from './diffDirectories';
 import { readDirectory } from './readDirectory';
 import { FileChange } from './fileChange';
+import {
+    LineChangeGroup,
+    LineChangeGroupRemove,
+    LineChangeGroupAdd,
+} from './lineChangeGroup';
 
 /**
  * Computes the differences between two texts using the Diff Match Patch library.
@@ -20,6 +25,95 @@ export const diffTexts = (text1: string, text2: string): Change[] => {
     });
 
     return diffs;
+};
+
+/**
+ * Consolidates line change groups by merging matching remove/add pairs into replace operations.
+ *
+ * @param groups - An array of `LineChangeGroup` objects representing line changes.
+ * @returns An array of `LineChangeGroup` objects with consolidated changes.
+ *
+ * The function processes the input `groups` array and looks for pairs of 'remove' and 'add' changes
+ * that affect the same single line range. When such pairs are found, they are replaced with a single
+ * 'replace' operation. The function ensures that each change is only used once by keeping track of
+ * used indices.
+ *
+ * Example:
+ *
+ * Input:
+ * [
+ *   { changeType: 'remove', startLineNumber: 1, endLineNumber: 1, oldContent: 'foo' },
+ *   { changeType: 'add', startLineNumber: 1, endLineNumber: 1, newContent: 'bar' }
+ * ]
+ *
+ * Output:
+ * [
+ *   { changeType: 'replace', startLineNumber: 1, endLineNumber: 1, oldContent: 'foo', newContent: 'bar' }
+ * ]
+ */
+const consolidateLineChangeGroups = (
+    groups: LineChangeGroup[]
+): LineChangeGroup[] => {
+    const result: LineChangeGroup[] = [];
+    const usedIndices = new Set<number>();
+
+    for (let i = 0; i < groups.length; i++) {
+        if (usedIndices.has(i)) continue;
+
+        const current = groups[i];
+        if (
+            (current.changeType === 'remove' || current.changeType === 'add') &&
+            current.startLineNumber === current.endLineNumber
+        ) {
+            for (let j = i + 1; j < groups.length; j++) {
+                if (usedIndices.has(j)) continue;
+                const next = groups[j];
+                if (
+                    next.changeType !== current.changeType &&
+                    next.startLineNumber === current.startLineNumber &&
+                    next.endLineNumber === current.endLineNumber
+                ) {
+                    // We have a matching remove/add pair with same single line range
+                    if (
+                        current.changeType === 'remove' &&
+                        next.changeType === 'add'
+                    ) {
+                        result.push({
+                            changeType: 'replace',
+                            startLineNumber: current.startLineNumber,
+                            endLineNumber: current.endLineNumber,
+                            oldContent: (current as LineChangeGroupRemove)
+                                .oldContent,
+                            newContent: (next as LineChangeGroupAdd).newContent,
+                        });
+                    } else if (
+                        current.changeType === 'add' &&
+                        next.changeType === 'remove'
+                    ) {
+                        result.push({
+                            changeType: 'replace',
+                            startLineNumber: current.startLineNumber,
+                            endLineNumber: current.endLineNumber,
+                            oldContent: (next as LineChangeGroupRemove)
+                                .oldContent,
+                            newContent: (current as LineChangeGroupAdd)
+                                .newContent,
+                        });
+                    }
+                    usedIndices.add(j);
+                    usedIndices.add(i);
+                    break;
+                }
+            }
+            if (!usedIndices.has(i)) {
+                result.push(current);
+            }
+        } else {
+            result.push(current);
+        }
+    }
+
+    return result;
 };
 
 export const getFileChangesToApplyMod = async (

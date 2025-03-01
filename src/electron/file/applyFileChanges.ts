@@ -63,12 +63,21 @@ export const textFileChangesAreConflicting = (
         }
     }
 
-    for (const diff of fileDiffMap.values()) {
+    for (const [fileName, diff] of fileDiffMap.entries()) {
         const sortedPositions = Array.from(diff.keys()).sort((a, b) => a - b);
         let activeIntervals = 0;
         for (const pos of sortedPositions) {
             activeIntervals += diff.get(pos)!;
             if (activeIntervals > 1) {
+                const originalFileChanges = fileChanges.filter(
+                    (change) => change.fileName === fileName
+                );
+                console.log(
+                    'Conflict found in file:',
+                    fileName,
+                    'with file changes:',
+                    JSON.stringify(originalFileChanges, null, 2)
+                );
                 return true;
             }
         }

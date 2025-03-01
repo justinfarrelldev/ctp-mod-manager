@@ -37,7 +37,7 @@ export class ModApplicationError extends Error {
  * @param fileChanges - An array of text file changes to check for conflicts.
  * @returns `true` if there are conflicting line change groups, otherwise `false`.
  */
-const textFileChangesAreConflicting = (
+export const textFileChangesAreConflicting = (
     fileChanges: TextFileChange[]
 ): boolean => {
     const fileChangeMap: Map<string, LineChangeGroup[]> = new Map();

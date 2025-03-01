@@ -4,8 +4,9 @@ import {
     applyFileChanges,
     ModApplicationError,
     ModsIncompatibleError,
+    textFileChangesAreConflicting,
 } from './applyFileChanges';
-import { FileChange } from './fileChange';
+import { FileChange, TextFileChange } from './fileChange';
 import { LineChangeGroup } from './lineChangeGroup';
 
 describe('areFileChangesValid', () => {
@@ -362,7 +363,215 @@ describe('applyFileChanges', () => {
             ModsIncompatibleError
         );
     });
+    describe('textFileChangesAreConflicting', () => {
+        it('should return false for non-overlapping changes', () => {
+            const fileChanges: TextFileChange[] = [
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 2,
+                            newContent: 'new content',
+                            changeType: 'add',
+                        },
+                        {
+                            startLineNumber: 3,
+                            endLineNumber: 4,
+                            oldContent: 'old content',
+                            changeType: 'remove',
+                        },
+                    ],
+                },
+            ];
 
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(false);
+        });
+
+        it('should return true for overlapping changes within the same file', () => {
+            const fileChanges: TextFileChange[] = [
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 3,
+                            newContent: 'new content',
+                            changeType: 'add',
+                        },
+                        {
+                            startLineNumber: 2,
+                            endLineNumber: 4,
+                            oldContent: 'old content',
+                            changeType: 'remove',
+                        },
+                    ],
+                },
+            ];
+
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(true);
+        });
+
+        it('should return false for changes in different files', () => {
+            const fileChanges: TextFileChange[] = [
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 2,
+                            newContent: 'new content',
+                            changeType: 'add',
+                        },
+                    ],
+                },
+                {
+                    fileName: 'file2.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 2,
+                            oldContent: 'old content',
+                            changeType: 'remove',
+                        },
+                    ],
+                },
+            ];
+
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(false);
+        });
+
+        it('should return true for overlapping changes across multiple files', () => {
+            const fileChanges: TextFileChange[] = [
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 3,
+                            newContent: 'new content',
+                            changeType: 'add',
+                        },
+                    ],
+                },
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 2,
+                            endLineNumber: 4,
+                            oldContent: 'old content',
+                            changeType: 'remove',
+                        },
+                    ],
+                },
+            ];
+
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(true);
+        });
+
+        it('should return false for adjacent changes', () => {
+            const fileChanges: TextFileChange[] = [
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 2,
+                            newContent: 'new content',
+                            changeType: 'add',
+                        },
+                        {
+                            startLineNumber: 3,
+                            endLineNumber: 4,
+                            oldContent: 'old content',
+                            changeType: 'remove',
+                        },
+                    ],
+                },
+            ];
+
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(false);
+        });
+
+        it('should return true for changes that start and end on the same line', () => {
+            const fileChanges: TextFileChange[] = [
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 2,
+                            newContent: 'new content',
+                            changeType: 'add',
+                        },
+                        {
+                            startLineNumber: 2,
+                            endLineNumber: 3,
+                            oldContent: 'old content',
+                            changeType: 'remove',
+                        },
+                    ],
+                },
+            ];
+
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(true);
+        });
+
+        it('should return false for empty file changes', () => {
+            const fileChanges: TextFileChange[] = [];
+
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(false);
+        });
+
+        it('should return false for non-overlapping changes with large gaps', () => {
+            const fileChanges: TextFileChange[] = [
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 2,
+                            newContent: 'new content',
+                            changeType: 'add',
+                        },
+                        {
+                            startLineNumber: 100,
+                            endLineNumber: 101,
+                            oldContent: 'old content',
+                            changeType: 'remove',
+                        },
+                    ],
+                },
+            ];
+
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(false);
+        });
+
+        it('should return true for overlapping changes with large gaps', () => {
+            const fileChanges: TextFileChange[] = [
+                {
+                    fileName: 'file1.txt',
+                    lineChangeGroups: [
+                        {
+                            startLineNumber: 1,
+                            endLineNumber: 100,
+                            newContent: 'new content',
+                            changeType: 'add',
+                        },
+                        {
+                            startLineNumber: 50,
+                            endLineNumber: 150,
+                            oldContent: 'old content',
+                            changeType: 'remove',
+                        },
+                    ],
+                },
+            ];
+
+            expect(textFileChangesAreConflicting(fileChanges)).toBe(true);
+        });
+    });
     it.skip('should not throw when mod file changes are valid', () => {
         const changeGroup1: LineChangeGroup[] = [
             {

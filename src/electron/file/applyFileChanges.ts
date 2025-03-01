@@ -40,36 +40,36 @@ export class ModApplicationError extends Error {
 export const textFileChangesAreConflicting = (
     fileChanges: TextFileChange[]
 ): boolean => {
-    const fileChangeMap: Map<string, { position: number; isStart: boolean }[]> =
-        new Map();
+    // Use a difference map per file to track changes with O(n + k log k) performance.
+    // This approach is more efficient when processing millions of intervals.
+    const fileDiffMap = new Map<string, Map<number, number>>();
 
-    // Convert each line change group into start/end events
     for (const { fileName, lineChangeGroups } of fileChanges) {
-        if (!fileChangeMap.has(fileName)) {
-            fileChangeMap.set(fileName, []);
+        if (!fileDiffMap.has(fileName)) {
+            fileDiffMap.set(fileName, new Map<number, number>());
         }
+        const diff = fileDiffMap.get(fileName)!;
         for (const group of lineChangeGroups) {
-            fileChangeMap.get(fileName)!.push({
-                position: group.startLineNumber,
-                isStart: true,
-            });
-            fileChangeMap.get(fileName)!.push({
-                position: group.endLineNumber + 1,
-                isStart: false,
-            });
+            // Increment at the start line.
+            diff.set(
+                group.startLineNumber,
+                (diff.get(group.startLineNumber) || 0) + 1
+            );
+            // Decrement immediately after the end line.
+            diff.set(
+                group.endLineNumber + 1,
+                (diff.get(group.endLineNumber + 1) || 0) - 1
+            );
         }
     }
 
-    // Check for overlaps using a line sweep
-    for (const events of fileChangeMap.values()) {
-        events.sort((a, b) => a.position - b.position);
-        let openIntervals = 0;
-        for (const event of events) {
-            if (event.isStart) {
-                openIntervals++;
-                if (openIntervals > 1) return true;
-            } else {
-                openIntervals--;
+    for (const diff of fileDiffMap.values()) {
+        const sortedPositions = Array.from(diff.keys()).sort((a, b) => a - b);
+        let activeIntervals = 0;
+        for (const pos of sortedPositions) {
+            activeIntervals += diff.get(pos)!;
+            if (activeIntervals > 1) {
+                return true;
             }
         }
     }

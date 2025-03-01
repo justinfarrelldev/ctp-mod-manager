@@ -152,6 +152,17 @@ export const getFileChangesToApplyMod = async (
             newDir: modDirStructure,
         });
 
+        result.forEach((fileChange) => {
+            if (
+                'lineChangeGroups' in fileChange &&
+                fileChange.lineChangeGroups
+            ) {
+                fileChange.lineChangeGroups = consolidateLineChangeGroups(
+                    fileChange.lineChangeGroups
+                );
+            }
+        });
+
         return result;
 
         // Now we have the comparison ready, we need to apply the changes to the game directory

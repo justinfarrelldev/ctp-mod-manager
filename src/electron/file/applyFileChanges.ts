@@ -53,16 +53,15 @@ export const textFileChangesAreConflicting = (
 
     // Check for conflicts within each file
     for (const lineChangeGroups of fileChangeMap.values()) {
-        for (let i = 0; i < lineChangeGroups.length; i++) {
-            for (let j = i + 1; j < lineChangeGroups.length; j++) {
-                if (
-                    lineChangeGroups[i].startLineNumber <=
-                        lineChangeGroups[j].endLineNumber &&
-                    lineChangeGroups[j].startLineNumber <=
-                        lineChangeGroups[i].endLineNumber
-                ) {
-                    return true;
-                }
+        // Sort line change groups by start line number
+        lineChangeGroups.sort((a, b) => a.startLineNumber - b.startLineNumber);
+
+        for (let i = 0; i < lineChangeGroups.length - 1; i++) {
+            if (
+                lineChangeGroups[i].endLineNumber >=
+                lineChangeGroups[i + 1].startLineNumber
+            ) {
+                return true;
             }
         }
     }

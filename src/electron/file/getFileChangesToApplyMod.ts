@@ -51,7 +51,7 @@ export const diffTexts = (text1: string, text2: string): Change[] => {
  *   { changeType: 'replace', startLineNumber: 1, endLineNumber: 1, oldContent: 'foo', newContent: 'bar' }
  * ]
  */
-const consolidateLineChangeGroups = (
+export const consolidateLineChangeGroups = (
     groups: LineChangeGroup[]
 ): LineChangeGroup[] => {
     const result: LineChangeGroup[] = [];

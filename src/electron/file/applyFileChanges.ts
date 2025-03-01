@@ -29,29 +29,44 @@ export class ModApplicationError extends Error {
 }
 
 /**
- * Checks if there are any conflicting line change groups.
+ * Checks if there are any conflicting line change groups within the provided file changes.
  *
- * A conflict occurs if any two line change groups overlap, meaning that
+ * A conflict occurs if any two line change groups overlap within the same file, meaning that
  * the start line number of one group is within the range of another group.
  *
- * @param lineChangeGroups - An array of line change groups to check for conflicts.
+ * @param fileChanges - An array of text file changes to check for conflicts.
  * @returns `true` if there are conflicting line change groups, otherwise `false`.
  */
-const lineChangesAreConflicting = (
-    lineChangeGroups: LineChangeGroup[]
+const textFileChangesAreConflicting = (
+    fileChanges: TextFileChange[]
 ): boolean => {
-    for (let i = 0; i < lineChangeGroups.length; i++) {
-        for (let j = i + 1; j < lineChangeGroups.length; j++) {
-            if (
-                lineChangeGroups[i].startLineNumber <=
-                    lineChangeGroups[j].endLineNumber &&
-                lineChangeGroups[j].startLineNumber <=
-                    lineChangeGroups[i].endLineNumber
-            ) {
-                return true;
+    const fileChangeMap: Map<string, LineChangeGroup[]> = new Map();
+
+    // Group line change groups by file name
+    for (const fileChange of fileChanges) {
+        const { fileName, lineChangeGroups } = fileChange;
+        if (!fileChangeMap.has(fileName)) {
+            fileChangeMap.set(fileName, []);
+        }
+        fileChangeMap.get(fileName)!.push(...lineChangeGroups);
+    }
+
+    // Check for conflicts within each file
+    for (const lineChangeGroups of fileChangeMap.values()) {
+        for (let i = 0; i < lineChangeGroups.length; i++) {
+            for (let j = i + 1; j < lineChangeGroups.length; j++) {
+                if (
+                    lineChangeGroups[i].startLineNumber <=
+                        lineChangeGroups[j].endLineNumber &&
+                    lineChangeGroups[j].startLineNumber <=
+                        lineChangeGroups[i].endLineNumber
+                ) {
+                    return true;
+                }
             }
         }
     }
+
     return false;
 };
 
@@ -100,15 +115,13 @@ export const areFileChangesValid = ({
         modFileChanges.map((modFileChange) => modFileChange.mod)
     );
 
-    const allLineChangeGroups: LineChangeGroup[] = modFileChanges.flatMap(
+    const allLineChangeGroups: TextFileChange[] = modFileChanges.flatMap(
         ({ fileChanges }) =>
-            fileChanges.flatMap(
-                (fileChange) => (fileChange as TextFileChange).lineChangeGroups
-            )
+            fileChanges.flatMap((fileChange) => fileChange as TextFileChange)
     );
 
     if (uniqueMods.size === 1) {
-        if (lineChangesAreConflicting(allLineChangeGroups)) {
+        if (textFileChangesAreConflicting(allLineChangeGroups)) {
             throw new ModApplicationError(
                 'Conflicts detected within a single mod'
             );
@@ -126,7 +139,11 @@ export const areFileChangesValid = ({
             (fileChange) => (fileChange as TextFileChange).lineChangeGroups
         );
 
-        if (lineChangesAreConflicting(lineChangeGroups)) {
+        const textFileChanges: TextFileChange[] = fileChanges.flatMap(
+            (fileChange) => fileChange as TextFileChange
+        );
+
+        if (textFileChangesAreConflicting(textFileChanges)) {
             const conflictingChanges =
                 getAllConflictingLineChanges(lineChangeGroups);
             console.log('Conflicting line changes: ', conflictingChanges);
@@ -142,7 +159,7 @@ export const areFileChangesValid = ({
         );
     }
 
-    return !lineChangesAreConflicting(allLineChangeGroups);
+    return !textFileChangesAreConflicting(allLineChangeGroups);
 };
 
 export const applyFileChanges = ({

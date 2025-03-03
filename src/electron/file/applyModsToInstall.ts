@@ -1,6 +1,9 @@
 import { DEFAULT_MOD_DIR } from '../constants';
 import { applyFileChanges, ModFileChanges } from './applyFileChanges';
-import { getFileChangesToApplyMod } from './getFileChangesToApplyMod';
+import {
+    consolidateLineChangeGroups,
+    getFileChangesToApplyMod,
+} from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
 import * as fs from 'fs';
 
@@ -81,6 +84,59 @@ export const applyModsToInstall = async (
     console.log(
         `${changesArr.length} changes found for all ${queuedMods.length} mods. Applying changes...`
     );
+
+    // First consolidate line change groups within each file change object
+    changesArr = changesArr.map((modFileChange) => {
+        const consolidatedFileChanges = modFileChange.fileChanges.map(
+            (fileChange) => {
+                if ('lineChangeGroups' in fileChange) {
+                    fileChange.lineChangeGroups = consolidateLineChangeGroups(
+                        fileChange.lineChangeGroups
+                    );
+                }
+                return fileChange;
+            }
+        );
+
+        return {
+            ...modFileChange,
+            fileChanges: consolidatedFileChanges,
+        };
+    });
+
+    // Now merge file change objects that target the same file
+    changesArr = changesArr.map((modFileChange) => {
+        const fileMap = new Map();
+
+        modFileChange.fileChanges.forEach((fileChange) => {
+            if ('lineChangeGroups' in fileChange) {
+                const existingChange = fileMap.get(fileChange.fileName);
+
+                if (existingChange) {
+                    // Merge the line change groups from this file change into the existing one
+                    existingChange.lineChangeGroups = [
+                        ...existingChange.lineChangeGroups,
+                        ...fileChange.lineChangeGroups,
+                    ];
+                    // Re-consolidate after merging
+                    existingChange.lineChangeGroups =
+                        consolidateLineChangeGroups(
+                            existingChange.lineChangeGroups
+                        );
+                } else {
+                    fileMap.set(fileChange.fileName, fileChange);
+                }
+            } else {
+                // For binary files or other types
+                fileMap.set(fileChange.fileName, fileChange);
+            }
+        });
+
+        return {
+            ...modFileChange,
+            fileChanges: Array.from(fileMap.values()),
+        };
+    });
 
     applyFileChanges({ modFileChanges: changesArr, installDir });
 

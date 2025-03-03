@@ -226,6 +226,22 @@ export const consolidateLineChangeGroups = (
     return result;
 };
 
+/**
+ * Asynchronously retrieves the file changes required to apply a mod to the game directory.
+ *
+ * @param {string} mod - The name of the mod to be applied.
+ * @param {string} installDir - The directory where the game is installed.
+ * @returns {Promise<FileChange[]>} A promise that resolves to an array of file changes required to apply the mod.
+ *
+ * This function performs the following steps:
+ * 1. Retrieves the file statistics for the specified mod directory.
+ * 2. Checks if the mod directory exists and is a directory.
+ * 3. Reads the directory structure of both the mod and the game installation.
+ * 4. Compares the directory structures to determine the necessary file changes.
+ *
+ * If an error occurs while retrieving the file statistics or if the specified mod is not a directory,
+ * an error message is logged to the console and an empty array is returned.
+ */
 export const getFileChangesToApplyMod = async (
     mod: string,
     installDir: string

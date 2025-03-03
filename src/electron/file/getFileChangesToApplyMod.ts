@@ -69,7 +69,6 @@ const diffLinesAsync = async (
             // no idea why this "error" value ('_') is a) undocumented and b) always undefined,
             // but here we are
             callback: (_: undefined, result: Change[]) => {
-                console.log('Callback is resolving: ', result);
                 resolve(result);
             },
         });
@@ -81,7 +80,7 @@ const diffLinesAsync = async (
  *
  * This function compares two text strings and returns an array of changes that represent
  * the differences between the two texts. For small strings, it uses `diffLines` directly.
- * For larger strings, it splits them into chunks and compares the chunks in parallel.
+ * For larger strings, it splits them into chunks and processes them concurrently.
  *
  * @param text1 - The first text string to compare.
  * @param text2 - The second text string to compare.
@@ -91,50 +90,54 @@ export const diffTexts = async (
     text1: string,
     text2: string
 ): Promise<Change[]> => {
-    // For strings, using streams isn't more efficient than direct comparison
-    // since we already have the full strings in memory
-    // However, we can break large strings into chunks for better parallelization
-
-    let allChanges: Change[] = [];
-
-    if (text1.length < CHUNK_SIZE && text2.length < CHUNK_SIZE) {
-        // For small strings, just use diffLines directly
-        return await diffLinesAsync(text1, text2);
+    // For small strings or strings of drastically different sizes, use diffLines directly
+    // as the chunking is not very performant when dealing with differently-sized texts
+    if (text1.length < CHUNK_SIZE || text2.length < CHUNK_SIZE) {
+        return diffLines(text1, text2, {
+            newlineIsToken: true,
+        });
     }
 
     const chunks1 = splitIntoChunks(text1);
     const chunks2 = splitIntoChunks(text2);
 
-    // Compare equivalent chunks
+    // Compare equivalent chunks in parallel
     const minChunks = Math.min(chunks1.length, chunks2.length);
 
-    for (let i = 0; i < minChunks; i++) {
-        const chunkChanges = diffLines(chunks1[i], chunks2[i], {
-            newlineIsToken: true,
-        });
-        allChanges = allChanges.concat(chunkChanges);
-    }
+    const chunkComparisonPromises = Array.from({ length: minChunks }, (_, i) =>
+        diffLinesAsync(chunks1[i], chunks2[i])
+    );
 
     // Handle remaining chunks in the longer text
     if (chunks1.length > chunks2.length) {
         for (let i = minChunks; i < chunks1.length; i++) {
-            allChanges.push({
-                count: chunks1[i].split('\n').length,
-                value: chunks1[i],
-                removed: true,
-            });
+            chunkComparisonPromises.push(
+                Promise.resolve([
+                    {
+                        count: chunks1[i].split('\n').length,
+                        value: chunks1[i],
+                        removed: true,
+                    },
+                ])
+            );
         }
     } else if (chunks2.length > chunks1.length) {
         for (let i = minChunks; i < chunks2.length; i++) {
-            allChanges.push({
-                count: chunks2[i].split('\n').length,
-                value: chunks2[i],
-                added: true,
-            });
+            chunkComparisonPromises.push(
+                Promise.resolve([
+                    {
+                        count: chunks2[i].split('\n').length,
+                        value: chunks2[i],
+                        added: true,
+                    },
+                ])
+            );
         }
     }
 
-    return allChanges;
+    // Wait for all chunk comparisons to complete and combine results
+    const chunkResults = await Promise.all(chunkComparisonPromises);
+    return chunkResults.flat();
 };
 
 /**

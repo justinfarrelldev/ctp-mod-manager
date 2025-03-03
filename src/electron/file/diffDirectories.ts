@@ -30,17 +30,23 @@ import { DirectoryContents } from './readDirectory';
 import * as crypto from 'crypto';
 
 export const countLines = (str: string): number => {
-    let count = 1; // Start with 1, as the last line may not end with '\n'
+    // We rely on '\n' having char code 10
+    let newlineCount = 0;
     for (let i = 0; i < str.length; i++) {
-        if (str[i] === '\n') {
-            count++;
+        if (str.charCodeAt(i) === 10) {
+            newlineCount++;
         }
     }
-    // If the string ends with a newline, don't count an extra line
-    if (str.length > 0 && str[str.length - 1] === '\n') {
-        count--;
+
+    // Start from 1 line, then add the newlines
+    let total = newlineCount + 1;
+
+    // If the last character is a newline, don't count an extra line
+    if (str.length > 0 && str.charCodeAt(str.length - 1) === 10) {
+        total--;
     }
-    return count;
+
+    return total;
 };
 
 const hashFileContents = (contents: string): string => {

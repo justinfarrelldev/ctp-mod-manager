@@ -36,6 +36,10 @@ export const countLines = (str: string): number => {
             count++;
         }
     }
+    // If the string ends with a newline, don't count an extra line
+    if (str.length > 0 && str[str.length - 1] === '\n') {
+        count--;
+    }
     return count;
 };
 

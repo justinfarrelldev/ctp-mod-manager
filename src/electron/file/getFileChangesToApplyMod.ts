@@ -10,6 +10,37 @@ import {
     LineChangeGroupAdd,
 } from './lineChangeGroup';
 
+const CHUNK_SIZE = 50000; // 50KB chunks for text diffing
+
+// Split strings into chunks at newline boundaries
+const splitIntoChunks = (text: string): string[] => {
+    const chunks: string[] = [];
+    let currentChunk = '';
+    const lines = text.split('\n');
+
+    for (const line of lines) {
+        if (
+            currentChunk.length + line.length + 1 > CHUNK_SIZE &&
+            currentChunk.length > 0
+        ) {
+            chunks.push(currentChunk);
+            currentChunk = line + '\n';
+        } else {
+            currentChunk += line + '\n';
+        }
+    }
+
+    if (currentChunk.length > 0) {
+        // Remove trailing newline if original text didn't end with newline
+        if (!text.endsWith('\n') && currentChunk.endsWith('\n')) {
+            currentChunk = currentChunk.slice(0, -1);
+        }
+        chunks.push(currentChunk);
+    }
+
+    return chunks;
+};
+
 /**
  * Computes the differences between two texts using the Diff Match Patch library.
  *
@@ -20,11 +51,50 @@ import {
  *          and the associated text.
  */
 export const diffTexts = (text1: string, text2: string): Change[] => {
-    const diffs = diffLines(text1, text2, {
-        newlineIsToken: true,
-    });
+    // For strings, using streams isn't more efficient than direct comparison
+    // since we already have the full strings in memory
+    // However, we can break large strings into chunks for better parallelization
 
-    return diffs;
+    let allChanges: Change[] = [];
+
+    if (text1.length < CHUNK_SIZE && text2.length < CHUNK_SIZE) {
+        // For small strings, just use diffLines directly
+        return diffLines(text1, text2, { newlineIsToken: true });
+    }
+
+    const chunks1 = splitIntoChunks(text1);
+    const chunks2 = splitIntoChunks(text2);
+
+    // Compare equivalent chunks
+    const minChunks = Math.min(chunks1.length, chunks2.length);
+
+    for (let i = 0; i < minChunks; i++) {
+        const chunkChanges = diffLines(chunks1[i], chunks2[i], {
+            newlineIsToken: true,
+        });
+        allChanges = allChanges.concat(chunkChanges);
+    }
+
+    // Handle remaining chunks in the longer text
+    if (chunks1.length > chunks2.length) {
+        for (let i = minChunks; i < chunks1.length; i++) {
+            allChanges.push({
+                count: chunks1[i].split('\n').length,
+                value: chunks1[i],
+                removed: true,
+            });
+        }
+    } else if (chunks2.length > chunks1.length) {
+        for (let i = minChunks; i < chunks2.length; i++) {
+            allChanges.push({
+                count: chunks2[i].split('\n').length,
+                value: chunks2[i],
+                added: true,
+            });
+        }
+    }
+
+    return allChanges;
 };
 
 /**

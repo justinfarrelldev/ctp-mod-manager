@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { consolidateLineChangeGroups } from './getFileChangesToApplyMod';
 import { LineChangeGroup } from './lineChangeGroup';
+import { diffTexts } from './getFileChangesToApplyMod';
 
 vi.mock('electron', () => ({
     app: {
@@ -296,5 +297,42 @@ describe('consolidateLineChangeGroups', () => {
 
         // Ensure that we get 3 consolidated line change groups and all of them are "replace" types.
         expect(consolidated).toEqual(expected);
+    });
+});
+describe('diffTexts', () => {
+    it('should compute diff for small texts with a single line change', async () => {
+        const text1 = 'Line1\nLine2\nLine3\n';
+        const text2 = 'Line1\nChangedLine2\nLine3\n';
+        const changes = await diffTexts(text1, text2);
+        // Verify that there is one removed and one added change
+        const removed = changes.filter((c) => c.removed);
+        const added = changes.filter((c) => c.added);
+        expect(removed.length).toBeGreaterThanOrEqual(1);
+        expect(added.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should compute diff for large texts (between 20 and 40 KB each)', async () => {
+        // Generate a large text with ~3000 lines (approx 30KB)
+        const numLines = 3000;
+        const baseLines = Array.from(
+            { length: numLines },
+            (_, i) => `Line ${i}`
+        );
+        const baseText = baseLines.join('\n') + '\n';
+
+        // Create a modified version with one line changed in the middle
+        const modifiedLines = [...baseLines];
+        const changeIndex = Math.floor(numLines / 2);
+        modifiedLines[changeIndex] = `Modified ${modifiedLines[changeIndex]}`;
+        const modifiedText = modifiedLines.join('\n') + '\n';
+
+        const changes = await diffTexts(baseText, modifiedText);
+
+        // Instead of comparing the full diff output (which can be huge),
+        // we simply check that there is at least one removed and one added chunk.
+        const removed = changes.filter((c) => c.removed);
+        const added = changes.filter((c) => c.added);
+        expect(removed.length).toBeGreaterThanOrEqual(1);
+        expect(added.length).toBeGreaterThanOrEqual(1);
     });
 });

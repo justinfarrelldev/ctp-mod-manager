@@ -241,6 +241,9 @@ export const addLinesToFile = ({
         }
     }
 
+    console.log(
+        `(add) Writing ${lines.length} lines to ${installDir + '\\' + fileName}`
+    );
     fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
 };
 
@@ -326,6 +329,9 @@ export const removeLinesFromFile = ({
         }
     }
 
+    console.log(
+        `(remove) Writing ${lines.length} lines to ${installDir + '\\' + fileName}`
+    );
     fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
 };
 
@@ -359,6 +365,9 @@ export const replaceLinesInFile = ({
         );
     }
 
+    console.log(
+        `(replace) Writing ${lines.length} lines to ${installDir + '\\' + fileName}`
+    );
     fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
 };
 

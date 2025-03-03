@@ -555,5 +555,39 @@ describe('diffTexts', () => {
             );
             expect(changes).toEqual([]);
         });
+        it('should return an empty array if the mod directory does not exist', async () => {
+            vi.spyOn(fs, 'statSync').mockImplementation(() => {
+                throw new Error('Directory does not exist');
+            });
+            const changes = await getFileChangesToApplyMod(
+                'nonexistent-mod',
+                '/install/dir'
+            );
+            expect(changes).toEqual([]);
+        });
+
+        it('should return an empty array if the mod path is not a directory', async () => {
+            vi.spyOn(fs, 'statSync').mockReturnValue({
+                isDirectory: () => false,
+            } as fs.Stats);
+            const changes = await getFileChangesToApplyMod(
+                'not-a-directory',
+                '/install/dir'
+            );
+            expect(changes).toEqual([]);
+        });
+
+        it('should handle empty mod directory', async () => {
+            vi.spyOn(fs, 'statSync').mockReturnValue({
+                isDirectory: () => true,
+            } as fs.Stats);
+            vi.spyOn(fs, 'readdirSync').mockReturnValue([]);
+
+            const changes = await getFileChangesToApplyMod(
+                'empty-mod',
+                '/install/dir'
+            );
+            expect(changes).toEqual([]);
+        });
     });
 });

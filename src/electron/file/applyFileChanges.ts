@@ -69,15 +69,15 @@ export const textFileChangesAreConflicting = (
         for (const pos of sortedPositions) {
             activeIntervals += diff.get(pos)!;
             if (activeIntervals > 1) {
-                const originalFileChanges = fileChanges.filter(
-                    (change) => change.fileName === fileName
-                );
-                console.log(
-                    'Conflict found in file:',
-                    fileName,
-                    'with file changes:',
-                    JSON.stringify(originalFileChanges, null, 2)
-                );
+                // const originalFileChanges = fileChanges.filter(
+                //     (change) => change.fileName === fileName
+                // );
+                // console.log(
+                //     'Conflict found in file:',
+                //     fileName,
+                //     'with file changes:',
+                //     JSON.stringify(originalFileChanges, null, 2)
+                // );
                 return true;
             }
         }
@@ -162,7 +162,6 @@ export const areFileChangesValid = ({
         if (textFileChangesAreConflicting(textFileChanges)) {
             const conflictingChanges =
                 getAllConflictingLineChanges(lineChangeGroups);
-            console.log('Conflicting line changes: ', conflictingChanges);
             throw new ModApplicationError(
                 'The mod could not be applied due to conflicting line changes.'
             );
@@ -399,7 +398,6 @@ export const applyModFileChanges = ({
     installDir: string;
 }): void => {
     for (const { fileChanges, mod } of modFileChanges) {
-        console.log('file changes: ', fileChanges);
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;
 

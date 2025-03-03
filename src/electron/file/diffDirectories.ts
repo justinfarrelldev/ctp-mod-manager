@@ -143,10 +143,6 @@ export const diffDirectories = async ({
             // (or the base game) did, then of course AOM is not removing it!
             // So, we can safely skip these changes
 
-            console.log(
-                `Skipping file ${fullPath} as it exists in the old directory but not in the new directory`
-            );
-
             return;
         }
 
@@ -187,8 +183,6 @@ export const diffDirectories = async ({
             }
 
             const diffs = await diffTexts(oldFileContents, newFileContents);
-
-            console.log('diffs are: ', diffs);
 
             let lineCount = 1;
 

@@ -183,7 +183,6 @@ export const App: FC = (): React.ReactElement => {
     };
 
     const openModsDir = (): void => {
-        console.log('opening mods dir');
         (window as ElectronWindow).api.openModsDir('file:openModsDir');
     };
 
@@ -195,7 +194,6 @@ export const App: FC = (): React.ReactElement => {
             zipFilePath
         );
 
-        console.log('contents: ', contents);
         return contents;
     };
 
@@ -211,8 +209,6 @@ export const App: FC = (): React.ReactElement => {
         themeChange(false);
         // 👆 false parameter is required for react project
     }, []);
-
-    console.log('Checked mods: ', checkedMods);
 
     return (
         <div>
@@ -434,9 +430,6 @@ export const App: FC = (): React.ReactElement => {
                                         </button>
                                         <button
                                             onClick={async () => {
-                                                console.log(
-                                                    'Setting applying mods to true'
-                                                );
                                                 setApplyingMods(true);
 
                                                 await (

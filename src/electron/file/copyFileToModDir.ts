@@ -243,7 +243,6 @@ export const createAppDataFolder = async (name: string) => {
     let folderPath;
     try {
         folderPath = `${app.getPath('appData')}\\${app.getName()}\\${name}`;
-        console.log('folder path: ', folderPath);
     } catch (err) {
         // eslint-disable-next-line no-console
         console.error(

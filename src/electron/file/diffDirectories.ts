@@ -79,7 +79,7 @@ export const diffDirectories = async ({
     // so that we can determine which files were deleted
     const oldDirFileNames: string[] = Object.keys(oldDir);
 
-    for (const [k, v] of Object.entries(newDir)) {
+    const promises = Object.entries(newDir).map(async ([k, v]) => {
         oldDirFileNames.splice(oldDirFileNames.indexOf(k), 1);
         let fileName = k;
         const newFileContents = v;
@@ -91,17 +91,6 @@ export const diffDirectories = async ({
         const existsInOldDir = oldDir[fileName] !== undefined;
         const existsInNewDir = newDir[fileName] !== undefined;
 
-        if (fileName.includes('B1')) {
-            console.log(`fileName: ${fileName}`);
-            // console.log(`newFileContents: ${newFileContents}`);
-            // console.log(`oldFileContents: ${oldFileContents}`);
-            console.log(`fullPath: ${fullPath}`);
-            console.log(`oldIsFile: ${oldIsFile}`);
-            console.log(`newIsFile: ${newIsFile}`);
-            console.log(`existsInOldDir: ${existsInOldDir}`);
-            console.log(`existsInNewDir: ${existsInNewDir}`);
-        }
-
         if (!oldIsFile && !newIsFile) {
             // This is a directory, we want to recursively call this on it and append the results
             const subChanges = await diffDirectories({
@@ -110,7 +99,7 @@ export const diffDirectories = async ({
                 parentPath: fullPath,
             });
             changes.push(...subChanges);
-            continue;
+            return;
         }
 
         if (!existsInOldDir && !existsInNewDir) {
@@ -141,7 +130,7 @@ export const diffDirectories = async ({
                 lineChangeGroups: [changeGroup],
                 isBinary: isBinaryFile(fileName),
             });
-            continue;
+            return;
         }
 
         if (existsInOldDir && !existsInNewDir && oldIsFile) {
@@ -158,7 +147,7 @@ export const diffDirectories = async ({
                 `Skipping file ${fullPath} as it exists in the old directory but not in the new directory`
             );
 
-            continue;
+            return;
         }
 
         if (
@@ -185,7 +174,7 @@ export const diffDirectories = async ({
                 'added binary file to change list as a replace: ',
                 fullPath
             );
-            continue;
+            return;
         }
 
         if (existsInOldDir && existsInNewDir && newIsFile && oldIsFile) {
@@ -194,7 +183,7 @@ export const diffDirectories = async ({
 
             if (oldFileHash === newFileHash) {
                 // Files are the same, skip further processing
-                continue;
+                return;
             }
 
             const diffs = await diffTexts(oldFileContents, newFileContents);
@@ -236,13 +225,15 @@ export const diffDirectories = async ({
                 }
             }
 
-            continue;
+            return;
         }
-    }
+    });
+
+    await Promise.all(promises);
 
     if (ignoreRemovedFiles) return changes;
 
-    for (const fileName of oldDirFileNames) {
+    const removedFilesPromises = oldDirFileNames.map(async (fileName) => {
         const oldFileContents = oldDir[fileName];
         const oldIsFile = typeof oldFileContents === 'string';
         const fullPath = parentPath ? `${parentPath}/${fileName}` : fileName;
@@ -261,7 +252,9 @@ export const diffDirectories = async ({
                 isBinary: isBinaryFile(fileName),
             });
         }
-    }
+    });
+
+    await Promise.allSettled(removedFilesPromises);
 
     return changes;
 };

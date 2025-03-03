@@ -311,28 +311,128 @@ describe('diffTexts', () => {
         expect(added.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should compute diff for large texts (between 20 and 40 KB each)', async () => {
-        // Generate a large text with ~3000 lines (approx 30KB)
-        const numLines = 3000;
-        const baseLines = Array.from(
-            { length: numLines },
-            (_, i) => `Line ${i}`
-        );
-        const baseText = baseLines.join('\n') + '\n';
+    describe('diffTexts', () => {
+        it('should compute diff for small texts with a single line change', async () => {
+            const text1 = 'Line1\nLine2\nLine3\n';
+            const text2 = 'Line1\nChangedLine2\nLine3\n';
+            const changes = await diffTexts(text1, text2);
+            // Verify that there is one removed and one added change
+            const removed = changes.filter((c) => c.removed);
+            const added = changes.filter((c) => c.added);
+            expect(removed.length).toBeGreaterThanOrEqual(1);
+            expect(added.length).toBeGreaterThanOrEqual(1);
+        });
 
-        // Create a modified version with one line changed in the middle
-        const modifiedLines = [...baseLines];
-        const changeIndex = Math.floor(numLines / 2);
-        modifiedLines[changeIndex] = `Modified ${modifiedLines[changeIndex]}`;
-        const modifiedText = modifiedLines.join('\n') + '\n';
+        it('should compute diff for large texts (between 20 and 40 KB each)', async () => {
+            // Generate a large text with ~3000 lines (approx 30KB)
+            const numLines = 3000;
+            const baseLines = Array.from(
+                { length: numLines },
+                (_, i) => `Line ${i}`
+            );
+            const baseText = baseLines.join('\n') + '\n';
 
-        const changes = await diffTexts(baseText, modifiedText);
+            // Create a modified version with one line changed in the middle
+            const modifiedLines = [...baseLines];
+            const changeIndex = Math.floor(numLines / 2);
+            modifiedLines[changeIndex] =
+                `Modified ${modifiedLines[changeIndex]}`;
+            const modifiedText = modifiedLines.join('\n') + '\n';
 
-        // Instead of comparing the full diff output (which can be huge),
-        // we simply check that there is at least one removed and one added chunk.
-        const removed = changes.filter((c) => c.removed);
-        const added = changes.filter((c) => c.added);
-        expect(removed.length).toBeGreaterThanOrEqual(1);
-        expect(added.length).toBeGreaterThanOrEqual(1);
+            const changes = await diffTexts(baseText, modifiedText);
+
+            // Instead of comparing the full diff output (which can be huge),
+            // we simply check that there is at least one removed and one added chunk.
+            const removed = changes.filter((c) => c.removed);
+            const added = changes.filter((c) => c.added);
+            expect(removed.length).toBeGreaterThanOrEqual(1);
+            expect(added.length).toBeGreaterThanOrEqual(1);
+        });
+
+        it('should compute diff for very large texts (between 40 and 60 KB each)', async () => {
+            // Generate a very large text with ~6000 lines (approx 60KB)
+            const numLines = 6000;
+            const baseLines = Array.from(
+                { length: numLines },
+                (_, i) => `Line ${i}`
+            );
+            const baseText = baseLines.join('\n') + '\n';
+
+            // Create a modified version with one line changed in the middle
+            const modifiedLines = [...baseLines];
+            const changeIndex = Math.floor(numLines / 2);
+            modifiedLines[changeIndex] =
+                `Modified ${modifiedLines[changeIndex]}`;
+            const modifiedText = modifiedLines.join('\n') + '\n';
+
+            const changes = await diffTexts(baseText, modifiedText);
+
+            // Instead of comparing the full diff output (which can be huge),
+            // we simply check that there is at least one removed and one added chunk.
+            const removed = changes.filter((c) => c.removed);
+            const added = changes.filter((c) => c.added);
+            expect(removed.length).toBeGreaterThanOrEqual(1);
+            expect(added.length).toBeGreaterThanOrEqual(1);
+        });
+
+        it('should compute diff for small text with large text', async () => {
+            const smallText = 'Line1\nLine2\nLine3\n';
+
+            // Generate a large text with ~3000 lines (approx 30KB)
+            const numLines = 3000;
+            const baseLines = Array.from(
+                { length: numLines },
+                (_, i) => `Line ${i}`
+            );
+            const largeText = baseLines.join('\n') + '\n';
+
+            const changes = await diffTexts(smallText, largeText);
+
+            // Verify that there are added changes for the large text
+            const added = changes.filter((c) => c.added);
+            expect(added.length).toBeGreaterThanOrEqual(1);
+        });
+
+        it('should compute diff for large text with small text', async () => {
+            const smallText = 'Line1\nLine2\nLine3\n';
+
+            // Generate a large text with ~3000 lines (approx 30KB)
+            const numLines = 3000;
+            const baseLines = Array.from(
+                { length: numLines },
+                (_, i) => `Line ${i}`
+            );
+            const largeText = baseLines.join('\n') + '\n';
+
+            const changes = await diffTexts(largeText, smallText);
+
+            // Verify that there are removed changes for the large text
+            const removed = changes.filter((c) => c.removed);
+            expect(removed.length).toBeGreaterThanOrEqual(1);
+        });
+
+        it('should compute diff for texts with different sizes', async () => {
+            // Generate a medium text with ~1500 lines (approx 15KB)
+            const numLinesMedium = 1500;
+            const baseLinesMedium = Array.from(
+                { length: numLinesMedium },
+                (_, i) => `Line ${i}`
+            );
+            const mediumText = baseLinesMedium.join('\n') + '\n';
+
+            // Generate a large text with ~3000 lines (approx 30KB)
+            const numLinesLarge = 3000;
+            const baseLinesLarge = Array.from(
+                { length: numLinesLarge },
+                (_, i) => `Line ${i}`
+            );
+            const largeText = baseLinesLarge.join('\n') + '\n';
+
+            const changes = await diffTexts(mediumText, largeText);
+
+            // Verify that there are added changes for the large text
+            const added = changes.filter((c) => c.added);
+            expect(added.length).toBeGreaterThanOrEqual(1);
+        });
     });
 });

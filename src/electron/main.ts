@@ -16,7 +16,6 @@ import { removeFromInstallDirs } from './file/removeFromInstallDirs';
 import { makeBackup } from './file/makeBackup';
 import { applyModsToInstall } from './file/applyModsToInstall';
 import { removeModFromMods } from './file/removeModFromMods';
-import { getFileChangesToApplyMod } from './file/getFileChangesToApplyMod';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -96,10 +95,6 @@ app.whenReady().then(() => {
         'file:applyModsToInstall',
         async (_, dir, mods) => await applyModsToInstall(dir, mods)
     );
-
-    ipcMain.on('file:getFileChangesToApplyMod', (_, modName, installDir) => {
-        getFileChangesToApplyMod(modName, installDir);
-    });
 
     createWindow();
 });

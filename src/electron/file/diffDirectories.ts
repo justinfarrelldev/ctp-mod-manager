@@ -27,6 +27,7 @@ import { diffTexts } from './getFileChangesToApplyMod';
 import { isBinaryFile } from './isBinaryFile';
 import { LineChangeGroup } from './lineChangeGroup';
 import { DirectoryContents } from './readDirectory';
+import * as crypto from 'crypto';
 
 const countLines = (str: string): number => {
     let count = 1; // Start with 1, as the last line may not end with '\n'
@@ -36,6 +37,10 @@ const countLines = (str: string): number => {
         }
     }
     return count;
+};
+
+const hashFileContents = (contents: string): string => {
+    return crypto.createHash('sha256').update(contents).digest('hex');
 };
 
 export const diffDirectories = ({
@@ -174,6 +179,14 @@ export const diffDirectories = ({
         }
 
         if (existsInOldDir && existsInNewDir && newIsFile && oldIsFile) {
+            const oldFileHash = hashFileContents(oldFileContents);
+            const newFileHash = hashFileContents(newFileContents);
+
+            if (oldFileHash === newFileHash) {
+                // Files are the same, skip further processing
+                continue;
+            }
+
             const diffs = diffTexts(oldFileContents, newFileContents);
 
             let lineCount = 1;

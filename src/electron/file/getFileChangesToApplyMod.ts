@@ -9,6 +9,7 @@ import {
     LineChangeGroupRemove,
     LineChangeGroupAdd,
 } from './lineChangeGroup';
+import pLimit from 'p-limit';
 
 export const CHUNK_SIZE = 5000; // 5KB chunks for text diffing
 
@@ -103,34 +104,39 @@ export const diffTexts = async (
 
     // Compare equivalent chunks in parallel
     const minChunks = Math.min(chunks1.length, chunks2.length);
+    const limit = pLimit(100);
 
     const chunkComparisonPromises = Array.from({ length: minChunks }, (_, i) =>
-        diffLinesAsync(chunks1[i], chunks2[i])
+        limit(() => diffLinesAsync(chunks1[i], chunks2[i]))
     );
 
     // Handle remaining chunks in the longer text
     if (chunks1.length > chunks2.length) {
         for (let i = minChunks; i < chunks1.length; i++) {
             chunkComparisonPromises.push(
-                Promise.resolve([
-                    {
-                        count: chunks1[i].split('\n').length,
-                        value: chunks1[i],
-                        removed: true,
-                    },
-                ])
+                limit(() =>
+                    Promise.resolve([
+                        {
+                            count: chunks1[i].split('\n').length,
+                            value: chunks1[i],
+                            removed: true,
+                        },
+                    ])
+                )
             );
         }
     } else if (chunks2.length > chunks1.length) {
         for (let i = minChunks; i < chunks2.length; i++) {
             chunkComparisonPromises.push(
-                Promise.resolve([
-                    {
-                        count: chunks2[i].split('\n').length,
-                        value: chunks2[i],
-                        added: true,
-                    },
-                ])
+                limit(() =>
+                    Promise.resolve([
+                        {
+                            count: chunks2[i].split('\n').length,
+                            value: chunks2[i],
+                            added: true,
+                        },
+                    ])
+                )
             );
         }
     }

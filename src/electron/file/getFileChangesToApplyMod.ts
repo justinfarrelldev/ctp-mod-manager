@@ -10,7 +10,7 @@ import {
     LineChangeGroupAdd,
 } from './lineChangeGroup';
 
-const CHUNK_SIZE = 50000; // 50KB chunks for text diffing
+const CHUNK_SIZE = 5000; // 5KB chunks for text diffing
 
 /**
  * Splits a given text into chunks of a specified maximum size.

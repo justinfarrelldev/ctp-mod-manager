@@ -252,8 +252,8 @@ export const diffDirectories = async ({
 
                 await processFileChange(
                     fileName,
-                    newFileContents,
-                    oldFileContents,
+                    newFileContents as string,
+                    oldFileContents as string,
                     fullPath,
                     changes
                 );

@@ -83,7 +83,7 @@ describe('applyModsToInstall', () => {
         await applyModsToInstall('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'An error occurred while copying the directory /mock/path\\mock-name\\Mods\\mod1 to /mock/path\\mock-name\\Mods: Error: getFileChangesToApplyMod error'
+            'An error occurred within applying mods to install while copying the directory /mock/path\\mock-name\\Mods\\mod1 to /mock/path\\mock-name\\Mods: Error: getFileChangesToApplyMod error'
         );
         expect(getFileChangesToApplyModMock).toHaveBeenCalledWith(
             'mod1',

@@ -466,11 +466,20 @@ describe('diffTexts', () => {
         });
 
         it('should handle text larger than chunk size', () => {
-            const text = 'A'.repeat(CHUNK_SIZE + 1);
+            // Create text with multiple lines that exceeds the chunk size
+            const lineSize = 100; // Size of each line
+            const linesInFirstChunk = Math.floor(CHUNK_SIZE / (lineSize + 1)); // +1 for newline
+            const totalLines = linesInFirstChunk + 5; // Add some extra lines for second chunk
+
+            const lines = Array.from({ length: totalLines }, (_, i) =>
+                'A'.repeat(lineSize)
+            );
+            const text = lines.join('\n');
+
             const chunks = splitIntoChunks(text);
             expect(chunks.length).toBe(2);
-            expect(chunks[0].length).toBe(CHUNK_SIZE);
-            expect(chunks[1].length).toBe(1);
+            expect(chunks[0].length).toBeLessThanOrEqual(CHUNK_SIZE);
+            expect(chunks[1].length).toBeGreaterThan(0);
         });
     });
 

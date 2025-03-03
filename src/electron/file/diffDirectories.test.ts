@@ -2,7 +2,7 @@ import { describe, it, vi, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { afterEach } from 'vitest';
-import { diffDirectories } from './diffDirectories';
+import { countLines, diffDirectories } from './diffDirectories';
 import { TextFileChange } from './fileChange';
 
 vi.mock('electron', () => ({
@@ -322,4 +322,28 @@ describe('diffDirectories', () => {
         expect(resultTextChanges[6].lineChangeGroups[0].endLineNumber).toBe(1);
         expect(resultTextChanges[6].lineChangeGroups[0].changeType).toBe('add');
     });
+});
+it('should correctly count lines for empty string', () => {
+    const result = countLines('');
+    expect(result).toBe(1); // Empty string counts as 1 line
+});
+
+it('should correctly count lines for single line', () => {
+    const result = countLines('This is a single line');
+    expect(result).toBe(1);
+});
+
+it('should correctly count lines for multiple lines', () => {
+    const result = countLines('Line 1\nLine 2\nLine 3');
+    expect(result).toBe(3);
+});
+
+it('should correctly count lines with trailing newline', () => {
+    const result = countLines('Line 1\nLine 2\n');
+    expect(result).toBe(2);
+});
+
+it('should correctly count lines for complex text', () => {
+    const result = countLines('Line 1\n\nLine 3\nLine 4\n\nLine 6');
+    expect(result).toBe(6);
 });

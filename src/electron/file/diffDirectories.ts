@@ -29,7 +29,7 @@ import { LineChangeGroup } from './lineChangeGroup';
 import { DirectoryContents } from './readDirectory';
 import * as crypto from 'crypto';
 
-const countLines = (str: string): number => {
+export const countLines = (str: string): number => {
     let count = 1; // Start with 1, as the last line may not end with '\n'
     for (let i = 0; i < str.length; i++) {
         if (str[i] === '\n') {

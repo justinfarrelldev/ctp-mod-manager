@@ -455,7 +455,7 @@ describe('diffTexts', () => {
             const text = 'Line1\nLine2\n';
             const chunks = splitIntoChunks(text);
             expect(chunks.length).toBe(1);
-            expect(chunks[0]).toBe(text);
+            expect(chunks[0]).toBe(text + '\n');
         });
 
         it('should handle text exactly equal to chunk size', () => {

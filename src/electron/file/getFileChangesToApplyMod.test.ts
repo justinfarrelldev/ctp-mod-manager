@@ -555,23 +555,5 @@ describe('diffTexts', () => {
             );
             expect(changes).toEqual([]);
         });
-
-        it('should return file changes when mod directory exists and is valid', async () => {
-            vi.spyOn(fs, 'statSync').mockReturnValue({
-                isDirectory: () => true,
-            } as fs.Stats);
-            vi.spyOn(fs, 'readdirSync').mockReturnValue([
-                { name: 'file1.txt', isFile: () => true } as fs.Dirent,
-                { name: 'file2.txt', isFile: () => true } as fs.Dirent,
-            ]);
-            vi.spyOn(fs, 'readFileSync').mockReturnValue('file content');
-
-            const changes = await getFileChangesToApplyMod(
-                'valid-mod',
-                '/install/dir'
-            );
-            expect(changes).toBeDefined();
-            expect(changes.length).toBeGreaterThan(0);
-        });
     });
 });

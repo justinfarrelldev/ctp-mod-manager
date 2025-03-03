@@ -41,6 +41,23 @@ const splitIntoChunks = (text: string): string[] => {
     return chunks;
 };
 
+const diffLinesAsync = async (
+    text1: string,
+    text2: string
+): Promise<Change[]> => {
+    return new Promise<Change[]>((resolve) => {
+        diffLines(text1, text2, {
+            newlineIsToken: true,
+            // no idea why this "error" value ('_') is a) undocumented and b) always undefined,
+            // but here we are
+            callback: (_: undefined, result: Change[]) => {
+                console.log('Callback is resolving: ', result);
+                resolve(result);
+            },
+        });
+    });
+};
+
 /**
  * Computes the differences between two texts using the Diff Match Patch library.
  *
@@ -50,7 +67,10 @@ const splitIntoChunks = (text: string): string[] => {
  *          object with a `0` (equal), `-1` (delete), or `1` (insert) operation
  *          and the associated text.
  */
-export const diffTexts = (text1: string, text2: string): Change[] => {
+export const diffTexts = async (
+    text1: string,
+    text2: string
+): Promise<Change[]> => {
     // For strings, using streams isn't more efficient than direct comparison
     // since we already have the full strings in memory
     // However, we can break large strings into chunks for better parallelization
@@ -59,7 +79,7 @@ export const diffTexts = (text1: string, text2: string): Change[] => {
 
     if (text1.length < CHUNK_SIZE && text2.length < CHUNK_SIZE) {
         // For small strings, just use diffLines directly
-        return diffLines(text1, text2, { newlineIsToken: true });
+        return await diffLinesAsync(text1, text2);
     }
 
     const chunks1 = splitIntoChunks(text1);

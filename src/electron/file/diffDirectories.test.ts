@@ -15,7 +15,7 @@ describe('diffDirectories', () => {
     afterEach(() => {
         vi.resetAllMocks();
     });
-    it(`should be able to diff nested directories`, () => {
+    it(`should be able to diff nested directories`, async () => {
         // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
             const structure: Record<string, string[]> = {
@@ -59,7 +59,7 @@ describe('diffDirectories', () => {
                 },
             },
         };
-        const result = diffDirectories({
+        const result = await diffDirectories({
             oldDir,
             newDir,
         });
@@ -83,7 +83,7 @@ describe('diffDirectories', () => {
         console.log('resultTextChanges', resultTextChanges[0].lineChangeGroups);
     });
 
-    it(`should handle multi-line file changes`, () => {
+    it(`should handle multi-line file changes`, async () => {
         const oldDir = {
             src: {
                 'index.js': `console.log("old line 1");
@@ -96,7 +96,7 @@ describe('diffDirectories', () => {
     console.log("new line 2");`,
             },
         };
-        const result = diffDirectories({
+        const result = await diffDirectories({
             oldDir,
             newDir,
         });
@@ -131,7 +131,7 @@ describe('diffDirectories', () => {
         expect(resultTextChanges[3].lineChangeGroups[0].changeType).toBe('add');
     });
 
-    it(`should handle added multi-line files`, () => {
+    it(`should handle added multi-line files`, async () => {
         const oldDir = {
             src: {},
         };
@@ -141,7 +141,7 @@ describe('diffDirectories', () => {
     console.log("new line 2");`,
             },
         };
-        const result = diffDirectories({
+        const result = await diffDirectories({
             oldDir,
             newDir,
         });
@@ -157,7 +157,7 @@ describe('diffDirectories', () => {
         expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(2);
     });
 
-    it(`should handle removed multi-line files`, () => {
+    it(`should handle removed multi-line files`, async () => {
         const oldDir = {
             src: {
                 'index.js': `console.log("old line 1");
@@ -167,7 +167,7 @@ describe('diffDirectories', () => {
         const newDir = {
             src: {},
         };
-        const result = diffDirectories({
+        const result = await diffDirectories({
             oldDir,
             newDir,
         });
@@ -185,7 +185,7 @@ describe('diffDirectories', () => {
         expect(resultTextChanges[0].lineChangeGroups[0].endLineNumber).toBe(2);
     });
 
-    it(`should ignore removed files when ignoreRemovedFiles option is set to true`, () => {
+    it(`should ignore removed files when ignoreRemovedFiles option is set to true`, async () => {
         const oldDir = {
             src: {
                 'index.js': `console.log("old line 1");
@@ -199,7 +199,7 @@ describe('diffDirectories', () => {
     console.log("new line 2");`,
             },
         };
-        const result = diffDirectories({
+        const result = await diffDirectories({
             oldDir,
             newDir,
             ignoreRemovedFiles: true,
@@ -235,7 +235,7 @@ describe('diffDirectories', () => {
         expect(resultTextChanges[3].lineChangeGroups[0].changeType).toBe('add');
     });
 
-    it(`should handle multiple files in different folders`, () => {
+    it(`should handle multiple files in different folders`, async () => {
         const oldDir = {
             src: {
                 'file1.slc': 'old content 1',
@@ -258,7 +258,7 @@ describe('diffDirectories', () => {
                 },
             },
         };
-        const result = diffDirectories({
+        const result = await diffDirectories({
             oldDir,
             newDir,
         });

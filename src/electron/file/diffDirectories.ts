@@ -53,7 +53,7 @@ const hashFileContents = (contents: string): string => {
     return crypto.createHash('sha256').update(contents).digest('hex');
 };
 
-export const diffDirectories = ({
+export const diffDirectories = async ({
     oldDir,
     newDir,
     parentPath,
@@ -64,7 +64,7 @@ export const diffDirectories = ({
     parentPath?: string;
     ignoreRemovedFiles?: boolean; // This is for the case where we don't want to include removed files (because the "new" dir is the mod, and the old one
     // is the game data)
-}): FileChange[] => {
+}): Promise<FileChange[]> => {
     if (oldDir === undefined) {
         oldDir = {};
     }
@@ -104,7 +104,7 @@ export const diffDirectories = ({
 
         if (!oldIsFile && !newIsFile) {
             // This is a directory, we want to recursively call this on it and append the results
-            const subChanges = diffDirectories({
+            const subChanges = await diffDirectories({
                 oldDir: oldDir[fileName] as DirectoryContents,
                 newDir: newDir[fileName] as DirectoryContents,
                 parentPath: fullPath,
@@ -197,7 +197,9 @@ export const diffDirectories = ({
                 continue;
             }
 
-            const diffs = diffTexts(oldFileContents, newFileContents);
+            const diffs = await diffTexts(oldFileContents, newFileContents);
+
+            console.log('diffs are: ', diffs);
 
             let lineCount = 1;
 

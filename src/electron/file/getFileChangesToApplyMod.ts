@@ -273,20 +273,44 @@ export const getFileChangesToApplyMod = async (
             );
             return [];
         }
+        let modDirStructure;
+        let gameDirStructure;
+        let result;
 
-        const modDirStructure = readDirectory(`${DEFAULT_MOD_DIR}\\${mod}`);
+        try {
+            modDirStructure = readDirectory(`${DEFAULT_MOD_DIR}\\${mod}`);
+        } catch (err) {
+            console.error(
+                `An error occurred while reading the mod directory ${`${DEFAULT_MOD_DIR}\\${mod}`}: ${err}`
+            );
+            return [];
+        }
 
-        const gameDirStructure = readDirectory(installDir);
+        try {
+            gameDirStructure = readDirectory(installDir);
+        } catch (err) {
+            console.error(
+                `An error occurred while reading the game directory ${installDir}: ${err}`
+            );
+            return [];
+        }
 
-        /*
+        try {
+            /*
             This compares the game's structure to the mod's structure. To extrapolate this into other
             mods, we need to compare the other mods to the game's structure as well and then use the line 
             changes to deduce incompatible files. This can be done with as many mods as we like...
-        */
-        const result = diffDirectories({
-            oldDir: gameDirStructure,
-            newDir: modDirStructure,
-        });
+            */
+            result = diffDirectories({
+                oldDir: gameDirStructure,
+                newDir: modDirStructure,
+            });
+        } catch (err) {
+            console.error(
+                `An error occurred while diffing directories: ${err}`
+            );
+            return [];
+        }
 
         return result;
 

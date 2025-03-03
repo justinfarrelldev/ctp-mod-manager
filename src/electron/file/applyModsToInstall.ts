@@ -76,7 +76,7 @@ export const applyModsToInstall = async (
             });
         } catch (err) {
             console.error(
-                `An error occurred while copying the directory ${`${DEFAULT_MOD_DIR}\\${mod}`} to ${DEFAULT_MOD_DIR}: ${err}`
+                `An error occurred within applying mods to install while copying the directory ${`${DEFAULT_MOD_DIR}\\${mod}`} to ${DEFAULT_MOD_DIR}: ${err}`
             );
         }
     }

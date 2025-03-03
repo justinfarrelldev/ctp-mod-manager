@@ -12,7 +12,13 @@ import {
 
 const CHUNK_SIZE = 50000; // 50KB chunks for text diffing
 
-// Split strings into chunks at newline boundaries
+/**
+ * Splits a given text into chunks of a specified maximum size.
+ * Each chunk will contain complete lines and will not exceed the CHUNK_SIZE.
+ *
+ * @param text - The input text to be split into chunks.
+ * @returns An array of strings, where each string is a chunk of the original text.
+ */
 const splitIntoChunks = (text: string): string[] => {
     const chunks: string[] = [];
     let currentChunk = '';
@@ -41,6 +47,18 @@ const splitIntoChunks = (text: string): string[] => {
     return chunks;
 };
 
+/**
+ * Asynchronously computes the line-by-line differences between two strings.
+ *
+ * @param text1 - The first string to compare.
+ * @param text2 - The second string to compare.
+ * @returns A promise that resolves to an array of changes.
+ *
+ * @remarks
+ * This function uses the `diffLines` method to compute the differences. The `newlineIsToken` option is set to `true`.
+ * The callback function's first parameter is an undocumented and always undefined value, which is ignored.
+ * The second parameter of the callback is the result array of changes, which is resolved by the promise.
+ */
 const diffLinesAsync = async (
     text1: string,
     text2: string
@@ -59,13 +77,15 @@ const diffLinesAsync = async (
 };
 
 /**
- * Computes the differences between two texts using the Diff Match Patch library.
+ * Computes the differences between two text strings and returns an array of changes.
  *
- * @param text1 - The first text to compare.
- * @param text2 - The second text to compare.
- * @returns An array of differences, where each difference is represented as an
- *          object with a `0` (equal), `-1` (delete), or `1` (insert) operation
- *          and the associated text.
+ * This function compares two text strings and returns an array of changes that represent
+ * the differences between the two texts. For small strings, it uses `diffLines` directly.
+ * For larger strings, it splits them into chunks and compares the chunks in parallel.
+ *
+ * @param text1 - The first text string to compare.
+ * @param text2 - The second text string to compare.
+ * @returns A promise that resolves to an array of `Change` objects representing the differences.
  */
 export const diffTexts = async (
     text1: string,

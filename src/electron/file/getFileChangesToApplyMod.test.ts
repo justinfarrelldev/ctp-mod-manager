@@ -1,7 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
-import { consolidateLineChangeGroups } from './getFileChangesToApplyMod';
+import {
+    CHUNK_SIZE,
+    consolidateLineChangeGroups,
+    getFileChangesToApplyMod,
+    splitIntoChunks,
+} from './getFileChangesToApplyMod';
 import { LineChangeGroup } from './lineChangeGroup';
 import { diffTexts } from './getFileChangesToApplyMod';
+import fs from 'node:fs';
 
 vi.mock('electron', () => ({
     app: {
@@ -433,6 +439,130 @@ describe('diffTexts', () => {
             // Verify that there are added changes for the large text
             const added = changes.filter((c) => c.added);
             expect(added.length).toBeGreaterThanOrEqual(1);
+        });
+    });
+    describe('splitIntoChunks', () => {
+        it('should split text into chunks of specified size', () => {
+            const text = 'Line1\nLine2\nLine3\nLine4\nLine5\n';
+            const chunks = splitIntoChunks(text);
+            expect(chunks.length).toBeGreaterThan(0);
+            expect(chunks.every((chunk) => chunk.length <= CHUNK_SIZE)).toBe(
+                true
+            );
+        });
+
+        it('should handle text smaller than chunk size', () => {
+            const text = 'Line1\nLine2\n';
+            const chunks = splitIntoChunks(text);
+            expect(chunks.length).toBe(1);
+            expect(chunks[0]).toBe(text);
+        });
+
+        it('should handle text exactly equal to chunk size', () => {
+            const text = 'A'.repeat(CHUNK_SIZE);
+            const chunks = splitIntoChunks(text);
+            expect(chunks.length).toBe(1);
+            expect(chunks[0]).toBe(text);
+        });
+
+        it('should handle text larger than chunk size', () => {
+            const text = 'A'.repeat(CHUNK_SIZE + 1);
+            const chunks = splitIntoChunks(text);
+            expect(chunks.length).toBe(2);
+            expect(chunks[0].length).toBe(CHUNK_SIZE);
+            expect(chunks[1].length).toBe(1);
+        });
+    });
+
+    describe('diffTexts', () => {
+        it('should compute diff for small texts with a single line change', async () => {
+            const text1 = 'Line1\nLine2\nLine3\n';
+            const text2 = 'Line1\nChangedLine2\nLine3\n';
+            const changes = await diffTexts(text1, text2);
+            const removed = changes.filter((c) => c.removed);
+            const added = changes.filter((c) => c.added);
+            expect(removed.length).toBeGreaterThanOrEqual(1);
+            expect(added.length).toBeGreaterThanOrEqual(1);
+        });
+
+        it('should compute diff for large texts (between 20 and 40 KB each)', async () => {
+            const numLines = 3000;
+            const baseLines = Array.from(
+                { length: numLines },
+                (_, i) => `Line ${i}`
+            );
+            const baseText = baseLines.join('\n') + '\n';
+            const modifiedLines = [...baseLines];
+            const changeIndex = Math.floor(numLines / 2);
+            modifiedLines[changeIndex] =
+                `Modified ${modifiedLines[changeIndex]}`;
+            const modifiedText = modifiedLines.join('\n') + '\n';
+            const changes = await diffTexts(baseText, modifiedText);
+            const removed = changes.filter((c) => c.removed);
+            const added = changes.filter((c) => c.added);
+            expect(removed.length).toBeGreaterThanOrEqual(1);
+            expect(added.length).toBeGreaterThanOrEqual(1);
+        });
+
+        it('should compute diff for very large texts (between 40 and 60 KB each)', async () => {
+            const numLines = 6000;
+            const baseLines = Array.from(
+                { length: numLines },
+                (_, i) => `Line ${i}`
+            );
+            const baseText = baseLines.join('\n') + '\n';
+            const modifiedLines = [...baseLines];
+            const changeIndex = Math.floor(numLines / 2);
+            modifiedLines[changeIndex] =
+                `Modified ${modifiedLines[changeIndex]}`;
+            const modifiedText = modifiedLines.join('\n') + '\n';
+            const changes = await diffTexts(baseText, modifiedText);
+            const removed = changes.filter((c) => c.removed);
+            const added = changes.filter((c) => c.added);
+            expect(removed.length).toBeGreaterThanOrEqual(1);
+            expect(added.length).toBeGreaterThanOrEqual(1);
+        });
+    });
+
+    describe('getFileChangesToApplyMod', () => {
+        it('should return an empty array if the mod directory does not exist', async () => {
+            vi.spyOn(fs, 'statSync').mockImplementation(() => {
+                throw new Error('Directory does not exist');
+            });
+            const changes = await getFileChangesToApplyMod(
+                'nonexistent-mod',
+                '/install/dir'
+            );
+            expect(changes).toEqual([]);
+        });
+
+        it('should return an empty array if the mod path is not a directory', async () => {
+            vi.spyOn(fs, 'statSync').mockReturnValue({
+                isDirectory: () => false,
+            } as fs.Stats);
+            const changes = await getFileChangesToApplyMod(
+                'not-a-directory',
+                '/install/dir'
+            );
+            expect(changes).toEqual([]);
+        });
+
+        it('should return file changes when mod directory exists and is valid', async () => {
+            vi.spyOn(fs, 'statSync').mockReturnValue({
+                isDirectory: () => true,
+            } as fs.Stats);
+            vi.spyOn(fs, 'readdirSync').mockReturnValue([
+                { name: 'file1.txt', isFile: () => true } as fs.Dirent,
+                { name: 'file2.txt', isFile: () => true } as fs.Dirent,
+            ]);
+            vi.spyOn(fs, 'readFileSync').mockReturnValue('file content');
+
+            const changes = await getFileChangesToApplyMod(
+                'valid-mod',
+                '/install/dir'
+            );
+            expect(changes).toBeDefined();
+            expect(changes.length).toBeGreaterThan(0);
         });
     });
 });

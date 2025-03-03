@@ -10,7 +10,7 @@ import {
     LineChangeGroupAdd,
 } from './lineChangeGroup';
 
-const CHUNK_SIZE = 5000; // 5KB chunks for text diffing
+export const CHUNK_SIZE = 5000; // 5KB chunks for text diffing
 
 /**
  * Splits a given text into chunks of a specified maximum size.
@@ -19,7 +19,7 @@ const CHUNK_SIZE = 5000; // 5KB chunks for text diffing
  * @param text - The input text to be split into chunks.
  * @returns An array of strings, where each string is a chunk of the original text.
  */
-const splitIntoChunks = (text: string): string[] => {
+export const splitIntoChunks = (text: string): string[] => {
     const chunks: string[] = [];
     let currentChunk = '';
     const lines = text.split('\n');
@@ -238,6 +238,7 @@ export const getFileChangesToApplyMod = async (
         console.error(
             `An error occurred while getting the stats for the file ${`${DEFAULT_MOD_DIR}\\${mod}`}: ${err}`
         );
+        return [];
     }
 
     if (statsOfFile) {

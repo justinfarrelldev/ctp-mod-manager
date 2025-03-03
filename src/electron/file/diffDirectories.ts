@@ -235,26 +235,32 @@ export const diffDirectories = async ({
 
     if (ignoreRemovedFiles) return changes;
 
-    const removedFilesPromises = oldDirFileNames.map(async (fileName) => {
-        const oldFileContents = oldDir[fileName];
-        const oldIsFile = typeof oldFileContents === 'string';
-        const fullPath = parentPath ? `${parentPath}/${fileName}` : fileName;
+    const removedLimit = pLimit(MAX_PROMISES_ALLOWED);
 
-        if (oldIsFile) {
-            // This is a file that is being removed
-            let changeGroup: LineChangeGroup = {
-                startLineNumber: 1,
-                endLineNumber: countLines(oldFileContents),
-                changeType: 'remove',
-                oldContent: oldFileContents,
-            };
-            changes.push({
-                fileName: fullPath,
-                lineChangeGroups: [changeGroup],
-                isBinary: isBinaryFile(fileName),
-            });
-        }
-    });
+    const removedFilesPromises = oldDirFileNames.map((fileName) =>
+        removedLimit(async () => {
+            const oldFileContents = oldDir[fileName];
+            const oldIsFile = typeof oldFileContents === 'string';
+            const fullPath = parentPath
+                ? `${parentPath}/${fileName}`
+                : fileName;
+
+            if (oldIsFile) {
+                // This is a file that is being removed
+                let changeGroup: LineChangeGroup = {
+                    startLineNumber: 1,
+                    endLineNumber: countLines(oldFileContents),
+                    changeType: 'remove',
+                    oldContent: oldFileContents,
+                };
+                changes.push({
+                    fileName: fullPath,
+                    lineChangeGroups: [changeGroup],
+                    isBinary: isBinaryFile(fileName),
+                });
+            }
+        })
+    );
 
     await Promise.allSettled(removedFilesPromises);
 

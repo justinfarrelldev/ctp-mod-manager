@@ -275,7 +275,7 @@ export const removeLinesFromFile = ({
     lineChangeGroup: LineChangeGroupRemove;
     lineMap: Map<number, number>;
     lines: string[];
-}>): void => {
+}>): NewLinesAndLineMap => {
     // Just need to remove all the lines specified in the line change groups.
     // If there are lines that are removed from the end in the line change groups but that does
     // not exist in the lines, we throw an error.
@@ -295,17 +295,21 @@ export const removeLinesFromFile = ({
     // 3. test file
 
     // If the start or the end line number do not exist in the lineMap, throw
-    if (!lineMap.get(lineChangeGroup.startLineNumber)) {
+
+    const newLineMap: Map<number, number> = new Map(lineMap),
+        newLines: string[] = [...lines];
+
+    if (!newLineMap.get(lineChangeGroup.startLineNumber)) {
         console.error(
             `startLineNumber (${lineChangeGroup.startLineNumber}) does not exist in the lineMap. Line map: `,
-            lineMap
+            newLineMap
         );
         throw new Error(
             `startLineNumber (${lineChangeGroup.startLineNumber}) does not exist in the lineMap.`
         );
     }
 
-    if (!lineMap.get(lineChangeGroup.endLineNumber)) {
+    if (!newLineMap.get(lineChangeGroup.endLineNumber)) {
         throw new Error(
             `endLineNumber (${lineChangeGroup.endLineNumber}) does not exist in the lineMap`
         );
@@ -314,25 +318,34 @@ export const removeLinesFromFile = ({
     const { endLineNumber, startLineNumber } = lineChangeGroup;
 
     const numberOfLinesToRemove = endLineNumber - startLineNumber + 1;
-    lines.splice(startLineNumber - 1, numberOfLinesToRemove);
+    newLines.splice(startLineNumber - 1, numberOfLinesToRemove);
 
-    for (const [origLine, currLine] of lineMap.entries()) {
+    for (const [origLine, currLine] of newLineMap.entries()) {
         if (currLine >= startLineNumber - 1) {
             if (
                 currLine >= startLineNumber - 1 &&
                 currLine <= endLineNumber - 1
             ) {
-                lineMap.delete(origLine);
+                newLineMap.delete(origLine);
             } else if (currLine > endLineNumber - 1) {
-                lineMap.set(origLine, currLine - numberOfLinesToRemove);
+                newLineMap.set(origLine, currLine - numberOfLinesToRemove);
             }
         }
     }
 
     console.log(
-        `(remove) Writing ${lines.length} lines to ${installDir + '\\' + fileName}`
+        `(remove) Writing ${newLines.length} lines to ${installDir + '\\' + fileName}`
     );
-    fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
+    fs.writeFileSync(
+        installDir + '\\' + fileName,
+        newLines.join('\n'),
+        'utf-8'
+    );
+
+    return {
+        lineMap: newLineMap,
+        lines: newLines,
+    };
 };
 
 /**
@@ -353,11 +366,16 @@ export const replaceLinesInFile = ({
     installDir: string;
     lineChangeGroup: LineChangeGroupReplace;
     lines: string[];
-}>): void => {
+}>): string[] => {
     const { endLineNumber, newContent, startLineNumber } = lineChangeGroup;
 
-    if (startLineNumber <= lines.length && endLineNumber <= lines.length) {
-        lines.splice(
+    const newLines: string[] = [...lines];
+
+    if (
+        startLineNumber <= newLines.length &&
+        endLineNumber <= newLines.length
+    ) {
+        newLines.splice(
             startLineNumber - 1,
             endLineNumber - startLineNumber + 1,
             newContent
@@ -365,9 +383,14 @@ export const replaceLinesInFile = ({
     }
 
     console.log(
-        `(replace) Writing ${lines.length} lines to ${installDir + '\\' + fileName}`
+        `(replace) Writing ${newLines.length} lines to ${installDir + '\\' + fileName}`
     );
-    fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
+    fs.writeFileSync(
+        installDir + '\\' + fileName,
+        newLines.join('\n'),
+        'utf-8'
+    );
+    return newLines;
 };
 
 /**
@@ -475,13 +498,16 @@ export const applyModFileChanges = ({
                             break;
                         case 'remove':
                             try {
-                                removeLinesFromFile({
-                                    fileName: fileChange.fileName,
-                                    installDir,
-                                    lineChangeGroup,
-                                    lineMap,
-                                    lines,
-                                });
+                                const { lineMap: newLineMap, lines: newLines } =
+                                    removeLinesFromFile({
+                                        fileName: fileChange.fileName,
+                                        installDir,
+                                        lineChangeGroup,
+                                        lineMap,
+                                        lines,
+                                    });
+                                lines = newLines;
+                                lineMap = newLineMap;
                             } catch (error) {
                                 throw new ModApplicationError(
                                     `Failed to remove lines from file ${fileChange.fileName}: ${error.message}`
@@ -490,13 +516,14 @@ export const applyModFileChanges = ({
                             break;
                         case 'replace':
                             try {
-                                replaceLinesInFile({
+                                const newLines = replaceLinesInFile({
                                     fileName: fileChange.fileName,
                                     installDir,
                                     lineChangeGroup:
                                         lineChangeGroup as LineChangeGroupReplace,
                                     lines,
                                 });
+                                lines = newLines;
                             } catch (error) {
                                 throw new ModApplicationError(
                                     `Failed to replace lines in file ${fileChange.fileName}: ${error.message}`

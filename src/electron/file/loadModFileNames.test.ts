@@ -18,9 +18,12 @@ describe('loadModFileNames', () => {
     });
 
     it('should create the directory if it does not exist', () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         vi.spyOn(fs, 'existsSync').mockReturnValueOnce(false);
         // @ts-expect-error This is a mock
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         vi.spyOn(fs, 'mkdirSync').mockImplementationOnce(() => {});
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]);
 
@@ -31,6 +34,8 @@ describe('loadModFileNames', () => {
     });
 
     it('should return an array of filenames if directory exists', () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         vi.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
         const mockFiles = ['mod1', 'mod2', 'mod3'];
@@ -39,20 +44,24 @@ describe('loadModFileNames', () => {
 
         const result = loadModFileNames();
 
-        expect(result).toEqual(mockFiles);
+        expect(result).toStrictEqual(mockFiles);
     });
 
     it('should return an empty array if directory is empty', () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         vi.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]);
 
         const result = loadModFileNames();
 
-        expect(result).toEqual([]);
+        expect(result).toStrictEqual([]);
     });
 
     it('should throw an error if there is an issue reading the files', () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         vi.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
         const mockError = new Error('Read error');
@@ -60,13 +69,16 @@ describe('loadModFileNames', () => {
             throw mockError;
         });
 
-        expect(() => loadModFileNames()).toThrow(mockError);
+        expect(loadModFileNames).toThrow(mockError);
     });
 
     it('should not create the directory if it already exists', () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         vi.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
         // @ts-expect-error This is a mock
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         vi.spyOn(fs, 'mkdirSync').mockImplementationOnce(() => {});
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]);
 

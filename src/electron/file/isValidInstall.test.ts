@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { isValidInstall } from './isValidInstall';
 
@@ -7,6 +7,8 @@ vi.mock('fs');
 
 describe('isValidInstall', () => {
     it('should return true if ctp2_data directory exists', async () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce(['ctp2_data']); // Return the mock value
@@ -16,6 +18,8 @@ describe('isValidInstall', () => {
     });
 
     it('should return false if directory is empty', async () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]); // Simulate empty directory
 
@@ -24,6 +28,8 @@ describe('isValidInstall', () => {
     });
 
     it('should handle multiple directories and return true if ctp2_data exists', async () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([
             // @ts-expect-error This is a mock
@@ -37,6 +43,8 @@ describe('isValidInstall', () => {
     });
 
     it('should handle multiple directories and return false if ctp2_data does not exist', async () => {
+        expect.hasAssertions();
+
         // Mock for this test case
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([
             // @ts-expect-error This is a mock

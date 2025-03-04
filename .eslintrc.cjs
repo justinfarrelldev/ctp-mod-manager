@@ -15,6 +15,7 @@ module.exports = {
         // 'plugin:tailwindcss/recommended',
         'plugin:perfectionist/recommended-natural-legacy',
         'plugin:jsdoc/recommended-typescript',
+        'plugin:@typescript-eslint/recommended',
     ],
     ignorePatterns: ['!**/.server', '!**/.client'],
     overrides: [
@@ -62,6 +63,7 @@ module.exports = {
             rules: {
                 '@typescript-eslint/explicit-function-return-type': 'error',
                 '@typescript-eslint/no-explicit-any': 'error',
+                '@typescript-eslint/no-unused-expressions': 'error',
                 'functional/functional-parameters': 'off',
                 'functional/immutable-data': 'off',
                 'functional/no-conditional-statements': 'off',
@@ -167,11 +169,11 @@ module.exports = {
                 ...vitest.configs.all.rules,
                 'functional/functional-parameters': 'off',
 
+                'functional/immutable-data': 'off',
                 'functional/no-expression-statements': 'off',
                 'functional/no-let': 'off',
                 'functional/no-return-void': 'off',
                 'functional/no-throw-statements': 'off',
-                'functional/immutable-data': 'off',
                 'no-undef': 'off',
                 'no-unused-vars': 'off',
                 'vitest/max-expects': 'off',
@@ -179,7 +181,7 @@ module.exports = {
             },
         },
     ],
-
+    parser: '@typescript-eslint/parser',
     parserOptions: {
         ecmaFeatures: {
             jsx: true,
@@ -188,12 +190,16 @@ module.exports = {
         sourceType: 'module',
     },
 
+    plugins: ['@typescript-eslint'],
+
     root: true,
     rules: {
         // 'tailwindcss/classnames-order': 'off',
         '@typescript-eslint/explicit-function-return-type': 'error',
+        '@typescript-eslint/no-unused-expressions': 'error',
         'functional/no-let': 'off',
         'no-undef': 'off',
+        'no-unused-expressions': 'off',
         'no-unused-vars': 'off',
     },
 };

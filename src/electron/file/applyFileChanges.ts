@@ -183,6 +183,11 @@ export const applyFileChanges = ({
     applyModFileChanges({ installDir, modFileChanges });
 };
 
+type NewLinesAndLineMap = {
+    lineMap: Map<number, number>;
+    lines: string[];
+};
+
 /**
  * Adds lines to a file at the specified line numbers.
  * @param params - The parameters for the function.
@@ -208,29 +213,40 @@ export const addLinesToFile = ({
     lineChangeGroup: LineChangeGroupAdd;
     lineMap: Map<number, number>;
     lines: string[];
-}>): void => {
+}>): NewLinesAndLineMap => {
     const { endLineNumber, newContent, startLineNumber } = lineChangeGroup;
+    const newLineMap: Map<number, number> = new Map(lineMap),
+        newLines: string[] = [...lines];
 
     // TODO WHEN I GET BACK ON
     // There is something that is making the first line of files not be written, I need to figure that out
     const newContentSplit = newContent.split('\n');
 
-    if (endLineNumber > lines.length + 1) {
-        lines.push(...newContentSplit);
+    if (endLineNumber > newLines.length + 1) {
+        newLines.push(...newContentSplit);
     } else {
-        lines.splice(startLineNumber - 1, 0, ...newContentSplit);
+        newLines.splice(startLineNumber - 1, 0, ...newContentSplit);
     }
 
-    for (const [origLine, currLine] of lineMap.entries()) {
+    for (const [origLine, currLine] of newLineMap.entries()) {
         if (currLine >= startLineNumber - 1) {
-            lineMap.set(origLine, currLine + newContentSplit.length);
+            newLineMap.set(origLine, currLine + newContentSplit.length);
         }
     }
 
     console.log(
-        `(add) Writing ${lines.length} lines to ${installDir + '\\' + fileName}`
+        `(add) Writing ${newLines.length} lines to ${installDir + '\\' + fileName}`
     );
-    fs.writeFileSync(installDir + '\\' + fileName, lines.join('\n'), 'utf-8');
+    fs.writeFileSync(
+        installDir + '\\' + fileName,
+        newLines.join('\n'),
+        'utf-8'
+    );
+
+    return {
+        lineMap: newLineMap,
+        lines: newLines,
+    };
 };
 
 /**
@@ -384,7 +400,7 @@ export const applyModFileChanges = ({
     installDir: string;
     modFileChanges: ModFileChanges[];
 }>): void => {
-    for (const { fileChanges, mod } of modFileChanges) {
+    for (const { fileChanges } of modFileChanges) {
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;
 
@@ -398,21 +414,25 @@ export const applyModFileChanges = ({
                     );
                 }
 
-                const lines: string[] = [];
+                let lines: string[] = [];
                 // Key is original line number, value is current line number (adjusted for additions, removals)
-                const lineMap = new Map<number, number>(
+                let lineMap = new Map<number, number>(
                     lines.map((_, index) => [index, index])
                 );
                 for (const lineChangeGroup of textFileChange.lineChangeGroups) {
                     try {
-                        addLinesToFile({
-                            fileName: fileChange.fileName,
-                            installDir,
-                            lineChangeGroup:
-                                lineChangeGroup as LineChangeGroupAdd,
-                            lineMap,
-                            lines,
-                        });
+                        const { lineMap: newLineMap, lines: newLines } =
+                            addLinesToFile({
+                                fileName: fileChange.fileName,
+                                installDir,
+                                lineChangeGroup:
+                                    lineChangeGroup as LineChangeGroupAdd,
+                                lineMap,
+                                lines,
+                            });
+
+                        lines = newLines;
+                        lineMap = newLineMap;
                     } catch (error) {
                         throw new ModApplicationError(
                             `Failed to add lines to file ${fileChange.fileName}: ${error.message}`
@@ -424,9 +444,9 @@ export const applyModFileChanges = ({
                     installDir + '\\' + fileChange.fileName,
                     'utf-8'
                 );
-                const lines: string[] = fileData.split('\n');
+                let lines: string[] = fileData.split('\n');
                 // Key is original line number, value is current line number (adjusted for additions, removals)
-                const lineMap = new Map<number, number>(
+                let lineMap = new Map<number, number>(
                     lines.map((_, index) => [index + 1, index + 1])
                 );
 
@@ -434,14 +454,18 @@ export const applyModFileChanges = ({
                     switch (lineChangeGroup.changeType) {
                         case 'add':
                             try {
-                                addLinesToFile({
-                                    fileName: fileChange.fileName,
-                                    installDir,
-                                    lineChangeGroup:
-                                        lineChangeGroup as LineChangeGroupAdd,
-                                    lineMap,
-                                    lines,
-                                });
+                                const { lineMap: newLineMap, lines: newLines } =
+                                    addLinesToFile({
+                                        fileName: fileChange.fileName,
+                                        installDir,
+                                        lineChangeGroup:
+                                            lineChangeGroup as LineChangeGroupAdd,
+                                        lineMap,
+                                        lines,
+                                    });
+
+                                lines = newLines;
+                                lineMap = newLineMap;
                             } catch (error) {
                                 throw new ModApplicationError(
                                     `Failed to add lines to file ${fileChange.fileName}: ${error.message}`

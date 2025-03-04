@@ -12,6 +12,7 @@ import { ModsIncompatibleError } from './modsIncompatibleError';
 
 describe('areFileChangesValid', () => {
     it('should return true for non-overlapping changes', () => {
+        expect.hasAssertions();
         const changeGroup: LineChangeGroup[] = [
             {
                 changeType: 'add',
@@ -45,6 +46,8 @@ describe('areFileChangesValid', () => {
         expect(areFileChangesValid({ modFileChanges })).toBeTruthy();
     });
     it('should return false for overlapping changes', () => {
+        expect.hasAssertions();
+
         const changeGroup1: LineChangeGroup[] = [
             {
                 changeType: 'add',
@@ -94,6 +97,8 @@ describe('areFileChangesValid', () => {
     });
 
     it('should throw ModApplicationError for conflicts within a single mod', () => {
+        expect.hasAssertions();
+
         const changeGroup: LineChangeGroup[] = [
             {
                 changeType: 'add',
@@ -130,6 +135,8 @@ describe('areFileChangesValid', () => {
     });
 
     it('should return true for non-overlapping changes across multiple mods', () => {
+        expect.hasAssertions();
+
         const changeGroup1: LineChangeGroup[] = [
             {
                 changeType: 'add',
@@ -179,6 +186,8 @@ describe('areFileChangesValid', () => {
     });
 
     it('should return false for overlapping changes across multiple mods', () => {
+        expect.hasAssertions();
+
         const changeGroup1: LineChangeGroup[] = [
             {
                 changeType: 'add',
@@ -228,6 +237,8 @@ describe('areFileChangesValid', () => {
     });
 
     it('should return false for overlapping changes across multiple mods and multiple files', () => {
+        expect.hasAssertions();
+
         const changeGroup1: LineChangeGroup[] = [
             {
                 changeType: 'add',
@@ -313,6 +324,8 @@ describe('areFileChangesValid', () => {
 });
 describe('applyFileChanges', () => {
     it('should throw ModsIncompatibleError when mod file changes are invalid', () => {
+        expect.hasAssertions();
+
         const changeGroup1: LineChangeGroup[] = [
             {
                 changeType: 'add',
@@ -366,6 +379,8 @@ describe('applyFileChanges', () => {
     });
     describe('textFileChangesAreConflicting', () => {
         it('should return false for non-overlapping changes', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [
                 {
                     fileName: 'file1.txt',
@@ -390,6 +405,8 @@ describe('applyFileChanges', () => {
         });
 
         it('should return true for overlapping changes within the same file', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [
                 {
                     fileName: 'file1.txt',
@@ -414,6 +431,8 @@ describe('applyFileChanges', () => {
         });
 
         it('should return false for changes in different files', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [
                 {
                     fileName: 'file1.txt',
@@ -443,6 +462,8 @@ describe('applyFileChanges', () => {
         });
 
         it('should return true for overlapping changes across multiple files', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [
                 {
                     fileName: 'file1.txt',
@@ -472,6 +493,8 @@ describe('applyFileChanges', () => {
         });
 
         it('should return false for adjacent changes', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [
                 {
                     fileName: 'file1.txt',
@@ -496,6 +519,8 @@ describe('applyFileChanges', () => {
         });
 
         it('should return true for changes that start and end on the same line', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [
                 {
                     fileName: 'file1.txt',
@@ -520,12 +545,16 @@ describe('applyFileChanges', () => {
         });
 
         it('should return false for empty file changes', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [];
 
             expect(textFileChangesAreConflicting(fileChanges)).toBeFalsy();
         });
 
         it('should return false for non-overlapping changes with large gaps', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [
                 {
                     fileName: 'file1.txt',
@@ -550,6 +579,8 @@ describe('applyFileChanges', () => {
         });
 
         it('should return true for overlapping changes with large gaps', () => {
+            expect.hasAssertions();
+
             const fileChanges: TextFileChange[] = [
                 {
                     fileName: 'file1.txt',
@@ -574,6 +605,8 @@ describe('applyFileChanges', () => {
         });
     });
     it.skip('should not throw when mod file changes are valid', () => {
+        expect.hasAssertions();
+
         const changeGroup1: LineChangeGroup[] = [
             {
                 changeType: 'add',

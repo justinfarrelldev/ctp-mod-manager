@@ -1,6 +1,7 @@
 import { Change, diffLines } from 'diff';
 import fs from 'node:fs';
 import pLimit from 'p-limit';
+import { ReadonlyDeep } from 'type-fest';
 
 import { DEFAULT_MOD_DIR } from '../constants';
 import { diffDirectories } from './diffDirectories';
@@ -53,7 +54,6 @@ export const splitIntoChunks = (text: string): string[] => {
  * @param text1 - The first string to compare.
  * @param text2 - The second string to compare.
  * @returns A promise that resolves to an array of changes.
- * @remarks
  * This function uses the `diffLines` method to compute the differences. The `newlineIsToken` option is set to `true`.
  * The callback function's first parameter is an undocumented and always undefined value, which is ignored.
  * The second parameter of the callback is the result array of changes, which is resolved by the promise.
@@ -61,12 +61,12 @@ export const splitIntoChunks = (text: string): string[] => {
 const diffLinesAsync = async (
     text1: string,
     text2: string
-): Promise<Change[]> => {
-    return new Promise<Change[]>((resolve) => {
+): Promise<ReadonlyDeep<Change[]>> => {
+    return new Promise<ReadonlyDeep<Change[]>>((resolve) => {
         diffLines(text1, text2, {
             // no idea why this "error" value ('_') is a) undocumented and b) always undefined,
             // but here we are
-            callback: (_: undefined, result: Change[]) => {
+            callback: (_: undefined, result: ReadonlyDeep<Change[]>) => {
                 resolve(result);
             },
             newlineIsToken: true,
@@ -167,7 +167,7 @@ export const diffTexts = async (
  * ]
  */
 export const consolidateLineChangeGroups = (
-    groups: LineChangeGroup[]
+    groups: ReadonlyDeep<LineChangeGroup[]>
 ): LineChangeGroup[] => {
     const result: LineChangeGroup[] = [];
     const usedIndices = new Set<number>();

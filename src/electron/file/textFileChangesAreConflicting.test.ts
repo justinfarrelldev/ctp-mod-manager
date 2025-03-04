@@ -5,6 +5,7 @@ import { TextFileChange } from './fileChange';
 
 describe('textFileChangesAreConflicting', () => {
     it('should return true for overlapping changes', () => {
+        expect.hasAssertions();
         const fileChanges: TextFileChange[] = [
             {
                 fileName: 'ctp2_data/default/gamedata/Colors00.txt',

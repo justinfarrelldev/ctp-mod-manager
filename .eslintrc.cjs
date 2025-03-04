@@ -173,6 +173,7 @@ module.exports = {
                 'functional/no-throw-statements': 'off',
                 'no-undef': 'off',
                 'no-unused-vars': 'off',
+                'vitest/max-expects': 'off',
                 'vitest/no-hooks': 'off',
             },
         },

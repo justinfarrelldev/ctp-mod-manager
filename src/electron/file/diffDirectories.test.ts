@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { afterEach, describe, expect, it , vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { countLines, diffDirectories } from './diffDirectories';
 import { TextFileChange } from './fileChange';
@@ -16,6 +16,7 @@ describe('diffDirectories', () => {
         vi.resetAllMocks();
     });
     it(`should be able to diff nested directories`, async () => {
+        expect.hasAssertions();
         // @ts-expect-error This is a mock
         vi.spyOn(fs, 'readdirSync').mockImplementation((dirPath: string) => {
             const structure: Record<string, string[]> = {
@@ -84,6 +85,7 @@ describe('diffDirectories', () => {
     });
 
     it(`should handle multi-line file changes`, async () => {
+        expect.hasAssertions();
         const oldDir = {
             src: {
                 'index.js': `console.log("old line 1");
@@ -132,6 +134,7 @@ describe('diffDirectories', () => {
     });
 
     it(`should handle added multi-line files`, async () => {
+        expect.hasAssertions();
         const oldDir = {
             src: {},
         };
@@ -158,6 +161,7 @@ describe('diffDirectories', () => {
     });
 
     it(`should handle removed multi-line files`, async () => {
+        expect.hasAssertions();
         const oldDir = {
             src: {
                 'index.js': `console.log("old line 1");
@@ -186,6 +190,7 @@ describe('diffDirectories', () => {
     });
 
     it(`should ignore removed files when ignoreRemovedFiles option is set to true`, async () => {
+        expect.hasAssertions();
         const oldDir = {
             src: {
                 'index.js': `console.log("old line 1");
@@ -238,6 +243,7 @@ describe('diffDirectories', () => {
     // Skipping this test as it is not deterministic and is flaky due to the test
     // expectations requiring that diffDirectories returns items in a specific order
     it.skip(`should handle multiple files in different folders`, async () => {
+        expect.hasAssertions();
         const oldDir = {
             src: {
                 'file1.slc': 'old content 1',
@@ -325,27 +331,37 @@ describe('diffDirectories', () => {
         expect(resultTextChanges[6].lineChangeGroups[0].changeType).toBe('add');
     });
 });
-test('should correctly count lines for empty string', () => {
-    const result = countLines('');
-    expect(result).toBe(1); // Empty string counts as 1 line
-});
+describe('countLines', () => {
+    it('should correctly count lines for empty string', () => {
+        expect.assertions(1);
+        const result = countLines('');
+        expect(result).toBe(1); // Empty string counts as 1 line
+    });
 
-test('should correctly count lines for single line', () => {
-    const result = countLines('This is a single line');
-    expect(result).toBe(1);
-});
+    it('should correctly count lines for single line', () => {
+        expect.assertions(1);
+        const result = countLines('This is a single line');
+        expect(result).toBe(1);
+    });
 
-test('should correctly count lines for multiple lines', () => {
-    const result = countLines('Line 1\nLine 2\nLine 3');
-    expect(result).toBe(3);
-});
+    it('should correctly count lines for multiple lines', () => {
+        expect.assertions(1);
 
-test('should correctly count lines with trailing newline', () => {
-    const result = countLines('Line 1\nLine 2\n');
-    expect(result).toBe(2);
-});
+        const result = countLines('Line 1\nLine 2\nLine 3');
+        expect(result).toBe(3);
+    });
 
-test('should correctly count lines for complex text', () => {
-    const result = countLines('Line 1\n\nLine 3\nLine 4\n\nLine 6');
-    expect(result).toBe(6);
+    it('should correctly count lines with trailing newline', () => {
+        expect.assertions(1);
+
+        const result = countLines('Line 1\nLine 2\n');
+        expect(result).toBe(2);
+    });
+
+    it('should correctly count lines for complex text', () => {
+        expect.assertions(1);
+
+        const result = countLines('Line 1\n\nLine 3\nLine 4\n\nLine 6');
+        expect(result).toBe(6);
+    });
 });

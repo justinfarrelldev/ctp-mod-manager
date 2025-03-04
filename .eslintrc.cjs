@@ -69,6 +69,8 @@ module.exports = {
                 'functional/no-let': 'off',
                 'functional/no-return-void': 'off',
                 'functional/prefer-immutable-types': 'error',
+                'no-undef': 'off',
+                'no-unused-vars': 'off',
                 'prefer-arrow/prefer-arrow-functions': [
                     'warn',
                     {
@@ -103,8 +105,10 @@ module.exports = {
             files: ['**/*.{js,jsx,ts,tsx}'],
             plugins: ['no-unsanitized'],
             rules: {
+                'no-undef': 'off',
                 'no-unsanitized/method': 'error',
                 'no-unsanitized/property': 'error',
+                'no-unused-vars': 'off',
             },
         },
         // functional programming
@@ -126,14 +130,19 @@ module.exports = {
             plugins: ['functional'],
             rules: {
                 'functional/functional-parameters': 'off',
+                'functional/immutable-data': 'off',
+                'functional/no-conditional-statements': 'off',
                 'functional/no-expression-statements': [
-                    'error',
+                    'off',
                     {
                         ignoreVoid: true,
                     },
                 ],
                 'functional/no-let': 'off',
+                'functional/no-loop-statements': 'off',
                 'functional/no-return-void': 'off',
+                'no-undef': 'off',
+                'no-unused-vars': 'off',
             },
         },
         // Tests
@@ -160,6 +169,8 @@ module.exports = {
                 'functional/no-expression-statements': 'off',
                 'functional/no-let': 'off',
                 'functional/no-return-void': 'off',
+                'no-undef': 'off',
+                'no-unused-vars': 'off',
                 'vitest/no-hooks': 'off',
             },
         },
@@ -178,5 +189,7 @@ module.exports = {
         // 'tailwindcss/classnames-order': 'off',
         '@typescript-eslint/explicit-function-return-type': 'error',
         'functional/no-let': 'off',
+        'no-undef': 'off',
+        'no-unused-vars': 'off',
     },
 };

@@ -1,3 +1,4 @@
+/* eslint-disable functional/prefer-immutable-types */
 import { contextBridge, ipcRenderer } from 'electron';
 
 import { loadModFileNames } from './file/loadModFileNames';

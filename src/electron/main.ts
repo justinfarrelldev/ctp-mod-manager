@@ -23,7 +23,7 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 
 let win: BrowserWindow;
 
-const createWindow = () => {
+const createWindow = (): void => {
     // Create the browser window.
     win = new BrowserWindow({
         webPreferences: {

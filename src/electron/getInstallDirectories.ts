@@ -6,19 +6,33 @@ const DEFAULT_WINDOWS_DIR =
 const DEFAULT_WSL2_DIR =
     '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';
 
-export const getInstallDirectories = () => {
-    const installInfos = [];
-    // C:\Program Files (x86)\Steam\steamapps\common\Call to Power II
+type InstallInfo = WindowsInstallInfo | WSLInstallInfo;
+
+type WindowsInstallInfo = {
+    directory: string;
+    installationType: 'steam';
+    os: 'win32';
+};
+
+type WSLInstallInfo = {
+    directory: string;
+    installationType: 'steam';
+    os: 'linux';
+};
+
+export const getInstallDirectories = (): InstallInfo[] => {
+    const installInfos: (WindowsInstallInfo | WSLInstallInfo)[] = [];
+
     if (process.platform === 'win32') {
         if (fs.existsSync(DEFAULT_WINDOWS_DIR)) {
             installInfos.push({
                 directory: DEFAULT_WINDOWS_DIR,
                 installationType: 'steam',
-                os: process.platform,
+                os: 'win32',
             });
         }
     }
-    // WSL
+
     if (
         process.platform === 'linux' &&
         os.release().toLowerCase().includes('microsoft')
@@ -27,7 +41,7 @@ export const getInstallDirectories = () => {
             installInfos.push({
                 directory: DEFAULT_WSL2_DIR,
                 installationType: 'steam',
-                os: process.platform,
+                os: 'linux',
             });
         }
     }

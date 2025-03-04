@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, afterAll } from 'vitest';
 import * as fs from 'fs';
+import { afterAll, describe, expect, it, vi } from 'vitest';
+
 import { applyModsToInstall } from './applyModsToInstall';
-import { isValidInstall } from './isValidInstall';
 import * as getFileChangesToApplyMod from './getFileChangesToApplyMod';
+import { isValidInstall } from './isValidInstall';
 // import { DEFAULT_MOD_DIR } from '../constants';
 
 vi.mock('fs');
@@ -12,8 +13,8 @@ vi.mock('./isValidInstall', () => ({
 
 vi.mock('electron', () => ({
     app: {
-        getPath: vi.fn().mockReturnValue('/mock/path'),
         getName: vi.fn().mockReturnValue('mock-name'),
+        getPath: vi.fn().mockReturnValue('/mock/path'),
     },
 }));
 

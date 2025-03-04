@@ -1,21 +1,22 @@
-import path from 'path';
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import isDev from 'electron-is-dev';
-import { copyFileToModDir } from './file/copyFileToModDir';
-import { goToRoute } from './process/goToRoute';
-import { getInstallDirectories } from './getInstallDirectories';
-import { loadModFileNames } from './file/loadModFileNames';
+import path from 'path';
+
 import { DEFAULT_MOD_DIR } from './constants';
-import { viewFileDirsInZip } from './file/viewFilesInZip';
-import { selectFolder } from './file/selectFolder';
-import { isValidInstall } from './file/isValidInstall';
 import { addToInstallDirs } from './file/addToInstallDirs';
-import { getInstallDirs } from './file/getInstallDirs';
-import { runGame } from './file/runGame';
-import { removeFromInstallDirs } from './file/removeFromInstallDirs';
-import { makeBackup } from './file/makeBackup';
 import { applyModsToInstall } from './file/applyModsToInstall';
+import { copyFileToModDir } from './file/copyFileToModDir';
+import { getInstallDirs } from './file/getInstallDirs';
+import { isValidInstall } from './file/isValidInstall';
+import { loadModFileNames } from './file/loadModFileNames';
+import { makeBackup } from './file/makeBackup';
+import { removeFromInstallDirs } from './file/removeFromInstallDirs';
 import { removeModFromMods } from './file/removeModFromMods';
+import { runGame } from './file/runGame';
+import { selectFolder } from './file/selectFolder';
+import { viewFileDirsInZip } from './file/viewFilesInZip';
+import { getInstallDirectories } from './getInstallDirectories';
+import { goToRoute } from './process/goToRoute';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -26,8 +27,8 @@ const createWindow = () => {
     // Create the browser window.
     win = new BrowserWindow({
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js'),
         },
     });
 

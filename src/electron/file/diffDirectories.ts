@@ -22,13 +22,14 @@
     - Return the FileChange[]
 */
 
+import * as crypto from 'crypto';
 import pLimit from 'p-limit';
+
 import { FileChange } from './fileChange';
 import { diffTexts } from './getFileChangesToApplyMod';
 import { isBinaryFile } from './isBinaryFile';
 import { LineChangeGroup } from './lineChangeGroup';
 import { DirectoryContents } from './readDirectory';
-import * as crypto from 'crypto';
 
 const MAX_PROMISES_ALLOWED = 100;
 
@@ -68,8 +69,8 @@ const processFileChange = async (
     if (!oldIsFile && !newIsFile) {
         // This is a directory, we want to recursively call this on it and append the results
         const subChanges = await diffDirectories({
-            oldDir: oldFileContents as DirectoryContents,
             newDir: newFileContents as DirectoryContents,
+            oldDir: oldFileContents as DirectoryContents,
             parentPath: fullPath,
         });
         changes.push(...subChanges);
@@ -78,32 +79,32 @@ const processFileChange = async (
 
     if (!oldIsFile && newIsFile) {
         // This is a file that is being added
-        let changeGroup: LineChangeGroup = {
-            startLineNumber: 1,
-            endLineNumber: countLines(newFileContents),
+        const changeGroup: LineChangeGroup = {
             changeType: 'add',
+            endLineNumber: countLines(newFileContents),
             newContent: newFileContents,
+            startLineNumber: 1,
         };
         changes.push({
             fileName: fullPath,
-            lineChangeGroups: [changeGroup],
             isBinary: isBinaryFile(fileName),
+            lineChangeGroups: [changeGroup],
         });
         return;
     }
 
     if (oldIsFile && !newIsFile) {
         // This is a file that is being removed
-        let changeGroup: LineChangeGroup = {
-            startLineNumber: 1,
-            endLineNumber: countLines(oldFileContents),
+        const changeGroup: LineChangeGroup = {
             changeType: 'remove',
+            endLineNumber: countLines(oldFileContents),
             oldContent: oldFileContents,
+            startLineNumber: 1,
         };
         changes.push({
             fileName: fullPath,
-            lineChangeGroups: [changeGroup],
             isBinary: isBinaryFile(fileName),
+            lineChangeGroups: [changeGroup],
         });
         return;
     }
@@ -111,16 +112,16 @@ const processFileChange = async (
     if (oldIsFile && newIsFile && isBinaryFile(fileName)) {
         // This is a binary file that is being changed
         const changeGroup: LineChangeGroup = {
-            startLineNumber: 1,
-            endLineNumber: countLines(newFileContents),
             changeType: 'replace',
+            endLineNumber: countLines(newFileContents),
             newContent: newFileContents,
             oldContent: oldFileContents,
+            startLineNumber: 1,
         };
         changes.push({
             fileName: fullPath,
-            lineChangeGroups: [changeGroup],
             isBinary: isBinaryFile(fileName),
+            lineChangeGroups: [changeGroup],
         });
         return;
     }
@@ -141,27 +142,27 @@ const processFileChange = async (
         for (const diff of diffs) {
             if (diff.added) {
                 const changeGroup: LineChangeGroup = {
-                    startLineNumber: lineCount,
-                    endLineNumber: lineCount,
                     changeType: 'add',
+                    endLineNumber: lineCount,
                     newContent: diff.value,
+                    startLineNumber: lineCount,
                 };
                 changes.push({
                     fileName: fullPath,
-                    lineChangeGroups: [changeGroup],
                     isBinary: isBinaryFile(fileName),
+                    lineChangeGroups: [changeGroup],
                 });
             } else if (diff.removed) {
                 const changeGroup: LineChangeGroup = {
-                    startLineNumber: lineCount,
-                    endLineNumber: lineCount,
                     changeType: 'remove',
+                    endLineNumber: lineCount,
                     oldContent: diff.value,
+                    startLineNumber: lineCount,
                 };
                 changes.push({
                     fileName: fullPath,
-                    lineChangeGroups: [changeGroup],
                     isBinary: isBinaryFile(fileName),
+                    lineChangeGroups: [changeGroup],
                 });
             }
             if (diff.value.includes('\n')) {
@@ -190,16 +191,16 @@ const processRemovedFiles = async (
 
                 if (oldIsFile) {
                     // This is a file that is being removed
-                    let changeGroup: LineChangeGroup = {
-                        startLineNumber: 1,
-                        endLineNumber: countLines(oldFileContents),
+                    const changeGroup: LineChangeGroup = {
                         changeType: 'remove',
+                        endLineNumber: countLines(oldFileContents),
                         oldContent: oldFileContents,
+                        startLineNumber: 1,
                     };
                     changes.push({
                         fileName: fullPath,
-                        lineChangeGroups: [changeGroup],
                         isBinary: isBinaryFile(fileName),
+                        lineChangeGroups: [changeGroup],
                     });
                 }
             } catch (error) {
@@ -216,15 +217,15 @@ const processRemovedFiles = async (
 };
 
 export const diffDirectories = async ({
-    oldDir,
-    newDir,
-    parentPath,
     ignoreRemovedFiles = false,
+    newDir,
+    oldDir,
+    parentPath,
 }: {
-    oldDir: DirectoryContents;
-    newDir: DirectoryContents;
-    parentPath?: string;
     ignoreRemovedFiles?: boolean;
+    newDir: DirectoryContents;
+    oldDir: DirectoryContents;
+    parentPath?: string;
 }): Promise<FileChange[]> => {
     if (oldDir === undefined) {
         oldDir = {};

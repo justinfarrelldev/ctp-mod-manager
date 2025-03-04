@@ -21,7 +21,6 @@ const SPECIAL_FILE_EXTENSIONS: string[] = [
 
 /**
  * Checks if the given file path has a special file extension (.tga, .til, .pdf, etc.).
- *
  * @param filePath - The path of the file to check.
  * @returns `true` if the file has a special extension, otherwise `false`.
  */

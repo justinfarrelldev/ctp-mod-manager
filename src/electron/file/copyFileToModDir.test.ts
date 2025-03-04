@@ -1,15 +1,16 @@
-import { describe, it, expect, vi, afterAll } from 'vitest';
-import fs from 'fs';
 import AdmZip from 'adm-zip';
-import { unzipInModDir } from './copyFileToModDir';
+import fs from 'fs';
+import { afterAll, describe, expect, it, vi } from 'vitest';
+
 import { DEFAULT_MOD_DIR } from '../constants';
+import { unzipInModDir } from './copyFileToModDir';
 
 vi.mock('fs');
 vi.mock('adm-zip');
 vi.mock('electron', () => ({
     app: {
-        getPath: vi.fn().mockReturnValue('/mock/path'),
         getName: vi.fn().mockReturnValue('mock-name'),
+        getPath: vi.fn().mockReturnValue('/mock/path'),
     },
 }));
 

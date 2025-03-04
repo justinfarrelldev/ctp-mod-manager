@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 
 type Props = {
     dir: string;
-    installationType?: 'steam' | 'gog';
+    installationType?: 'gog' | 'steam';
 };
 
 export const InstallationPathText: FC<Props> = (props: Props) => (

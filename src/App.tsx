@@ -1,21 +1,78 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Settings as SettingsMenu } from './components/Settings';
-import { Modal } from './components/Modal';
-import { AUTO_DETECT_INSTALL_TEXT } from './constants';
-import { InstallDirTable } from './components/InstallDirTable';
-import { ErrorModal } from './components/ErrorModal';
-import { ModifyInstallView } from './components/ModifyInstallView';
-import { SettingsIcon } from './components/icons/settings';
 import { themeChange } from 'theme-change';
-import { TrashIcon } from './components/icons/trash';
-import { ApplyIcon } from './components/icons/apply';
 
-// Wish there was a way to share this type, but alas... it's also found in electron/file/getFileChangesToApplyMod.tsx
-type LineChangeGroup = {
-    startLineNumber: number;
-    endLineNumber: number;
-    change: string; // The change, including everything between startLineNumber and endLineNumber (including newlines)
-    contentBeforeChange: string; // The content before it was replaced by the mod
+import { ErrorModal } from './components/ErrorModal';
+import { ApplyIcon } from './components/icons/apply';
+import { SettingsIcon } from './components/icons/settings';
+import { TrashIcon } from './components/icons/trash';
+import { InstallDirTable } from './components/InstallDirTable';
+import { Modal } from './components/Modal';
+import { ModifyInstallView } from './components/ModifyInstallView';
+import { Settings as SettingsMenu } from './components/Settings';
+import { AUTO_DETECT_INSTALL_TEXT } from './constants';
+
+export type ElectronWindow = typeof globalThis &
+    Window & {
+        api: {
+            addToInstallDirs: (
+                ipcCommand: string,
+                dir: string
+            ) => Promise<void>;
+            applyModsToInstall: (
+                ipcCommand: 'file:applyModsToInstall',
+                installDir: string,
+                mods: string[]
+            ) => Promise<void>;
+            copyFileToModDir: (
+                ipcCommand: string,
+                fileDir: string
+            ) => Promise<void>;
+            getCtp2InstallDir: () => Promise<
+                [
+                    {
+                        directory: string;
+                        installationType: 'gog' | 'steam';
+                        os: string;
+                    },
+                ]
+            >;
+            getInstallDirs: (
+                ipcCommand: 'file:getInstallDirs'
+            ) => Promise<string[]>;
+            getModsDir: (ipcCommand: string) => Promise<string>;
+            goToRoute: (ipcCommand: string, route: string) => void;
+            isValidInstall: (
+                ipcCommand: string,
+                dir: string
+            ) => Promise<boolean>;
+            loadModFileNames: () => Promise<string[]>;
+            makeBackup: (
+                ipcCommand: 'file:makeBackup',
+                installDir: string
+            ) => Promise<void>;
+            openInstallDir: (ipcCommand: string, dir: string) => void;
+            openModsDir: (ipcCommand: string) => void;
+            removeFromInstallDirs: (
+                ipcCommand: 'file:removeFromInstallDirs',
+                dir: string
+            ) => Promise<void>;
+            removeModFromMods: (
+                ipcCommand: string,
+                fileDir: string
+            ) => Promise<void>;
+            runGame: (ipcCommand: 'file:runGame', exeDir: string) => void;
+            selectFolder: (ipcCommand: string) => Promise<string>;
+            viewFileDirsInZip: (
+                ipcCommand: string,
+                zipFilePath: string
+            ) => Promise<string[]>;
+        };
+    };
+
+export type InstallDirectory = {
+    directory: string;
+    installationType: 'gog' | 'steam';
+    os: string;
 };
 
 // Wish there was a way to share this type, but alas... it's also found in electron/file/getFileChangesToApplyMod.tsx
@@ -24,68 +81,12 @@ type FileChange = {
     lineChangeGroups: LineChangeGroup[];
 };
 
-export type ElectronWindow = Window &
-    typeof globalThis & {
-        api: {
-            getCtp2InstallDir: () => Promise<
-                [
-                    {
-                        directory: string;
-                        installationType: 'steam' | 'gog';
-                        os: string;
-                    },
-                ]
-            >;
-            openInstallDir: (ipcCommand: string, dir: string) => void;
-            openModsDir: (ipcCommand: string) => void;
-            copyFileToModDir: (
-                ipcCommand: string,
-                fileDir: string
-            ) => Promise<void>;
-            removeModFromMods: (
-                ipcCommand: string,
-                fileDir: string
-            ) => Promise<void>;
-            viewFileDirsInZip: (
-                ipcCommand: string,
-                zipFilePath: string
-            ) => Promise<string[]>;
-            goToRoute: (ipcCommand: string, route: string) => void;
-            loadModFileNames: () => Promise<string[]>;
-            getModsDir: (ipcCommand: string) => Promise<string>;
-            selectFolder: (ipcCommand: string) => Promise<string>;
-            isValidInstall: (
-                ipcCommand: string,
-                dir: string
-            ) => Promise<boolean>;
-            addToInstallDirs: (
-                ipcCommand: string,
-                dir: string
-            ) => Promise<void>;
-            getInstallDirs: (
-                ipcCommand: 'file:getInstallDirs'
-            ) => Promise<string[]>;
-            runGame: (ipcCommand: 'file:runGame', exeDir: string) => void;
-            removeFromInstallDirs: (
-                ipcCommand: 'file:removeFromInstallDirs',
-                dir: string
-            ) => Promise<void>;
-            makeBackup: (
-                ipcCommand: 'file:makeBackup',
-                installDir: string
-            ) => Promise<void>;
-            applyModsToInstall: (
-                ipcCommand: 'file:applyModsToInstall',
-                installDir: string,
-                mods: string[]
-            ) => Promise<void>;
-        };
-    };
-
-export type InstallDirectory = {
-    os: string;
-    directory: string;
-    installationType: 'steam' | 'gog';
+// Wish there was a way to share this type, but alas... it's also found in electron/file/getFileChangesToApplyMod.tsx
+type LineChangeGroup = {
+    change: string; // The change, including everything between startLineNumber and endLineNumber (including newlines)
+    contentBeforeChange: string; // The content before it was replaced by the mod
+    endLineNumber: number;
+    startLineNumber: number;
 };
 
 export const App: FC = (): React.ReactElement => {
@@ -225,11 +226,11 @@ export const App: FC = (): React.ReactElement => {
                 </div>
                 {error && (
                     <ErrorModal
-                        open={error.length > 0}
                         errorMessage={error}
                         onClose={() => {
                             setError('');
                         }}
+                        open={error.length > 0}
                     />
                 )}
                 {loadingDirs && (
@@ -237,36 +238,36 @@ export const App: FC = (): React.ReactElement => {
                 )}
                 {settingsOpen && (
                     <Modal
-                        width="50%"
-                        open={settingsOpen}
-                        onClose={() => setSettingsOpen(false)}
-                        modalName="Settings"
-                        text=""
                         buttons={[
                             {
-                                text: 'Close',
-                                onClick: () => setSettingsOpen(false),
                                 color: 'neutral',
+                                onClick: () => setSettingsOpen(false),
+                                text: 'Close',
                             },
                         ]}
+                        modalName="Settings"
+                        onClose={() => setSettingsOpen(false)}
+                        open={settingsOpen}
+                        text=""
+                        width="50%"
                     >
                         <SettingsMenu />
                     </Modal>
                 )}
                 {applyingMods && (
                     <Modal
-                        width="50%"
-                        open={applyingMods}
-                        onClose={() => setApplyingMods(false)}
-                        modalName="Applying Mods"
-                        text=""
                         buttons={[
                             {
-                                text: 'Cancel',
-                                onClick: () => setApplyingMods(false),
                                 color: 'neutral',
+                                onClick: () => setApplyingMods(false),
+                                text: 'Cancel',
                             },
                         ]}
+                        modalName="Applying Mods"
+                        onClose={() => setApplyingMods(false)}
+                        open={applyingMods}
+                        text=""
+                        width="50%"
                     >
                         <p>
                             Applying mods, please wait (this can take a
@@ -278,30 +279,40 @@ export const App: FC = (): React.ReactElement => {
 
                 <InstallDirTable
                     installDirs={installDirs}
-                    onClickModify={(dir) => setDirBeingModified(dir)}
                     onAddedInstallDirectory={() => loadInstallDirs()}
+                    onClickModify={(dir) => setDirBeingModified(dir)}
                 />
                 <Modal
-                    open={dirBeingModified !== ''}
+                    buttons={[
+                        {
+                            color: 'neutral',
+                            onClick: () => setDirBeingModified(''),
+                            text: 'Close',
+                        },
+                    ]}
+                    height="100%"
+                    modalName="Modify Installation"
                     onClose={() => {
                         setDirBeingModified('');
                     }}
-                    width="100%"
-                    height="100%"
-                    modalName="Modify Installation"
-                    buttons={[
-                        {
-                            text: 'Close',
-                            onClick: () => setDirBeingModified(''),
-                            color: 'neutral',
-                        },
-                    ]}
+                    open={dirBeingModified !== ''}
                     text=""
+                    width="100%"
                 >
                     <ModifyInstallView
-                        onBackClicked={() => setDirBeingModified('')}
+                        addedMods={modNamesAdded}
                         dirBeingModified={dirBeingModified}
+                        onBackClicked={() => setDirBeingModified('')}
+                        onDequeueMod={async (modName: string) => {
+                            setModNamesQueued(
+                                modNamesQueued.filter(
+                                    (value) => value !== modName
+                                )
+                            );
+                            setModNamesAdded([...modNamesAdded, modName]);
+                        }}
                         onModSelected={handleFileSelected}
+                        onOpenModsDir={() => openModsDir()}
                         onQueueMod={async (modName: string) => {
                             setModNamesQueued([...modNamesQueued, modName]);
                             setModNamesAdded(
@@ -313,42 +324,32 @@ export const App: FC = (): React.ReactElement => {
                                 `${await getModsDir()}\\${modName}`
                             ); // FIXME 100% temporary
                         }}
-                        onDequeueMod={async (modName: string) => {
-                            setModNamesQueued(
-                                modNamesQueued.filter(
-                                    (value) => value !== modName
-                                )
-                            );
-                            setModNamesAdded([...modNamesAdded, modName]);
-                        }}
-                        addedMods={modNamesAdded}
                         queuedMods={modNamesQueued}
-                        onOpenModsDir={() => openModsDir()}
                     />
                 </Modal>
                 <Modal
-                    width="50%"
-                    open={installDirModalOpen}
-                    onClose={handleInstallDirModalClose}
-                    modalName="Installation Auto-Detection"
-                    text={AUTO_DETECT_INSTALL_TEXT}
                     buttons={[
                         {
-                            text: 'Yes',
+                            color: 'primary',
                             onClick: () => {
                                 findInstallDirs();
                                 handleInstallDirModalClose();
                             },
-                            color: 'primary',
+                            text: 'Yes',
                         },
                         {
-                            text: 'No',
+                            color: 'neutral',
                             onClick: () => {
                                 handleInstallDirModalClose();
                             },
-                            color: 'neutral',
+                            text: 'No',
                         },
                     ]}
+                    modalName="Installation Auto-Detection"
+                    onClose={handleInstallDirModalClose}
+                    open={installDirModalOpen}
+                    text={AUTO_DETECT_INSTALL_TEXT}
+                    width="50%"
                 />
             </div>
             <div className="p-6">
@@ -379,7 +380,6 @@ export const App: FC = (): React.ReactElement => {
                                         <th>
                                             <label>
                                                 <input
-                                                    type="checkbox"
                                                     className="checkbox"
                                                     onChange={(event) => {
                                                         if (
@@ -399,6 +399,7 @@ export const App: FC = (): React.ReactElement => {
                                                             ]);
                                                         }
                                                     }}
+                                                    type="checkbox"
                                                 />
                                             </label>
                                         </th>
@@ -453,11 +454,11 @@ export const App: FC = (): React.ReactElement => {
                     <span className="loading loading-bars loading-md block"></span>
                 )}
                 <input
-                    onChange={handleFileSelected}
                     accept=".zip"
-                    id="add-mod-button"
-                    type="file"
                     hidden
+                    id="add-mod-button"
+                    onChange={handleFileSelected}
+                    type="file"
                 />
                 <button
                     className="btn btn-primary"

@@ -1,13 +1,14 @@
-import { describe, it, expect, vi, afterAll } from 'vitest';
 import fs from 'fs';
-import { loadModFileNames } from './loadModFileNames';
+import { afterAll, describe, expect, it, vi } from 'vitest';
+
 import { DEFAULT_MOD_DIR } from '../constants';
+import { loadModFileNames } from './loadModFileNames';
 
 vi.mock('fs');
 vi.mock('electron', () => ({
     app: {
-        getPath: vi.fn().mockReturnValue('/mock/path'),
         getName: vi.fn().mockReturnValue('mock-name'),
+        getPath: vi.fn().mockReturnValue('/mock/path'),
     },
 }));
 

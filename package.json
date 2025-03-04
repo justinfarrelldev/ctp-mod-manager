@@ -8,6 +8,7 @@
         "test": "vitest",
         "start": "electron-forge start",
         "lint": "eslint .",
+        "lint-fix": "eslint . --fix",
         "package": "electron-forge package",
         "make": "electron-forge make",
         "format": "npx prettier --write ."

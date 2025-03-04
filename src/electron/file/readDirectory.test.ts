@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
 import fs from 'node:fs';
+import { describe, expect, it, vi } from 'vitest';
+
 import { readDirectory } from './readDirectory';
 
 vi.mock('node:fs');
@@ -19,25 +20,25 @@ describe('readDirectory', () => {
 
         const files = [
             {
-                name: 'file1.txt',
-                isDirectory: () => false,
-                isFile: () => true,
                 isBlockDevice: () => false,
                 isCharacterDevice: () => false,
-                isSymbolicLink: () => false,
+                isDirectory: () => false,
                 isFIFO: () => false,
+                isFile: () => true,
                 isSocket: () => false,
+                isSymbolicLink: () => false,
+                name: 'file1.txt',
             },
 
             {
-                name: 'file2.txt',
-                isDirectory: () => false,
-                isFile: () => true,
                 isBlockDevice: () => false,
                 isCharacterDevice: () => false,
-                isSymbolicLink: () => false,
+                isDirectory: () => false,
                 isFIFO: () => false,
+                isFile: () => true,
                 isSocket: () => false,
+                isSymbolicLink: () => false,
+                name: 'file2.txt',
             },
         ];
 
@@ -58,49 +59,49 @@ describe('readDirectory', () => {
         const dirPath = '/dir-with-nested';
         const subDirs = [
             {
-                name: 'subdir1',
-                isDirectory: () => true,
-                isFile: () => false,
                 isBlockDevice: () => false,
                 isCharacterDevice: () => false,
-                isSymbolicLink: () => false,
+                isDirectory: () => true,
                 isFIFO: () => false,
+                isFile: () => false,
                 isSocket: () => false,
+                isSymbolicLink: () => false,
+                name: 'subdir1',
             },
 
             {
-                name: 'subdir2',
-                isDirectory: () => true,
-                isFile: () => false,
                 isBlockDevice: () => false,
                 isCharacterDevice: () => false,
-                isSymbolicLink: () => false,
+                isDirectory: () => true,
                 isFIFO: () => false,
+                isFile: () => false,
                 isSocket: () => false,
+                isSymbolicLink: () => false,
+                name: 'subdir2',
             },
         ];
         const subdir1Files = [
             {
-                name: 'file1.txt',
-                isDirectory: () => false,
-                isFile: () => true,
                 isBlockDevice: () => false,
                 isCharacterDevice: () => false,
-                isSymbolicLink: () => false,
+                isDirectory: () => false,
                 isFIFO: () => false,
+                isFile: () => true,
                 isSocket: () => false,
+                isSymbolicLink: () => false,
+                name: 'file1.txt',
             },
         ];
         const subdir2Files = [
             {
-                name: 'file2.txt',
-                isDirectory: () => false,
-                isFile: () => true,
                 isBlockDevice: () => false,
                 isCharacterDevice: () => false,
-                isSymbolicLink: () => false,
+                isDirectory: () => false,
                 isFIFO: () => false,
+                isFile: () => true,
                 isSocket: () => false,
+                isSymbolicLink: () => false,
+                name: 'file2.txt',
             },
         ];
 

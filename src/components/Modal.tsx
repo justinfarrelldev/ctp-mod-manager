@@ -1,25 +1,25 @@
 import React, { FC } from 'react';
 
 export interface ModalProps {
-    width: string;
-    height?: string;
-    text: string;
-    modalName: string;
     buttons: {
-        text: string;
+        color: 'accent' | 'neutral' | 'primary' | 'secondary';
         onClick: () => any;
-        color: 'primary' | 'secondary' | 'accent' | 'neutral';
+        text: string;
     }[];
     children?: React.ReactNode;
-    open: boolean;
+    height?: string;
+    modalName: string;
     onClose: () => any;
+    open: boolean;
+    text: string;
+    width: string;
 }
 
 export const Modal: FC<ModalProps> = (
     props: ModalProps
 ): React.ReactElement => {
     return (
-        <dialog id={props.modalName} className="modal" open={props.open}>
+        <dialog className="modal" id={props.modalName} open={props.open}>
             <div className="modal-box">
                 <p className="pb-4 text-xl font-bold">{props.modalName}</p>
                 <p className="text-l">{props.text}</p>
@@ -27,8 +27,8 @@ export const Modal: FC<ModalProps> = (
                 <div className="flex justify-between pt-4">
                     {props.buttons.map((btn) => (
                         <button
-                            key={btn.text.replaceAll(' ', '')}
                             className={`btn btn-${btn.color}`}
+                            key={btn.text.replaceAll(' ', '')}
                             onClick={btn.onClick}
                         >
                             {btn.text}
@@ -36,7 +36,7 @@ export const Modal: FC<ModalProps> = (
                     ))}
                 </div>
             </div>
-            <form method="dialog" className="modal-backdrop">
+            <form className="modal-backdrop" method="dialog">
                 <button onClick={props.onClose}>close</button>
             </form>
         </dialog>

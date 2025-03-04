@@ -1,18 +1,18 @@
-import { describe, it, expect, vi } from 'vitest';
+import fs from 'node:fs';
+import { describe, expect, it, vi } from 'vitest';
+
 import {
     CHUNK_SIZE,
     consolidateLineChangeGroups,
+    diffTexts,
     getFileChangesToApplyMod,
-    splitIntoChunks,
-} from './getFileChangesToApplyMod';
+ splitIntoChunks } from './getFileChangesToApplyMod';
 import { LineChangeGroup } from './lineChangeGroup';
-import { diffTexts } from './getFileChangesToApplyMod';
-import fs from 'node:fs';
 
 vi.mock('electron', () => ({
     app: {
-        getPath: vi.fn().mockReturnValue('/mock/path'),
         getName: vi.fn().mockReturnValue('mock-name'),
+        getPath: vi.fn().mockReturnValue('/mock/path'),
     },
 }));
 
@@ -21,25 +21,25 @@ describe('consolidateLineChangeGroups', () => {
         const input: LineChangeGroup[] = [
             {
                 changeType: 'remove',
-                startLineNumber: 1,
                 endLineNumber: 1,
                 oldContent: 'foo',
+                startLineNumber: 1,
             },
             {
                 changeType: 'add',
-                startLineNumber: 1,
                 endLineNumber: 1,
                 newContent: 'bar',
+                startLineNumber: 1,
             },
         ];
 
         const expected: LineChangeGroup[] = [
             {
                 changeType: 'replace',
-                startLineNumber: 1,
                 endLineNumber: 1,
-                oldContent: 'foo',
                 newContent: 'bar',
+                oldContent: 'foo',
+                startLineNumber: 1,
             },
         ];
 
@@ -50,30 +50,30 @@ describe('consolidateLineChangeGroups', () => {
         const input: LineChangeGroup[] = [
             {
                 changeType: 'remove',
-                startLineNumber: 1,
                 endLineNumber: 1,
                 oldContent: 'foo',
+                startLineNumber: 1,
             },
             {
                 changeType: 'add',
-                startLineNumber: 2,
                 endLineNumber: 2,
                 newContent: 'bar',
+                startLineNumber: 2,
             },
         ];
 
         const expected: LineChangeGroup[] = [
             {
                 changeType: 'remove',
-                startLineNumber: 1,
                 endLineNumber: 1,
                 oldContent: 'foo',
+                startLineNumber: 1,
             },
             {
                 changeType: 'add',
-                startLineNumber: 2,
                 endLineNumber: 2,
                 newContent: 'bar',
+                startLineNumber: 2,
             },
         ];
 
@@ -84,44 +84,44 @@ describe('consolidateLineChangeGroups', () => {
         const input: LineChangeGroup[] = [
             {
                 changeType: 'remove',
-                startLineNumber: 1,
                 endLineNumber: 1,
                 oldContent: 'foo',
+                startLineNumber: 1,
             },
             {
                 changeType: 'add',
-                startLineNumber: 1,
                 endLineNumber: 1,
                 newContent: 'bar',
+                startLineNumber: 1,
             },
             {
                 changeType: 'remove',
-                startLineNumber: 2,
                 endLineNumber: 2,
                 oldContent: 'baz',
+                startLineNumber: 2,
             },
             {
                 changeType: 'add',
-                startLineNumber: 2,
                 endLineNumber: 2,
                 newContent: 'qux',
+                startLineNumber: 2,
             },
         ];
 
         const expected: LineChangeGroup[] = [
             {
                 changeType: 'replace',
-                startLineNumber: 1,
                 endLineNumber: 1,
-                oldContent: 'foo',
                 newContent: 'bar',
+                oldContent: 'foo',
+                startLineNumber: 1,
             },
             {
                 changeType: 'replace',
-                startLineNumber: 2,
                 endLineNumber: 2,
-                oldContent: 'baz',
                 newContent: 'qux',
+                oldContent: 'baz',
+                startLineNumber: 2,
             },
         ];
 
@@ -132,42 +132,42 @@ describe('consolidateLineChangeGroups', () => {
         const input: LineChangeGroup[] = [
             {
                 changeType: 'remove',
-                startLineNumber: 1,
                 endLineNumber: 1,
                 oldContent: 'foo',
+                startLineNumber: 1,
             },
             {
                 changeType: 'add',
-                startLineNumber: 2,
                 endLineNumber: 2,
                 newContent: 'bar',
+                startLineNumber: 2,
             },
             {
                 changeType: 'remove',
-                startLineNumber: 3,
                 endLineNumber: 3,
                 oldContent: 'baz',
+                startLineNumber: 3,
             },
         ];
 
         const expected: LineChangeGroup[] = [
             {
                 changeType: 'remove',
-                startLineNumber: 1,
                 endLineNumber: 1,
                 oldContent: 'foo',
+                startLineNumber: 1,
             },
             {
                 changeType: 'add',
-                startLineNumber: 2,
                 endLineNumber: 2,
                 newContent: 'bar',
+                startLineNumber: 2,
             },
             {
                 changeType: 'remove',
-                startLineNumber: 3,
                 endLineNumber: 3,
                 oldContent: 'baz',
+                startLineNumber: 3,
             },
         ];
 
@@ -186,81 +186,81 @@ describe('consolidateLineChangeGroups', () => {
         const fileChanges = [
             {
                 fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                isBinary: false,
                 lineChangeGroups: [
                     {
-                        startLineNumber: 2,
-                        endLineNumber: 2,
                         changeType: 'remove',
+                        endLineNumber: 2,
                         oldContent:
                             'COLORSET_COLOR\t\t196 0 38\t\t#\tCOLOR_PLAYER0   \t\t\t',
+                        startLineNumber: 2,
                     },
                 ],
-                isBinary: false,
             },
             {
                 fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                isBinary: false,
                 lineChangeGroups: [
                     {
-                        startLineNumber: 2,
-                        endLineNumber: 2,
                         changeType: 'add',
+                        endLineNumber: 2,
                         newContent:
                             'COLORSET_COLOR\t\t32 32 32\t\t#\tCOLOR_PLAYER0   \t\t\t',
+                        startLineNumber: 2,
                     },
                 ],
-                isBinary: false,
             },
             {
                 fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                isBinary: false,
                 lineChangeGroups: [
                     {
-                        startLineNumber: 3,
-                        endLineNumber: 3,
                         changeType: 'remove',
+                        endLineNumber: 3,
                         oldContent:
                             'COLORSET_COLOR\t\t138 59 204\t\t#\tCOLOR_PLAYER5   \t\t\t',
+                        startLineNumber: 3,
                     },
                 ],
-                isBinary: false,
             },
             {
                 fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                isBinary: false,
                 lineChangeGroups: [
                     {
-                        startLineNumber: 3,
-                        endLineNumber: 3,
                         changeType: 'add',
+                        endLineNumber: 3,
                         newContent:
                             'COLORSET_COLOR\t\t200 0 0\t\t\t#\tCOLOR_PLAYER5   \t\t\t',
+                        startLineNumber: 3,
                     },
                 ],
-                isBinary: false,
             },
             {
                 fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                isBinary: false,
                 lineChangeGroups: [
                     {
-                        startLineNumber: 4,
-                        endLineNumber: 4,
                         changeType: 'remove',
+                        endLineNumber: 4,
                         oldContent:
                             'COLORSET_COLOR\t\t137 98 53\t\t#\tCOLOR_PLAYER8   \t\t\t',
+                        startLineNumber: 4,
                     },
                 ],
-                isBinary: false,
             },
             {
                 fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                isBinary: false,
                 lineChangeGroups: [
                     {
-                        startLineNumber: 4,
-                        endLineNumber: 4,
                         changeType: 'add',
+                        endLineNumber: 4,
                         newContent:
                             'COLORSET_COLOR\t\t255 255 64\t\t#\tCOLOR_PLAYER8   \t\t\t',
+                        startLineNumber: 4,
                     },
                 ],
-                isBinary: false,
             },
         ];
 
@@ -274,30 +274,30 @@ describe('consolidateLineChangeGroups', () => {
         const expected = [
             {
                 changeType: 'replace',
-                startLineNumber: 2,
                 endLineNumber: 2,
-                oldContent:
-                    'COLORSET_COLOR\t\t196 0 38\t\t#\tCOLOR_PLAYER0   \t\t\t',
                 newContent:
                     'COLORSET_COLOR\t\t32 32 32\t\t#\tCOLOR_PLAYER0   \t\t\t',
+                oldContent:
+                    'COLORSET_COLOR\t\t196 0 38\t\t#\tCOLOR_PLAYER0   \t\t\t',
+                startLineNumber: 2,
             },
             {
                 changeType: 'replace',
-                startLineNumber: 3,
                 endLineNumber: 3,
-                oldContent:
-                    'COLORSET_COLOR\t\t138 59 204\t\t#\tCOLOR_PLAYER5   \t\t\t',
                 newContent:
                     'COLORSET_COLOR\t\t200 0 0\t\t\t#\tCOLOR_PLAYER5   \t\t\t',
+                oldContent:
+                    'COLORSET_COLOR\t\t138 59 204\t\t#\tCOLOR_PLAYER5   \t\t\t',
+                startLineNumber: 3,
             },
             {
                 changeType: 'replace',
-                startLineNumber: 4,
                 endLineNumber: 4,
-                oldContent:
-                    'COLORSET_COLOR\t\t137 98 53\t\t#\tCOLOR_PLAYER8   \t\t\t',
                 newContent:
                     'COLORSET_COLOR\t\t255 255 64\t\t#\tCOLOR_PLAYER8   \t\t\t',
+                oldContent:
+                    'COLORSET_COLOR\t\t137 98 53\t\t#\tCOLOR_PLAYER8   \t\t\t',
+                startLineNumber: 4,
             },
         ];
 
@@ -446,22 +446,22 @@ describe('diffTexts', () => {
             const text = 'Line1\nLine2\nLine3\nLine4\nLine5\n';
             const chunks = splitIntoChunks(text);
             expect(chunks.length).toBeGreaterThan(0);
-            expect(chunks.every((chunk) => chunk.length <= CHUNK_SIZE)).toBe(
-                true
+            expect(chunks.every((chunk) => chunk.length <= CHUNK_SIZE)).toBeTruthy(
+                
             );
         });
 
         it('should handle text smaller than chunk size', () => {
             const text = 'Line1\nLine2\n';
             const chunks = splitIntoChunks(text);
-            expect(chunks.length).toBe(1);
+            expect(chunks).toHaveLength(1);
             expect(chunks[0]).toBe(text + '\n');
         });
 
         it('should handle text exactly equal to chunk size', () => {
             const text = 'A'.repeat(CHUNK_SIZE);
             const chunks = splitIntoChunks(text);
-            expect(chunks.length).toBe(1);
+            expect(chunks).toHaveLength(1);
             expect(chunks[0]).toBe(text);
         });
 
@@ -477,7 +477,7 @@ describe('diffTexts', () => {
             const text = lines.join('\n');
 
             const chunks = splitIntoChunks(text);
-            expect(chunks.length).toBe(2);
+            expect(chunks).toHaveLength(2);
             expect(chunks[0].length).toBeLessThanOrEqual(CHUNK_SIZE);
             expect(chunks[1].length).toBeGreaterThan(0);
         });

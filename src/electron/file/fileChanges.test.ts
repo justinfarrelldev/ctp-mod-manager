@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
-import { addLinesToFile } from './applyFileChanges';
 import * as fs from 'fs';
-import { LineChangeGroupAdd } from './lineChangeGroup';
-import { removeLinesFromFile } from './applyFileChanges';
-import { LineChangeGroupRemove } from './lineChangeGroup';
+import { describe, expect, it, vi } from 'vitest';
+
+import { addLinesToFile , removeLinesFromFile } from './applyFileChanges';
+import { LineChangeGroupAdd , LineChangeGroupRemove } from './lineChangeGroup';
+
 
 vi.mock('fs');
 
@@ -11,10 +11,10 @@ describe('addLinesToFile', () => {
     it('should add lines at the specified line numbers', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
-            startLineNumber: 3,
+            changeType: 'add',
             endLineNumber: 4,
             newContent: 'new line 1\nnew line 2',
-            changeType: 'add',
+            startLineNumber: 3,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>();
@@ -22,10 +22,10 @@ describe('addLinesToFile', () => {
 
         addLinesToFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lines).toEqual([
@@ -48,10 +48,10 @@ describe('addLinesToFile', () => {
     it('should add lines to the end of the file if endLineNumber is greater than file length', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
-            startLineNumber: 10,
+            changeType: 'add',
             endLineNumber: 12,
             newContent: 'new line 1\nnew line 2\nnew line 3',
-            changeType: 'add',
+            startLineNumber: 10,
         };
         const lines = ['line 1', 'line 2', 'line 3'];
         const lineMap = new Map<number, number>();
@@ -59,10 +59,10 @@ describe('addLinesToFile', () => {
 
         addLinesToFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lines).toEqual([
@@ -83,10 +83,10 @@ describe('addLinesToFile', () => {
     it('should update the lineMap correctly', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
-            startLineNumber: 2,
+            changeType: 'add',
             endLineNumber: 3,
             newContent: 'new line 1\nnew line 2',
-            changeType: 'add',
+            startLineNumber: 2,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([
@@ -99,10 +99,10 @@ describe('addLinesToFile', () => {
 
         addLinesToFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lineMap).toEqual(
@@ -123,10 +123,10 @@ describe('addLinesToFile', () => {
     it('should correctly update the lineMap when adding lines at the beginning of the file', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
-            startLineNumber: 1,
+            changeType: 'add',
             endLineNumber: 1,
             newContent: 'new line 1\nnew line 2',
-            changeType: 'add',
+            startLineNumber: 1,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([
@@ -139,10 +139,10 @@ describe('addLinesToFile', () => {
 
         addLinesToFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lineMap).toEqual(
@@ -163,10 +163,10 @@ describe('addLinesToFile', () => {
     it('should correctly update the lineMap when adding lines in the middle of the file', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
-            startLineNumber: 3,
+            changeType: 'add',
             endLineNumber: 3,
             newContent: 'new line 1\nnew line 2',
-            changeType: 'add',
+            startLineNumber: 3,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([
@@ -179,10 +179,10 @@ describe('addLinesToFile', () => {
 
         addLinesToFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lineMap).toEqual(
@@ -203,18 +203,18 @@ describe('addLinesToFile', () => {
         const fileName = 'testFile.txt';
         // Using 1-based indexing: the insertion point to insert after line 2 is 3
         const lineChangeGroup1: LineChangeGroupAdd = {
-            startLineNumber: 3,
+            changeType: 'add',
             endLineNumber: 3,
             newContent: 'new line 1',
-            changeType: 'add',
+            startLineNumber: 3,
         };
         // For the second change, to insert between line 3 and 4 in the new file,
         // we set startLineNumber to 5 (after the first insertion, line 4 becomes line 4)
         const lineChangeGroup2: LineChangeGroupAdd = {
-            startLineNumber: 5,
+            changeType: 'add',
             endLineNumber: 6,
             newContent: 'new line 2\nnew line 3',
-            changeType: 'add',
+            startLineNumber: 5,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         // Create a 1-based map: key and value both start at 1
@@ -228,17 +228,17 @@ describe('addLinesToFile', () => {
 
         addLinesToFile({
             fileName,
-            lineChangeGroup: lineChangeGroup1,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup: lineChangeGroup1,
+            lineMap,
+            lines,
         });
         addLinesToFile({
             fileName,
-            lineChangeGroup: lineChangeGroup2,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup: lineChangeGroup2,
+            lineMap,
+            lines,
         });
 
         expect(lines).toEqual([
@@ -271,10 +271,10 @@ describe('removeLinesFromFile', () => {
     it('should remove lines at the specified line numbers', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
-            startLineNumber: 2,
-            endLineNumber: 3,
             changeType: 'remove',
+            endLineNumber: 3,
             oldContent: 'line 2\nline 3',
+            startLineNumber: 2,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([
@@ -287,10 +287,10 @@ describe('removeLinesFromFile', () => {
 
         removeLinesFromFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lines).toEqual(['line 1', 'line 4']);
@@ -304,10 +304,10 @@ describe('removeLinesFromFile', () => {
     it('should throw an error if endLineNumber exceeds file length', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
-            startLineNumber: 3,
-            endLineNumber: 5,
             changeType: 'remove',
+            endLineNumber: 5,
             oldContent: 'line 3',
+            startLineNumber: 3,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([
@@ -321,12 +321,12 @@ describe('removeLinesFromFile', () => {
         expect(() => {
             removeLinesFromFile({
                 fileName,
-                lineChangeGroup,
-                lines,
-                lineMap,
                 installDir,
+                lineChangeGroup,
+                lineMap,
+                lines,
             });
-        }).toThrowError(
+        }).toThrow(
             `endLineNumber (${lineChangeGroup.endLineNumber}) does not exist in the lineMap`
         );
     });
@@ -334,10 +334,10 @@ describe('removeLinesFromFile', () => {
     it('should update the lineMap correctly after removing lines', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
-            startLineNumber: 2,
-            endLineNumber: 3,
             changeType: 'remove',
+            endLineNumber: 3,
             oldContent: 'line 3\nline 4',
+            startLineNumber: 2,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([
@@ -350,10 +350,10 @@ describe('removeLinesFromFile', () => {
 
         removeLinesFromFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lineMap).toEqual(
@@ -367,10 +367,10 @@ describe('removeLinesFromFile', () => {
     it('should correctly update the lineMap when removing lines from the beginning of the file', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
-            startLineNumber: 1,
-            endLineNumber: 2,
             changeType: 'remove',
+            endLineNumber: 2,
             oldContent: 'line 1\nline 2',
+            startLineNumber: 1,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([
@@ -383,10 +383,10 @@ describe('removeLinesFromFile', () => {
 
         removeLinesFromFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lineMap).toEqual(
@@ -400,10 +400,10 @@ describe('removeLinesFromFile', () => {
     it('should correctly update the lineMap when removing lines from the middle of the file', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
-            startLineNumber: 3,
-            endLineNumber: 3,
             changeType: 'remove',
+            endLineNumber: 3,
             oldContent: 'line 4',
+            startLineNumber: 3,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4'];
         const lineMap = new Map<number, number>([
@@ -416,10 +416,10 @@ describe('removeLinesFromFile', () => {
 
         removeLinesFromFile({
             fileName,
-            lineChangeGroup,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup,
+            lineMap,
+            lines,
         });
 
         expect(lineMap).toEqual(
@@ -434,16 +434,16 @@ describe('removeLinesFromFile', () => {
     it('should correctly apply multiple remove changes and update the lineMap', () => {
         const fileName = 'testFile.txt';
         const lineChangeGroup1: LineChangeGroupRemove = {
-            startLineNumber: 1,
-            endLineNumber: 1,
             changeType: 'remove',
+            endLineNumber: 1,
             oldContent: 'line 1',
+            startLineNumber: 1,
         };
         const lineChangeGroup2: LineChangeGroupRemove = {
-            startLineNumber: 2,
-            endLineNumber: 3,
             changeType: 'remove',
+            endLineNumber: 3,
             oldContent: 'line 3\nline 4',
+            startLineNumber: 2,
         };
         const lines = ['line 1', 'line 2', 'line 3', 'line 4', 'line 5'];
         const lineMap = new Map<number, number>([
@@ -457,17 +457,17 @@ describe('removeLinesFromFile', () => {
 
         removeLinesFromFile({
             fileName,
-            lineChangeGroup: lineChangeGroup1,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup: lineChangeGroup1,
+            lineMap,
+            lines,
         });
         removeLinesFromFile({
             fileName,
-            lineChangeGroup: lineChangeGroup2,
-            lines,
-            lineMap,
             installDir,
+            lineChangeGroup: lineChangeGroup2,
+            lineMap,
+            lines,
         });
 
         expect(lines).toEqual(['line 2', 'line 5']);

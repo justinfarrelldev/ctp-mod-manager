@@ -3,18 +3,19 @@
 */
 
 import React, { FC, useState } from 'react';
+
 import { ElectronWindow, InstallDirectory } from '../App';
-import { Modal } from './Modal';
 import { FolderIcon } from './icons/folder';
-import { WrenchIcon } from './icons/wrench';
-import { TrashIcon } from './icons/trash';
 import { PlayIcon } from './icons/play';
+import { TrashIcon } from './icons/trash';
+import { WrenchIcon } from './icons/wrench';
 import { InstallationPathText } from './InstallationPathText';
+import { Modal } from './Modal';
 
 interface Props {
     installDirs: InstallDirectory[];
-    onClickModify: (dirPathBeingModified: string) => void;
     onAddedInstallDirectory: () => void;
+    onClickModify: (dirPathBeingModified: string) => void;
 }
 
 const openInstallDir = (dir: string): void => {
@@ -38,8 +39,8 @@ const removeFromInstallDirs = async (dir: string): Promise<void> => {
 
 export const InstallDirTable: FC<Props> = ({
     installDirs,
-    onClickModify,
     onAddedInstallDirectory,
+    onClickModify,
 }) => {
     const [deletePopupOpen, setDeletePopupOpen] = useState<string>('');
 
@@ -84,30 +85,30 @@ export const InstallDirTable: FC<Props> = ({
                 <div key={dir.directory}>
                     {deletePopupOpen && (
                         <Modal
-                            width="50%"
-                            open={deletePopupOpen !== ''}
-                            onClose={() => setDeletePopupOpen('')}
-                            modalName="Remove Installation From Mod Manager"
-                            text={
-                                'This will remove the installation from the "installations" list in the mod manager, but it will not delete any actual files. Are you sure you want to do this?'
-                            }
                             buttons={[
                                 {
-                                    text: 'Yes',
+                                    color: 'primary',
                                     onClick: () => {
                                         removeInstall(deletePopupOpen);
                                         setDeletePopupOpen('');
                                     },
-                                    color: 'primary',
+                                    text: 'Yes',
                                 },
                                 {
-                                    text: 'No',
+                                    color: 'neutral',
                                     onClick: () => {
                                         setDeletePopupOpen('');
                                     },
-                                    color: 'neutral',
+                                    text: 'No',
                                 },
                             ]}
+                            modalName="Remove Installation From Mod Manager"
+                            onClose={() => setDeletePopupOpen('')}
+                            open={deletePopupOpen !== ''}
+                            text={
+                                'This will remove the installation from the "installations" list in the mod manager, but it will not delete any actual files. Are you sure you want to do this?'
+                            }
+                            width="50%"
                         />
                     )}
                     <div className="flex justify-between p-6">
@@ -145,8 +146,8 @@ export const InstallDirTable: FC<Props> = ({
                             dir={dir.directory}
                             installationType={
                                 dir.installationType.toUpperCase() as
-                                    | 'steam'
                                     | 'gog'
+                                    | 'steam'
                             }
                         />
                     </div>

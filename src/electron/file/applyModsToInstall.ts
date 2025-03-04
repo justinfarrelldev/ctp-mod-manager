@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 import { DEFAULT_MOD_DIR } from '../constants';
 import { applyFileChanges, ModFileChanges } from './applyFileChanges';
 import {
@@ -5,20 +7,16 @@ import {
     getFileChangesToApplyMod,
 } from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
-import * as fs from 'fs';
 
 /**
  * Applies the queued mods to the specified installation directory.
- *
  * @param installDir - The directory of the installation where mods will be applied.
  * @param queuedMods - An array of mod names to be applied in order.
- *
  * @remarks
  * This function first checks if the provided installation directory is valid.
  * If not, it logs an error and returns. Then, it iterates over the queued mods,
  * checks if each mod is a directory, and copies its contents to the installation directory.
  * If any errors occur during the process, they are logged to the console.
- *
  * @throws Will log an error if the installation directory is invalid.
  * @throws Will log an error if a mod is not a directory.
  * @throws Will log an error if there is an issue copying the mod directory.
@@ -71,8 +69,8 @@ export const applyModsToInstall = async (
             const changes = await getFileChangesToApplyMod(mod, installDir); // TODO make this a Promise.allSettled call
 
             changesArr.push({
-                mod,
                 fileChanges: changes,
+                mod,
             });
         } catch (err) {
             console.error(
@@ -138,7 +136,7 @@ export const applyModsToInstall = async (
         };
     });
 
-    applyFileChanges({ modFileChanges: changesArr, installDir });
+    applyFileChanges({ installDir, modFileChanges: changesArr });
 
     // console.log(
     //     changesArr

@@ -1,8 +1,9 @@
-import { app } from 'electron';
-import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
-import fs from 'fs';
 import AdmZip from 'adm-zip';
+import { app } from 'electron';
+import fs from 'fs';
 import klawSync from 'klaw-sync';
+
+import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
 
 export const unzipInModDir = async (
     zipFullPath: string,
@@ -34,10 +35,8 @@ export const unzipInModDir = async (
 
 /**
  * Finds and returns an array of directory paths that contain the "ctp2_data" folder within the specified directory.
- *
  * @param dir - The root directory to search within.
  * @returns An array of strings representing the paths to the "ctp2_data" folders found within the specified directory.
- *
  * @throws Will log an error message if an error occurs during the search process.
  */
 const findGameRootsWithinDir = (dir: string): string[] => {
@@ -62,7 +61,6 @@ const findGameRootsWithinDir = (dir: string): string[] => {
 
 /**
  * Finds all zip files in the specified directory.
- *
  * @param dir - The directory to search for zip files.
  * @returns An array of paths to the zip files found in the directory.
  * @throws Will log an error message if an error occurs during the search.
@@ -81,10 +79,9 @@ const findZipFilesInDir = (dir: string): string[] => {
 
 /**
  * Extracts the contents of a zip file to the specified target directory asynchronously.
- *
- * @param {AdmZip} zip - The zip file to extract.
- * @param {string} targetPath - The path to the directory where the contents should be extracted.
- * @returns {Promise<void>} A promise that resolves when the extraction is complete.
+ * @param zip - The zip file to extract.
+ * @param targetPath - The path to the directory where the contents should be extracted.
+ * @returns A promise that resolves when the extraction is complete.
  */
 const extract = (zip: AdmZip, targetPath: string): Promise<void> => {
     return new Promise((resolve) => {
@@ -104,7 +101,6 @@ const extract = (zip: AdmZip, targetPath: string): Promise<void> => {
  *
  * This function searches through every folder for zip files, extracting them as they are found.
  * If no zip files are found, it quits with success and moves on to the next step of the process.
- *
  * @param destination - The path to the directory where the search for zip files will begin.
  * @returns A promise that resolves when all zip files have been extracted.
  */
@@ -132,10 +128,8 @@ const unzipAllFiles = async (destination: string): Promise<void> => {
 
 /**
  * Copies multiple data folders to the specified mod directory.
- *
  * @param dirs - An array of directory paths to be copied.
  * @param modDir - The target mod directory where the data folders will be copied.
- *
  * @remarks
  * If the `dirs` array is empty, the function will return immediately without performing any operations.
  * After copying the data folders, the function will remove the target mod directory if it exists.
@@ -147,14 +141,13 @@ const copyDataFoldersToModDirs = (dirs: string[], modDir: string): void => {
     });
 
     fs.rmSync(modDir.replace('.zip', ''), {
-        recursive: true,
         force: true,
+        recursive: true,
     });
 };
 
 /**
  * Copies the contents of a directory ending with 'ctp2_data' to a mod directory.
- *
  * @param dir - The directory path that ends with 'ctp2_data'.
  * @throws Will throw an error if the directory does not end with 'ctp2_data'.
  *
@@ -190,7 +183,6 @@ const copyDataFolderToModDir = (dir: string): void => {
 
 /**
  * Copies a file to the mod directory, unzips it, and processes its contents.
- *
  * @param fileDir - The directory of the file to be copied.
  *
  * This function performs the following steps:
@@ -201,7 +193,6 @@ const copyDataFolderToModDir = (dir: string): void => {
  * 5. Unzips all files within the destination directory.
  * 6. Finds game root directories within the unzipped contents.
  * 7. Copies the data folders to the mod directories.
- *
  * @throws Will log an error if there is an issue getting the stats for the directory.
  */
 export const copyFileToModDir = async (fileDir: string) => {
@@ -235,7 +226,6 @@ export const copyFileToModDir = async (fileDir: string) => {
 
 /**
  * Creates a folder in the application's AppData directory with the specified name.
- *
  * @param name - The name of the folder to create.
  * @throws Will throw an error if there is an issue getting the app path or creating the folder.
  */

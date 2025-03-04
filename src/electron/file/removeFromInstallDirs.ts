@@ -1,8 +1,9 @@
 import * as fs from 'fs';
+
 import { DEFAULT_INSTALLS_FILE } from '../constants';
 import {
-    ensureInstallsFolderExists,
     ensureInstallFileExists,
+    ensureInstallsFolderExists,
     parseInstallFileIntoJSON,
 } from './addToInstallDirs';
 

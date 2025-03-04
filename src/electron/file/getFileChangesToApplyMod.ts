@@ -1,22 +1,22 @@
-import { DEFAULT_MOD_DIR } from '../constants';
+import { Change, diffLines } from 'diff';
 import fs from 'node:fs';
-import { diffLines, Change } from 'diff';
+import pLimit from 'p-limit';
+
+import { DEFAULT_MOD_DIR } from '../constants';
 import { diffDirectories } from './diffDirectories';
-import { readDirectory } from './readDirectory';
 import { FileChange } from './fileChange';
 import {
     LineChangeGroup,
-    LineChangeGroupRemove,
     LineChangeGroupAdd,
+    LineChangeGroupRemove,
 } from './lineChangeGroup';
-import pLimit from 'p-limit';
+import { readDirectory } from './readDirectory';
 
 export const CHUNK_SIZE = 5000; // 5KB chunks for text diffing
 
 /**
  * Splits a given text into chunks of a specified maximum size.
  * Each chunk will contain complete lines and will not exceed the CHUNK_SIZE.
- *
  * @param text - The input text to be split into chunks.
  * @returns An array of strings, where each string is a chunk of the original text.
  */
@@ -50,11 +50,9 @@ export const splitIntoChunks = (text: string): string[] => {
 
 /**
  * Asynchronously computes the line-by-line differences between two strings.
- *
  * @param text1 - The first string to compare.
  * @param text2 - The second string to compare.
  * @returns A promise that resolves to an array of changes.
- *
  * @remarks
  * This function uses the `diffLines` method to compute the differences. The `newlineIsToken` option is set to `true`.
  * The callback function's first parameter is an undocumented and always undefined value, which is ignored.
@@ -66,12 +64,12 @@ const diffLinesAsync = async (
 ): Promise<Change[]> => {
     return new Promise<Change[]>((resolve) => {
         diffLines(text1, text2, {
-            newlineIsToken: true,
             // no idea why this "error" value ('_') is a) undocumented and b) always undefined,
             // but here we are
             callback: (_: undefined, result: Change[]) => {
                 resolve(result);
             },
+            newlineIsToken: true,
         });
     });
 };
@@ -82,7 +80,6 @@ const diffLinesAsync = async (
  * This function compares two text strings and returns an array of changes that represent
  * the differences between the two texts. For small strings, it uses `diffLines` directly.
  * For larger strings, it splits them into chunks and processes them concurrently.
- *
  * @param text1 - The first text string to compare.
  * @param text2 - The second text string to compare.
  * @returns A promise that resolves to an array of `Change` objects representing the differences.
@@ -118,8 +115,8 @@ export const diffTexts = async (
                     Promise.resolve([
                         {
                             count: chunks1[i].split('\n').length,
-                            value: chunks1[i],
                             removed: true,
+                            value: chunks1[i],
                         },
                     ])
                 )
@@ -131,9 +128,9 @@ export const diffTexts = async (
                 limit(() =>
                     Promise.resolve([
                         {
+                            added: true,
                             count: chunks2[i].split('\n').length,
                             value: chunks2[i],
-                            added: true,
                         },
                     ])
                 )
@@ -148,7 +145,6 @@ export const diffTexts = async (
 
 /**
  * Consolidates line change groups by merging matching remove/add pairs into replace operations.
- *
  * @param groups - An array of `LineChangeGroup` objects representing line changes.
  * @returns An array of `LineChangeGroup` objects with consolidated changes.
  *
@@ -199,11 +195,11 @@ export const consolidateLineChangeGroups = (
                     ) {
                         result.push({
                             changeType: 'replace',
-                            startLineNumber: current.startLineNumber,
                             endLineNumber: current.endLineNumber,
+                            newContent: (next as LineChangeGroupAdd).newContent,
                             oldContent: (current as LineChangeGroupRemove)
                                 .oldContent,
-                            newContent: (next as LineChangeGroupAdd).newContent,
+                            startLineNumber: current.startLineNumber,
                         });
                     } else if (
                         current.changeType === 'add' &&
@@ -211,12 +207,12 @@ export const consolidateLineChangeGroups = (
                     ) {
                         result.push({
                             changeType: 'replace',
-                            startLineNumber: current.startLineNumber,
                             endLineNumber: current.endLineNumber,
-                            oldContent: (next as LineChangeGroupRemove)
-                                .oldContent,
                             newContent: (current as LineChangeGroupAdd)
                                 .newContent,
+                            oldContent: (next as LineChangeGroupRemove)
+                                .oldContent,
+                            startLineNumber: current.startLineNumber,
                         });
                     }
                     usedIndices.add(j);
@@ -237,10 +233,9 @@ export const consolidateLineChangeGroups = (
 
 /**
  * Asynchronously retrieves the file changes required to apply a mod to the game directory.
- *
- * @param {string} mod - The name of the mod to be applied.
- * @param {string} installDir - The directory where the game is installed.
- * @returns {Promise<FileChange[]>} A promise that resolves to an array of file changes required to apply the mod.
+ * @param mod - The name of the mod to be applied.
+ * @param installDir - The directory where the game is installed.
+ * @returns A promise that resolves to an array of file changes required to apply the mod.
  *
  * This function performs the following steps:
  * 1. Retrieves the file statistics for the specified mod directory.
@@ -302,8 +297,8 @@ export const getFileChangesToApplyMod = async (
             changes to deduce incompatible files. This can be done with as many mods as we like...
             */
             result = diffDirectories({
-                oldDir: gameDirStructure,
                 newDir: modDirStructure,
+                oldDir: gameDirStructure,
             });
         } catch (err) {
             console.error(

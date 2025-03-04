@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
 import Cookie from 'js-cookie';
+import React, { FC, useEffect, useState } from 'react';
 import { themeChange } from 'theme-change';
 
 // TODO finish this after configuring the proper locations within the Electron-side

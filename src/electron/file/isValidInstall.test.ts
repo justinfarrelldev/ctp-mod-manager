@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'fs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { isValidInstall } from './isValidInstall';
 
 vi.mock('fs');
@@ -11,7 +12,7 @@ describe('isValidInstall', () => {
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce(['ctp2_data']); // Return the mock value
 
         const result = await isValidInstall('/game');
-        expect(result).toBe(true);
+        expect(result).toBeTruthy();
     });
 
     it('should return false if directory is empty', async () => {
@@ -19,7 +20,7 @@ describe('isValidInstall', () => {
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]); // Simulate empty directory
 
         const result = await isValidInstall('/game');
-        expect(result).toBe(false);
+        expect(result).toBeFalsy();
     });
 
     it('should handle multiple directories and return true if ctp2_data exists', async () => {
@@ -32,7 +33,7 @@ describe('isValidInstall', () => {
         ]); // Return the mock value
 
         const result = await isValidInstall('/game');
-        expect(result).toBe(true);
+        expect(result).toBeTruthy();
     });
 
     it('should handle multiple directories and return false if ctp2_data does not exist', async () => {
@@ -45,6 +46,6 @@ describe('isValidInstall', () => {
         ]); // Simulate non-existing directory
 
         const result = await isValidInstall('/game');
-        expect(result).toBe(false);
+        expect(result).toBeFalsy();
     });
 });

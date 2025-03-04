@@ -1,29 +1,30 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { isBinaryFile } from './isBinaryFile';
 
 describe('isBinaryFile', () => {
     it('should return true for a file with a special extension', () => {
-        expect(isBinaryFile('example.tga')).toBe(true);
-        expect(isBinaryFile('example.PDF')).toBe(true);
-        expect(isBinaryFile('example.exe')).toBe(true);
+        expect(isBinaryFile('example.tga')).toBeTruthy();
+        expect(isBinaryFile('example.PDF')).toBeTruthy();
+        expect(isBinaryFile('example.exe')).toBeTruthy();
     });
 
     it('should return false for a file without a special extension', () => {
-        expect(isBinaryFile('example.txt')).toBe(false);
-        expect(isBinaryFile('example.doc')).toBe(false);
-        expect(isBinaryFile('example.png')).toBe(false);
+        expect(isBinaryFile('example.txt')).toBeFalsy();
+        expect(isBinaryFile('example.doc')).toBeFalsy();
+        expect(isBinaryFile('example.png')).toBeFalsy();
     });
 
     it('should handle file paths with mixed case extensions', () => {
-        expect(isBinaryFile('example.TiF')).toBe(true);
-        expect(isBinaryFile('example.GiF')).toBe(true);
+        expect(isBinaryFile('example.TiF')).toBeTruthy();
+        expect(isBinaryFile('example.GiF')).toBeTruthy();
     });
 
     it('should return false for a file with no extension', () => {
-        expect(isBinaryFile('example')).toBe(false);
+        expect(isBinaryFile('example')).toBeFalsy();
     });
 
     it('should return false for a file with an unknown extension', () => {
-        expect(isBinaryFile('example.unknown')).toBe(false);
+        expect(isBinaryFile('example.unknown')).toBeFalsy();
     });
 });

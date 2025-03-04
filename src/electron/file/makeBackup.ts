@@ -1,10 +1,11 @@
+import AdmZip from 'adm-zip';
 import * as fs from 'fs';
+
 import {
     DEFAULT_BACKUPS_FOLDER,
     DEFAULT_BACKUPS_FOLDER_NAME,
 } from '../constants';
 import { createAppDataFolder } from './copyFileToModDir';
-import AdmZip from 'adm-zip';
 
 export const selectivelyAddBackupsFolder = async (): Promise<void> => {
     let stats: fs.Stats | undefined;
@@ -27,10 +28,8 @@ export const selectivelyAddBackupsFolder = async (): Promise<void> => {
 /**
  * Creates a backup of the specified installation directory by zipping its contents
  * and saving the zip file in the backups folder.
- *
  * @param installDir - The directory to back up.
  * @returns A promise that resolves when the backup is complete.
- *
  * @throws Will log an error message if an error occurs during the zipping process.
  */
 export const makeBackup = async (installDir: string): Promise<void> => {

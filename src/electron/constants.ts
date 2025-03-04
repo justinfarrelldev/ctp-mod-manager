@@ -28,4 +28,4 @@ export const DEFAULT_BACKUPS_FOLDER = `${app.getPath(
     'appData'
 )}\\${app.getName()}\\${DEFAULT_BACKUPS_FOLDER_NAME}`;
 
-export { DEFAULT_MOD_DIR, DEFAULT_INSTALLS_DIR };
+export { DEFAULT_INSTALLS_DIR, DEFAULT_MOD_DIR };

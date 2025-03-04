@@ -9,25 +9,15 @@ import {
     LineChangeGroupRemove,
     LineChangeGroupReplace,
 } from './lineChangeGroup';
+import { ModApplicationError } from './modApplicationError';
+import { ModsIncompatibleError } from './modsIncompatibleError';
 
 export type ModFileChanges = {
     fileChanges: FileChange[];
     mod: string;
 };
 
-export class ModApplicationError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'ModsApplicationError';
-    }
-}
 
-export class ModsIncompatibleError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'ModsIncompatibleError';
-    }
-}
 
 /**
  * Checks if there are any conflicting line change groups within the provided file changes.
@@ -379,16 +369,14 @@ export const replaceLinesInFile = ({
  * fileChanges - An array of file changes.
  * mod - The name or identifier of the mod.
  * FileChange - Represents a change to a file.
- * @property {string} fileName - The name of the file to be changed.
- *
- * @typedef {Object} LineChangeGroup - Represents a group of line changes.
- * @property {string} changeType - The type of change ('add', 'remove', 'replace').
- * @property {number} startLineNumber - The starting line number for the change.
- * @property {number} endLineNumber - The ending line number for the change.
- * @property {string} newContent - The new content to be added or replaced.
- *
- * @typedef {Object} TextFileChange - Represents a text file change.
- * @property {LineChangeGroup[]} lineChangeGroups - An array of line change groups.
+ * fileName - The name of the file to be changed.
+ * LineChangeGroup - Represents a group of line changes.
+ * changeType - The type of change ('add', 'remove', 'replace').
+ * startLineNumber - The starting line number for the change.
+ * endLineNumber - The ending line number for the change.
+ * newContent - The new content to be added or replaced.
+ * TextFileChange - Represents a text file change.
+ * lineChangeGroups - An array of line change groups.
  */
 export const applyModFileChanges = ({
     installDir,

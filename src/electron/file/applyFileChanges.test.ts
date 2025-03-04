@@ -3,12 +3,12 @@ import { describe, expect, it } from 'vitest';
 import {
     applyFileChanges,
     areFileChangesValid,
-    ModApplicationError,
-    ModsIncompatibleError,
     textFileChangesAreConflicting,
 } from './applyFileChanges';
 import { FileChange, TextFileChange } from './fileChange';
 import { LineChangeGroup } from './lineChangeGroup';
+import { ModApplicationError } from './modApplicationError';
+import { ModsIncompatibleError } from './modsIncompatibleError';
 
 describe('areFileChangesValid', () => {
     it('should return true for non-overlapping changes', () => {

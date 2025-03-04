@@ -1,14 +1,14 @@
 import * as fs from 'fs';
 import { describe, expect, it, vi } from 'vitest';
 
-import { addLinesToFile , removeLinesFromFile } from './applyFileChanges';
-import { LineChangeGroupAdd , LineChangeGroupRemove } from './lineChangeGroup';
-
+import { addLinesToFile, removeLinesFromFile } from './applyFileChanges';
+import { LineChangeGroupAdd, LineChangeGroupRemove } from './lineChangeGroup';
 
 vi.mock('fs');
 
 describe('addLinesToFile', () => {
     it('should add lines at the specified line numbers', () => {
+        expect.hasAssertions();
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
             changeType: 'add',
@@ -28,7 +28,7 @@ describe('addLinesToFile', () => {
             lines,
         });
 
-        expect(lines).toEqual([
+        expect(lines).toStrictEqual([
             'line 1',
             'line 2',
             'new line 1',
@@ -46,6 +46,8 @@ describe('addLinesToFile', () => {
     vi.mock('fs');
 
     it('should add lines to the end of the file if endLineNumber is greater than file length', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
             changeType: 'add',
@@ -65,7 +67,7 @@ describe('addLinesToFile', () => {
             lines,
         });
 
-        expect(lines).toEqual([
+        expect(lines).toStrictEqual([
             'line 1',
             'line 2',
             'line 3',
@@ -81,6 +83,8 @@ describe('addLinesToFile', () => {
     });
 
     it('should update the lineMap correctly', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
             changeType: 'add',
@@ -105,7 +109,7 @@ describe('addLinesToFile', () => {
             lines,
         });
 
-        expect(lineMap).toEqual(
+        expect(lineMap).toStrictEqual(
             new Map<number, number>([
                 [0, 0],
                 [1, 3],
@@ -121,6 +125,8 @@ describe('addLinesToFile', () => {
     });
 
     it('should correctly update the lineMap when adding lines at the beginning of the file', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
             changeType: 'add',
@@ -145,7 +151,7 @@ describe('addLinesToFile', () => {
             lines,
         });
 
-        expect(lineMap).toEqual(
+        expect(lineMap).toStrictEqual(
             new Map<number, number>([
                 [0, 2],
                 [1, 3],
@@ -161,6 +167,8 @@ describe('addLinesToFile', () => {
     });
 
     it('should correctly update the lineMap when adding lines in the middle of the file', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupAdd = {
             changeType: 'add',
@@ -185,7 +193,7 @@ describe('addLinesToFile', () => {
             lines,
         });
 
-        expect(lineMap).toEqual(
+        expect(lineMap).toStrictEqual(
             new Map<number, number>([
                 [0, 0],
                 [1, 1],
@@ -200,6 +208,8 @@ describe('addLinesToFile', () => {
         );
     });
     it('should correctly apply multiple add changes and update the lineMap', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         // Using 1-based indexing: the insertion point to insert after line 2 is 3
         const lineChangeGroup1: LineChangeGroupAdd = {
@@ -241,7 +251,7 @@ describe('addLinesToFile', () => {
             lines,
         });
 
-        expect(lines).toEqual([
+        expect(lines).toStrictEqual([
             'line 1',
             'line 2',
             'new line 1',
@@ -250,7 +260,7 @@ describe('addLinesToFile', () => {
             'new line 3',
             'line 4',
         ]);
-        expect(lineMap).toEqual(
+        expect(lineMap).toStrictEqual(
             new Map<number, number>([
                 [1, 1],
                 [2, 3],
@@ -269,6 +279,8 @@ vi.mock('fs');
 
 describe('removeLinesFromFile', () => {
     it('should remove lines at the specified line numbers', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
             changeType: 'remove',
@@ -293,7 +305,7 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lines).toEqual(['line 1', 'line 4']);
+        expect(lines).toStrictEqual(['line 1', 'line 4']);
         expect(fs.writeFileSync).toHaveBeenCalledWith(
             `${installDir}\\${fileName}`,
             lines.join('\n'),
@@ -302,6 +314,8 @@ describe('removeLinesFromFile', () => {
     });
 
     it('should throw an error if endLineNumber exceeds file length', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
             changeType: 'remove',
@@ -332,6 +346,8 @@ describe('removeLinesFromFile', () => {
     });
 
     it('should update the lineMap correctly after removing lines', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
             changeType: 'remove',
@@ -356,7 +372,7 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lineMap).toEqual(
+        expect(lineMap).toStrictEqual(
             new Map<number, number>([
                 [0, 0],
                 [3, 1],
@@ -365,6 +381,8 @@ describe('removeLinesFromFile', () => {
     });
 
     it('should correctly update the lineMap when removing lines from the beginning of the file', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
             changeType: 'remove',
@@ -389,7 +407,7 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lineMap).toEqual(
+        expect(lineMap).toStrictEqual(
             new Map<number, number>([
                 [2, 0],
                 [3, 1],
@@ -398,6 +416,8 @@ describe('removeLinesFromFile', () => {
     });
 
     it('should correctly update the lineMap when removing lines from the middle of the file', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup: LineChangeGroupRemove = {
             changeType: 'remove',
@@ -422,7 +442,7 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lineMap).toEqual(
+        expect(lineMap).toStrictEqual(
             new Map<number, number>([
                 [0, 0],
                 [1, 1],
@@ -432,6 +452,8 @@ describe('removeLinesFromFile', () => {
     });
 
     it('should correctly apply multiple remove changes and update the lineMap', () => {
+        expect.hasAssertions();
+
         const fileName = 'testFile.txt';
         const lineChangeGroup1: LineChangeGroupRemove = {
             changeType: 'remove',
@@ -470,8 +492,8 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lines).toEqual(['line 2', 'line 5']);
-        expect(lineMap).toEqual(
+        expect(lines).toStrictEqual(['line 2', 'line 5']);
+        expect(lineMap).toStrictEqual(
             new Map<number, number>([
                 [1, 0],
                 [4, 1],

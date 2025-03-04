@@ -297,7 +297,7 @@ describe('removeLinesFromFile', () => {
         ]);
         const installDir = 'C:\\fakeInstallDir';
 
-        removeLinesFromFile({
+        const { lines: newLines } = removeLinesFromFile({
             fileName,
             installDir,
             lineChangeGroup,
@@ -305,10 +305,10 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lines).toStrictEqual(['line 1', 'line 4']);
+        expect(newLines).toStrictEqual(['line 1', 'line 4']);
         expect(fs.writeFileSync).toHaveBeenCalledWith(
             `${installDir}\\${fileName}`,
-            lines.join('\n'),
+            newLines.join('\n'),
             'utf-8'
         );
     });
@@ -364,7 +364,7 @@ describe('removeLinesFromFile', () => {
         ]);
         const installDir = 'C:\\fakeInstallDir';
 
-        removeLinesFromFile({
+        const { lineMap: newLineMap } = removeLinesFromFile({
             fileName,
             installDir,
             lineChangeGroup,
@@ -372,7 +372,7 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lineMap).toStrictEqual(
+        expect(newLineMap).toStrictEqual(
             new Map<number, number>([
                 [0, 0],
                 [3, 1],
@@ -399,7 +399,7 @@ describe('removeLinesFromFile', () => {
         ]);
         const installDir = 'C:\\fakeInstallDir';
 
-        removeLinesFromFile({
+        const { lineMap: newLineMap } = removeLinesFromFile({
             fileName,
             installDir,
             lineChangeGroup,
@@ -407,7 +407,7 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lineMap).toStrictEqual(
+        expect(newLineMap).toStrictEqual(
             new Map<number, number>([
                 [2, 0],
                 [3, 1],
@@ -434,7 +434,7 @@ describe('removeLinesFromFile', () => {
         ]);
         const installDir = 'C:\\fakeInstallDir';
 
-        removeLinesFromFile({
+        const { lineMap: newLineMap } = removeLinesFromFile({
             fileName,
             installDir,
             lineChangeGroup,
@@ -442,7 +442,7 @@ describe('removeLinesFromFile', () => {
             lines,
         });
 
-        expect(lineMap).toStrictEqual(
+        expect(newLineMap).toStrictEqual(
             new Map<number, number>([
                 [0, 0],
                 [1, 1],
@@ -477,23 +477,23 @@ describe('removeLinesFromFile', () => {
         ]);
         const installDir = 'C:\\fakeInstallDir';
 
-        removeLinesFromFile({
+        const { lineMap: newLineMap, lines: newLines } = removeLinesFromFile({
             fileName,
             installDir,
             lineChangeGroup: lineChangeGroup1,
             lineMap,
             lines,
         });
-        removeLinesFromFile({
+        const { lineMap: newLineMap2, lines: newLines2 } = removeLinesFromFile({
             fileName,
             installDir,
             lineChangeGroup: lineChangeGroup2,
-            lineMap,
-            lines,
+            lineMap: newLineMap,
+            lines: newLines,
         });
 
-        expect(lines).toStrictEqual(['line 2', 'line 5']);
-        expect(lineMap).toStrictEqual(
+        expect(newLines2).toStrictEqual(['line 2', 'line 5']);
+        expect(newLineMap2).toStrictEqual(
             new Map<number, number>([
                 [1, 0],
                 [4, 1],
@@ -501,7 +501,7 @@ describe('removeLinesFromFile', () => {
         );
         expect(fs.writeFileSync).toHaveBeenCalledWith(
             `${installDir}\\${fileName}`,
-            lines.join('\n'),
+            newLines2.join('\n'),
             'utf-8'
         );
     });

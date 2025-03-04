@@ -1,5 +1,4 @@
 import AdmZip from 'adm-zip';
-import fs from 'fs';
 import { afterAll, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_MOD_DIR } from '../constants';
@@ -20,6 +19,7 @@ describe('unzipInModDir', () => {
     });
 
     it('should extract the zip file to the correct directory', async () => {
+        expect.assertions(1);
         const mockExtractAllToAsync = vi.fn((_, __, ___, callback) =>
             callback()
         );
@@ -41,6 +41,7 @@ describe('unzipInModDir', () => {
     });
 
     it('should log an error if extraction fails', async () => {
+        expect.assertions(1);
         const mockExtractAllToAsync = vi.fn((_, __, ___, callback) =>
             callback(new Error('extract error'))
         );
@@ -52,6 +53,7 @@ describe('unzipInModDir', () => {
         );
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             .mockImplementation(() => {});
 
         await unzipInModDir('/path/to/zipfile.zip', 'zipfile.zip');
@@ -62,11 +64,13 @@ describe('unzipInModDir', () => {
     });
 
     it('should log an error if zip file creation fails', async () => {
+        expect.assertions(1);
         vi.mocked(AdmZip).mockImplementationOnce(() => {
             throw new Error('zip creation error');
         });
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             .mockImplementation(() => {});
 
         await unzipInModDir('/path/to/zipfile.zip', 'zipfile.zip');

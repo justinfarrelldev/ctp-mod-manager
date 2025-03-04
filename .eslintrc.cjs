@@ -170,6 +170,7 @@ module.exports = {
                 'functional/no-expression-statements': 'off',
                 'functional/no-let': 'off',
                 'functional/no-return-void': 'off',
+                'functional/no-throw-statements': 'off',
                 'no-undef': 'off',
                 'no-unused-vars': 'off',
                 'vitest/no-hooks': 'off',

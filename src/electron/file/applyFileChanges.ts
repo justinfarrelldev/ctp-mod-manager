@@ -189,13 +189,14 @@ type NewLinesAndLineMap = {
 };
 
 /**
- * Adds lines to a file at the specified line numbers.
+ * Adds lines to a file at the specified line numbers and updates the lineMap accordingly.
  * @param params - The parameters for the function.
  * @param params.fileName - The name of the file to modify.
  * @param params.lineChangeGroup - The line change group containing the lines to add.
  * @param params.lines - The current content of the file as an array of lines.
  * @param params.lineMap - A map of original line numbers to current line numbers.
  * @param params.installDir - The directory where the files are installed.
+ * @returns An object containing the updated lineMap and lines.
  *
  * This function adds the lines specified in the line change group to the file.
  * If the specified lines exceed the current length of the file, the new lines are appended.
@@ -257,6 +258,7 @@ export const addLinesToFile = ({
  * @param params.lines - The current content of the file as an array of lines.
  * @param params.lineMap - A map of original line numbers to current line numbers.
  * @param params.installDir - The directory where the files are installed.
+ * @returns An object containing the updated lineMap and lines.
  * @throws {Error} If the start or end line number does not exist in the lineMap.
  *
  * This function removes the lines specified in the line change group from the file.
@@ -355,6 +357,7 @@ export const removeLinesFromFile = ({
  * @param params.lineChangeGroup - The line change group containing the lines to replace.
  * @param params.lines - The current content of the file as an array of lines.
  * @param params.installDir - The directory where the files are installed.
+ * @returns The updated content of the file as an array of lines.
  */
 export const replaceLinesInFile = ({
     fileName,

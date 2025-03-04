@@ -2,6 +2,7 @@ import AdmZip from 'adm-zip';
 import { app } from 'electron';
 import fs from 'fs';
 import klawSync from 'klaw-sync';
+import { ReadonlyDeep } from 'type-fest';
 
 import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
 
@@ -130,11 +131,13 @@ const unzipAllFiles = async (destination: string): Promise<void> => {
  * Copies multiple data folders to the specified mod directory.
  * @param dirs - An array of directory paths to be copied.
  * @param modDir - The target mod directory where the data folders will be copied.
- * @remarks
  * If the `dirs` array is empty, the function will return immediately without performing any operations.
  * After copying the data folders, the function will remove the target mod directory if it exists.
  */
-const copyDataFoldersToModDirs = (dirs: string[], modDir: string): void => {
+const copyDataFoldersToModDirs = (
+    dirs: ReadonlyDeep<string[]>,
+    modDir: string
+): void => {
     if (dirs.length === 0) return;
     dirs.forEach((dir) => {
         copyDataFolderToModDir(dir);
@@ -195,7 +198,7 @@ const copyDataFolderToModDir = (dir: string): void => {
  * 7. Copies the data folders to the mod directories.
  * @throws Will log an error if there is an issue getting the stats for the directory.
  */
-export const copyFileToModDir = async (fileDir: string) => {
+export const copyFileToModDir = async (fileDir: string): Promise<void> => {
     const split = fileDir.split('\\');
     const fileName = split[split.length - 1];
     let stats: fs.Stats | undefined;
@@ -229,7 +232,7 @@ export const copyFileToModDir = async (fileDir: string) => {
  * @param name - The name of the folder to create.
  * @throws Will throw an error if there is an issue getting the app path or creating the folder.
  */
-export const createAppDataFolder = async (name: string) => {
+export const createAppDataFolder = async (name: string): Promise<void> => {
     let folderPath;
     try {
         folderPath = `${app.getPath('appData')}\\${app.getName()}\\${name}`;

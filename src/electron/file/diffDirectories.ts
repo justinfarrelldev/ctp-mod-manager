@@ -24,6 +24,7 @@
 
 import * as crypto from 'crypto';
 import pLimit from 'p-limit';
+import { ReadonlyDeep } from 'type-fest';
 
 import { FileChange } from './fileChange';
 import { diffTexts } from './getFileChangesToApplyMod';
@@ -61,8 +62,8 @@ const processFileChange = async (
     newFileContents: string,
     oldFileContents: string,
     fullPath: string,
-    changes: FileChange[]
-) => {
+    changes: ReadonlyDeep<FileChange[]>
+): Promise<void> => {
     const oldIsFile = typeof oldFileContents === 'string';
     const newIsFile = typeof newFileContents === 'string';
 
@@ -173,11 +174,11 @@ const processFileChange = async (
 };
 
 const processRemovedFiles = async (
-    oldDirFileNames: string[],
-    oldDir: DirectoryContents,
+    oldDirFileNames: ReadonlyDeep<string[]>,
+    oldDir: ReadonlyDeep<DirectoryContents>,
     parentPath: string | undefined,
-    changes: FileChange[]
-) => {
+    changes: ReadonlyDeep<FileChange[]>
+): Promise<void> => {
     const removedLimit = pLimit(MAX_PROMISES_ALLOWED);
 
     const removedFilesPromises = oldDirFileNames.map((fileName) =>
@@ -221,12 +222,12 @@ export const diffDirectories = async ({
     newDir,
     oldDir,
     parentPath,
-}: {
+}: ReadonlyDeep<{
     ignoreRemovedFiles?: boolean;
     newDir: DirectoryContents;
     oldDir: DirectoryContents;
     parentPath?: string;
-}): Promise<FileChange[]> => {
+}>): Promise<FileChange[]> => {
     if (oldDir === undefined) {
         oldDir = {};
     }

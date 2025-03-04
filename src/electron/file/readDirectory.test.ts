@@ -7,15 +7,17 @@ vi.mock('node:fs');
 
 describe('readDirectory', () => {
     it('should read an empty directory', () => {
+        expect.assertions(1);
         const dirPath = '/empty-dir';
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]);
 
         const result = readDirectory(dirPath);
 
-        expect(result).toEqual({});
+        expect(result).toStrictEqual({});
     });
 
     it('should read a directory with files', () => {
+        expect.assertions(1);
         const dirPath = '/dir-with-files';
 
         const files = [
@@ -49,13 +51,14 @@ describe('readDirectory', () => {
 
         const result = readDirectory(dirPath);
 
-        expect(result).toEqual({
+        expect(result).toStrictEqual({
             'file1.txt': 'Content of file1',
             'file2.txt': 'Content of file2',
         });
     });
 
     it('should handle nested directories', () => {
+        expect.hasAssertions();
         const dirPath = '/dir-with-nested';
         const subDirs = [
             {
@@ -116,7 +119,7 @@ describe('readDirectory', () => {
 
         const result = readDirectory(dirPath);
 
-        expect(result).toEqual({
+        expect(result).toStrictEqual({
             subdir1: {
                 'file1.txt': 'Content of file1',
             },

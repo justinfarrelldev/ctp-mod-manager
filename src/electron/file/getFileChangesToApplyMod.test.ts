@@ -6,7 +6,8 @@ import {
     consolidateLineChangeGroups,
     diffTexts,
     getFileChangesToApplyMod,
- splitIntoChunks } from './getFileChangesToApplyMod';
+    splitIntoChunks,
+} from './getFileChangesToApplyMod';
 import { LineChangeGroup } from './lineChangeGroup';
 
 vi.mock('electron', () => ({
@@ -18,6 +19,7 @@ vi.mock('electron', () => ({
 
 describe('consolidateLineChangeGroups', () => {
     it('should consolidate matching remove/add pairs into replace operations', () => {
+        expect.hasAssertions();
         const input: LineChangeGroup[] = [
             {
                 changeType: 'remove',
@@ -43,10 +45,12 @@ describe('consolidateLineChangeGroups', () => {
             },
         ];
 
-        expect(consolidateLineChangeGroups(input)).toEqual(expected);
+        expect(consolidateLineChangeGroups(input)).toStrictEqual(expected);
     });
 
     it('should not consolidate non-matching remove/add pairs', () => {
+        expect.hasAssertions();
+
         const input: LineChangeGroup[] = [
             {
                 changeType: 'remove',
@@ -77,10 +81,12 @@ describe('consolidateLineChangeGroups', () => {
             },
         ];
 
-        expect(consolidateLineChangeGroups(input)).toEqual(expected);
+        expect(consolidateLineChangeGroups(input)).toStrictEqual(expected);
     });
 
     it('should handle multiple matching remove/add pairs', () => {
+        expect.hasAssertions();
+
         const input: LineChangeGroup[] = [
             {
                 changeType: 'remove',
@@ -125,10 +131,12 @@ describe('consolidateLineChangeGroups', () => {
             },
         ];
 
-        expect(consolidateLineChangeGroups(input)).toEqual(expected);
+        expect(consolidateLineChangeGroups(input)).toStrictEqual(expected);
     });
 
     it('should handle non-matching changes', () => {
+        expect.hasAssertions();
+
         const input: LineChangeGroup[] = [
             {
                 changeType: 'remove',
@@ -171,18 +179,22 @@ describe('consolidateLineChangeGroups', () => {
             },
         ];
 
-        expect(consolidateLineChangeGroups(input)).toEqual(expected);
+        expect(consolidateLineChangeGroups(input)).toStrictEqual(expected);
     });
 
     it('should handle empty input', () => {
+        expect.hasAssertions();
+
         const input: LineChangeGroup[] = [];
 
         const expected: LineChangeGroup[] = [];
 
-        expect(consolidateLineChangeGroups(input)).toEqual(expected);
+        expect(consolidateLineChangeGroups(input)).toStrictEqual(expected);
     });
 
     it('should consolidate 6 file changes (flattened) into 3 replace operations with the expected content', () => {
+        expect.hasAssertions();
+
         const fileChanges = [
             {
                 fileName: 'ctp2_data/default/gamedata/Colors00.txt',
@@ -302,11 +314,13 @@ describe('consolidateLineChangeGroups', () => {
         ];
 
         // Ensure that we get 3 consolidated line change groups and all of them are "replace" types.
-        expect(consolidated).toEqual(expected);
+        expect(consolidated).toStrictEqual(expected);
     });
 });
 describe('diffTexts', () => {
     it('should compute diff for small texts with a single line change', async () => {
+        expect.hasAssertions();
+
         const text1 = 'Line1\nLine2\nLine3\n';
         const text2 = 'Line1\nChangedLine2\nLine3\n';
         const changes = await diffTexts(text1, text2);
@@ -319,6 +333,8 @@ describe('diffTexts', () => {
 
     describe('diffTexts', () => {
         it('should compute diff for small texts with a single line change', async () => {
+            expect.hasAssertions();
+
             const text1 = 'Line1\nLine2\nLine3\n';
             const text2 = 'Line1\nChangedLine2\nLine3\n';
             const changes = await diffTexts(text1, text2);
@@ -330,6 +346,8 @@ describe('diffTexts', () => {
         });
 
         it('should compute diff for large texts (between 20 and 40 KB each)', async () => {
+            expect.hasAssertions();
+
             // Generate a large text with ~3000 lines (approx 30KB)
             const numLines = 3000;
             const baseLines = Array.from(
@@ -356,6 +374,8 @@ describe('diffTexts', () => {
         });
 
         it('should compute diff for very large texts (between 40 and 60 KB each)', async () => {
+            expect.hasAssertions();
+
             // Generate a very large text with ~6000 lines (approx 60KB)
             const numLines = 6000;
             const baseLines = Array.from(
@@ -382,6 +402,8 @@ describe('diffTexts', () => {
         });
 
         it('should compute diff for small text with large text', async () => {
+            expect.hasAssertions();
+
             const smallText = 'Line1\nLine2\nLine3\n';
 
             // Generate a large text with ~3000 lines (approx 30KB)
@@ -400,6 +422,8 @@ describe('diffTexts', () => {
         });
 
         it('should compute diff for large text with small text', async () => {
+            expect.hasAssertions();
+
             const smallText = 'Line1\nLine2\nLine3\n';
 
             // Generate a large text with ~3000 lines (approx 30KB)
@@ -418,6 +442,8 @@ describe('diffTexts', () => {
         });
 
         it('should compute diff for texts with different sizes', async () => {
+            expect.hasAssertions();
+
             // Generate a medium text with ~1500 lines (approx 15KB)
             const numLinesMedium = 1500;
             const baseLinesMedium = Array.from(
@@ -443,15 +469,19 @@ describe('diffTexts', () => {
     });
     describe('splitIntoChunks', () => {
         it('should split text into chunks of specified size', () => {
+            expect.hasAssertions();
+
             const text = 'Line1\nLine2\nLine3\nLine4\nLine5\n';
             const chunks = splitIntoChunks(text);
             expect(chunks.length).toBeGreaterThan(0);
-            expect(chunks.every((chunk) => chunk.length <= CHUNK_SIZE)).toBeTruthy(
-                
-            );
+            expect(
+                chunks.every((chunk) => chunk.length <= CHUNK_SIZE)
+            ).toBeTruthy();
         });
 
         it('should handle text smaller than chunk size', () => {
+            expect.hasAssertions();
+
             const text = 'Line1\nLine2\n';
             const chunks = splitIntoChunks(text);
             expect(chunks).toHaveLength(1);
@@ -459,6 +489,8 @@ describe('diffTexts', () => {
         });
 
         it('should handle text exactly equal to chunk size', () => {
+            expect.hasAssertions();
+
             const text = 'A'.repeat(CHUNK_SIZE);
             const chunks = splitIntoChunks(text);
             expect(chunks).toHaveLength(1);
@@ -466,12 +498,14 @@ describe('diffTexts', () => {
         });
 
         it('should handle text larger than chunk size', () => {
+            expect.hasAssertions();
+
             // Create text with multiple lines that exceeds the chunk size
             const lineSize = 100; // Size of each line
             const linesInFirstChunk = Math.floor(CHUNK_SIZE / (lineSize + 1)); // +1 for newline
             const totalLines = linesInFirstChunk + 5; // Add some extra lines for second chunk
 
-            const lines = Array.from({ length: totalLines }, (_, i) =>
+            const lines = Array.from({ length: totalLines }, () =>
                 'A'.repeat(lineSize)
             );
             const text = lines.join('\n');
@@ -485,6 +519,8 @@ describe('diffTexts', () => {
 
     describe('diffTexts', () => {
         it('should compute diff for small texts with a single line change', async () => {
+            expect.hasAssertions();
+
             const text1 = 'Line1\nLine2\nLine3\n';
             const text2 = 'Line1\nChangedLine2\nLine3\n';
             const changes = await diffTexts(text1, text2);
@@ -495,6 +531,8 @@ describe('diffTexts', () => {
         });
 
         it('should compute diff for large texts (between 20 and 40 KB each)', async () => {
+            expect.hasAssertions();
+
             const numLines = 3000;
             const baseLines = Array.from(
                 { length: numLines },
@@ -514,6 +552,8 @@ describe('diffTexts', () => {
         });
 
         it('should compute diff for very large texts (between 40 and 60 KB each)', async () => {
+            expect.hasAssertions();
+
             const numLines = 6000;
             const baseLines = Array.from(
                 { length: numLines },
@@ -535,6 +575,8 @@ describe('diffTexts', () => {
 
     describe('getFileChangesToApplyMod', () => {
         it('should return an empty array if the mod directory does not exist', async () => {
+            expect.hasAssertions();
+
             vi.spyOn(fs, 'statSync').mockImplementation(() => {
                 throw new Error('Directory does not exist');
             });
@@ -542,10 +584,12 @@ describe('diffTexts', () => {
                 'nonexistent-mod',
                 '/install/dir'
             );
-            expect(changes).toEqual([]);
+            expect(changes).toStrictEqual([]);
         });
 
         it('should return an empty array if the mod path is not a directory', async () => {
+            expect.hasAssertions();
+
             vi.spyOn(fs, 'statSync').mockReturnValue({
                 isDirectory: () => false,
             } as fs.Stats);
@@ -553,9 +597,11 @@ describe('diffTexts', () => {
                 'not-a-directory',
                 '/install/dir'
             );
-            expect(changes).toEqual([]);
+            expect(changes).toStrictEqual([]);
         });
         it('should return an empty array if the mod directory does not exist', async () => {
+            expect.hasAssertions();
+
             vi.spyOn(fs, 'statSync').mockImplementation(() => {
                 throw new Error('Directory does not exist');
             });
@@ -563,10 +609,12 @@ describe('diffTexts', () => {
                 'nonexistent-mod',
                 '/install/dir'
             );
-            expect(changes).toEqual([]);
+            expect(changes).toStrictEqual([]);
         });
 
         it('should return an empty array if the mod path is not a directory', async () => {
+            expect.hasAssertions();
+
             vi.spyOn(fs, 'statSync').mockReturnValue({
                 isDirectory: () => false,
             } as fs.Stats);
@@ -574,10 +622,12 @@ describe('diffTexts', () => {
                 'not-a-directory',
                 '/install/dir'
             );
-            expect(changes).toEqual([]);
+            expect(changes).toStrictEqual([]);
         });
 
         it('should handle empty mod directory', async () => {
+            expect.hasAssertions();
+
             vi.spyOn(fs, 'statSync').mockReturnValue({
                 isDirectory: () => true,
             } as fs.Stats);
@@ -587,7 +637,7 @@ describe('diffTexts', () => {
                 'empty-mod',
                 '/install/dir'
             );
-            expect(changes).toEqual([]);
+            expect(changes).toStrictEqual([]);
         });
     });
 });

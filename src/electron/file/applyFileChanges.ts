@@ -37,7 +37,7 @@ export const textFileChangesAreConflicting = (
         if (!fileDiffMap.has(fileName)) {
             fileDiffMap.set(fileName, new Map<number, number>());
         }
-        const diff = fileDiffMap.get(fileName)!;
+        const diff = fileDiffMap.get(fileName);
         for (const group of lineChangeGroups) {
             // Increment at the start line.
             diff.set(
@@ -56,7 +56,7 @@ export const textFileChangesAreConflicting = (
         const sortedPositions = Array.from(diff.keys()).sort((a, b) => a - b);
         let activeIntervals = 0;
         for (const pos of sortedPositions) {
-            activeIntervals += diff.get(pos)!;
+            activeIntervals += diff.get(pos);
             if (activeIntervals > 1) {
                 // const originalFileChanges = fileChanges.filter(
                 //     (change) => change.fileName === fileName

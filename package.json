@@ -87,6 +87,7 @@
         "react-dom": "^18.2.0",
         "react-router-dom": "^6.10.0",
         "theme-change": "^2.5.0",
+        "type-fest": "^4.37.0",
         "typescript-eslint": "^8.26.0"
     }
 }

@@ -1,6 +1,7 @@
 // Applies the file changes that are passed to it
 
 import * as fs from 'fs';
+import { ReadonlyDeep } from 'type-fest';
 
 import { FileChange, TextFileChange } from './fileChange';
 import {
@@ -17,8 +18,6 @@ export type ModFileChanges = {
     mod: string;
 };
 
-
-
 /**
  * Checks if there are any conflicting line change groups within the provided file changes.
  *
@@ -28,7 +27,7 @@ export type ModFileChanges = {
  * @returns `true` if there are conflicting line change groups, otherwise `false`.
  */
 export const textFileChangesAreConflicting = (
-    fileChanges: TextFileChange[]
+    fileChanges: ReadonlyDeep<TextFileChange[]>
 ): boolean => {
     // Use a difference map per file to track changes with O(n + k log k) performance.
     // This approach is more efficient when processing millions of intervals.
@@ -85,7 +84,7 @@ export const textFileChangesAreConflicting = (
  * @returns An array of arrays, where each inner array contains conflicting line change groups.
  */
 const getAllConflictingLineChanges = (
-    lineChangeGroups: LineChangeGroup[]
+    lineChangeGroups: ReadonlyDeep<LineChangeGroup[]>
 ): LineChangeGroup[][] => {
     const conflicts: LineChangeGroup[][] = [];
     for (let i = 0; i < lineChangeGroups.length; i++) {
@@ -112,9 +111,9 @@ const getAllConflictingLineChanges = (
 
 export const areFileChangesValid = ({
     modFileChanges,
-}: {
+}: ReadonlyDeep<{
     modFileChanges: ModFileChanges[];
-}): boolean => {
+}>): boolean => {
     const uniqueMods = new Set(
         modFileChanges.map((modFileChange) => modFileChange.mod)
     );
@@ -168,10 +167,10 @@ export const areFileChangesValid = ({
 export const applyFileChanges = ({
     installDir,
     modFileChanges,
-}: {
+}: ReadonlyDeep<{
     installDir: string;
     modFileChanges: ModFileChanges[];
-}): void => {
+}>): void => {
     // First, we must validate that the file changes can be applied successfully
     // Additionally, once that step is done, we must back up the changes to a backup file so that they can be reversed in the future
 
@@ -203,13 +202,13 @@ export const addLinesToFile = ({
     lineChangeGroup,
     lineMap,
     lines,
-}: {
+}: ReadonlyDeep<{
     fileName: string;
     installDir: string;
     lineChangeGroup: LineChangeGroupAdd;
     lineMap: Map<number, number>;
     lines: string[];
-}): void => {
+}>): void => {
     const { endLineNumber, newContent, startLineNumber } = lineChangeGroup;
 
     // TODO WHEN I GET BACK ON
@@ -254,13 +253,13 @@ export const removeLinesFromFile = ({
     lineChangeGroup,
     lineMap,
     lines,
-}: {
+}: ReadonlyDeep<{
     fileName: string;
     installDir: string;
     lineChangeGroup: LineChangeGroupRemove;
     lineMap: Map<number, number>;
     lines: string[];
-}): void => {
+}>): void => {
     // Just need to remove all the lines specified in the line change groups.
     // If there are lines that are removed from the end in the line change groups but that does
     // not exist in the lines, we throw an error.
@@ -333,12 +332,12 @@ export const replaceLinesInFile = ({
     installDir,
     lineChangeGroup,
     lines,
-}: {
+}: ReadonlyDeep<{
     fileName: string;
     installDir: string;
     lineChangeGroup: LineChangeGroupReplace;
     lines: string[];
-}): void => {
+}>): void => {
     const { endLineNumber, newContent, startLineNumber } = lineChangeGroup;
 
     if (startLineNumber <= lines.length && endLineNumber <= lines.length) {
@@ -381,10 +380,10 @@ export const replaceLinesInFile = ({
 export const applyModFileChanges = ({
     installDir,
     modFileChanges,
-}: {
+}: ReadonlyDeep<{
     installDir: string;
     modFileChanges: ModFileChanges[];
-}): void => {
+}>): void => {
     for (const { fileChanges, mod } of modFileChanges) {
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;

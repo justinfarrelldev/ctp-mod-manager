@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { ReadonlyDeep } from 'type-fest';
 
 import { DEFAULT_MOD_DIR } from '../constants';
 import { applyFileChanges, ModFileChanges } from './applyFileChanges';
@@ -12,7 +13,6 @@ import { isValidInstall } from './isValidInstall';
  * Applies the queued mods to the specified installation directory.
  * @param installDir - The directory of the installation where mods will be applied.
  * @param queuedMods - An array of mod names to be applied in order.
- * @remarks
  * This function first checks if the provided installation directory is valid.
  * If not, it logs an error and returns. Then, it iterates over the queued mods,
  * checks if each mod is a directory, and copies its contents to the installation directory.
@@ -22,9 +22,9 @@ import { isValidInstall } from './isValidInstall';
  * @throws Will log an error if there is an issue copying the mod directory.
  */
 export const applyModsToInstall = async (
-    installDir: string,
-    queuedMods: string[]
-) => {
+    installDir: Readonly<string>,
+    queuedMods: ReadonlyDeep<string[]>
+): Promise<void> => {
     if (!isValidInstall(installDir)) {
         console.error(
             `Invalid install passed to applyModsToInstall! Install passed: ${installDir}`

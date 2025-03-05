@@ -72,7 +72,7 @@ app.whenReady().then(() => {
         removeModFromMods(fileName);
     });
 
-    ipcMain.handle('file:loadModFileNames', () => loadModFileNames());
+    ipcMain.handle('file:loadModFileNames', loadModFileNames);
 
     ipcMain.handle('file:getModsDir', () => DEFAULT_MOD_DIR);
 
@@ -82,7 +82,7 @@ app.whenReady().then(() => {
 
     ipcMain.handle('file:addToInstallDirs', (_, dir) => addToInstallDirs(dir));
 
-    ipcMain.handle('file:getInstallDirs', () => getInstallDirs());
+    ipcMain.handle('file:getInstallDirs', getInstallDirs);
 
     ipcMain.handle('file:runGame', (_, exeDir) => runGame(exeDir));
 

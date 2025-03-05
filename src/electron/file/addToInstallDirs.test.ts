@@ -122,10 +122,24 @@ describe('addToInstallDirs', () => {
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('stat error');
         });
+        vi.spyOn(fs, 'readFileSync').mockImplementationOnce(() => {
+            throw new Error('read error');
+        });
+        vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {
+            throw new Error('write error');
+        });
 
         await addToInstallDirs('/new/dir');
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith();
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            `An error occurred while getting the stats for the directory ${DEFAULT_INSTALLS_DIR}: Error: stat error`
+        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            `An error occurred while reading the file ${DEFAULT_INSTALLS_FILE}: Error: read error`
+        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            `An error occurred while writing the new data to the file ${DEFAULT_INSTALLS_FILE}: Error: write error`
+        );
     });
 });
 describe('ensureInstallsFolderExists', () => {
@@ -246,7 +260,12 @@ describe('ensureInstallFileExists', () => {
 
         await ensureInstallFileExists('/new/dir');
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith();
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            `An error occurred while getting the stats for the file ${DEFAULT_INSTALLS_FILE}: Error: stat error`
+        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            `An error occurred while writing to the file ${DEFAULT_INSTALLS_FILE}: Error: write error`
+        );
     });
 
     it('should create the installs file if the path is not a file', async () => {

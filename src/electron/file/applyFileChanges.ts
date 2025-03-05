@@ -235,7 +235,7 @@ export const addLinesToFile = ({
     }
 
     console.log(
-        `(add) Writing ${newLines.length} lines to ${installDir + '\\' + fileName}`
+        `(add) Writing ${newLines.length} lines to ${installDir + '\\' + fileName} (added lines ${startLineNumber} - ${endLineNumber})`
     );
 
     // Ensure the directory exists before writing the file
@@ -344,7 +344,7 @@ export const removeLinesFromFile = ({
     }
 
     console.log(
-        `(remove) Writing ${newLines.length} lines to ${installDir + '\\' + fileName}`
+        `(remove) Writing ${newLines.length} lines to ${installDir + '\\' + fileName} (removed lines ${startLineNumber} - ${endLineNumber})`
     );
     fs.writeFileSync(
         installDir + '\\' + fileName,
@@ -437,6 +437,27 @@ export const applyModFileChanges = ({
     for (const { fileChanges, mod } of modFileChanges) {
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;
+
+            // Store debug files in a dedicated folder at the project root
+            const debugDir = path.join(process.cwd(), 'debug');
+
+            // Create debug directory if it doesn't exist
+            if (!fs.existsSync(debugDir)) {
+                fs.mkdirSync(debugDir, { recursive: true });
+            }
+
+            const modFileChangesPath = path.join(
+                debugDir,
+                `modFileChanges-${new Date().toISOString().replace(/:/g, '-')}.json`
+            );
+            fs.writeFileSync(
+                modFileChangesPath,
+                JSON.stringify(modFileChanges, null, 2),
+                'utf-8'
+            );
+            console.log(
+                `Mod file changes written to disk at: ${modFileChangesPath}`
+            );
 
             console.log(`Processing file change for: ${fileChange.fileName}`);
 

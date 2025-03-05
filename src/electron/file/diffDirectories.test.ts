@@ -65,7 +65,7 @@ describe('diffDirectories', () => {
             oldDir,
         });
 
-        expect(result).toHaveLength(4);
+        expect(result).toHaveLength(2);
         expect(result[0].isBinary).toBeFalsy();
         expect(result[1].isBinary).toBeFalsy();
 

@@ -64,10 +64,12 @@ const processFileChange = async (
     oldFileContents: string,
     fullPath: string,
     changes: ReadonlyDeep<FileChange[]>
-): Promise<void> => {
+): Promise<FileChange[]> => {
     console.log(`Processing file change for: ${fileName}`);
     const oldIsFile = typeof oldFileContents === 'string';
     const newIsFile = typeof newFileContents === 'string';
+
+    const newChanges: FileChange[] = [...changes] as FileChange[];
 
     if (!oldIsFile && !newIsFile) {
         // This is a directory, we want to recursively call this on it and append the results
@@ -77,8 +79,8 @@ const processFileChange = async (
             oldDir: oldFileContents as DirectoryContents,
             parentPath: fullPath,
         });
-        changes.push(...subChanges);
-        return;
+        newChanges.push(...subChanges);
+        return newChanges;
     }
 
     if (!oldIsFile && newIsFile) {
@@ -90,12 +92,12 @@ const processFileChange = async (
             newContent: newFileContents,
             startLineNumber: 1,
         };
-        changes.push({
+        newChanges.push({
             fileName: fullPath,
             isBinary: isBinaryFile(fileName),
             lineChangeGroups: [changeGroup],
         });
-        return;
+        return newChanges;
     }
 
     if (oldIsFile && !newIsFile) {
@@ -107,12 +109,12 @@ const processFileChange = async (
             oldContent: oldFileContents,
             startLineNumber: 1,
         };
-        changes.push({
+        newChanges.push({
             fileName: fullPath,
             isBinary: isBinaryFile(fileName),
             lineChangeGroups: [changeGroup],
         });
-        return;
+        return newChanges;
     }
 
     if (oldIsFile && newIsFile && isBinaryFile(fileName)) {
@@ -125,12 +127,12 @@ const processFileChange = async (
             oldContent: oldFileContents,
             startLineNumber: 1,
         };
-        changes.push({
+        newChanges.push({
             fileName: fullPath,
             isBinary: isBinaryFile(fileName),
             lineChangeGroups: [changeGroup],
         });
-        return;
+        return newChanges;
     }
 
     if (oldIsFile && newIsFile) {
@@ -141,7 +143,7 @@ const processFileChange = async (
         if (oldFileHash === newFileHash) {
             // Files are the same, skip further processing
             console.log(`Files are identical, skipping: ${fullPath}`);
-            return;
+            return newChanges;
         }
 
         const diffs = await diffTexts(oldFileContents, newFileContents);
@@ -157,7 +159,7 @@ const processFileChange = async (
                     newContent: diff.value,
                     startLineNumber: lineCount,
                 };
-                changes.push({
+                newChanges.push({
                     fileName: fullPath,
                     isBinary: isBinaryFile(fileName),
                     lineChangeGroups: [changeGroup],
@@ -170,7 +172,7 @@ const processFileChange = async (
                     oldContent: diff.value,
                     startLineNumber: lineCount,
                 };
-                changes.push({
+                newChanges.push({
                     fileName: fullPath,
                     isBinary: isBinaryFile(fileName),
                     lineChangeGroups: [changeGroup],
@@ -181,6 +183,8 @@ const processFileChange = async (
             }
         }
     }
+
+    return newChanges;
 };
 
 const processRemovedFiles = async (
@@ -188,8 +192,10 @@ const processRemovedFiles = async (
     oldDir: ReadonlyDeep<DirectoryContents>,
     parentPath: string | undefined,
     changes: ReadonlyDeep<FileChange[]>
-): Promise<void> => {
+): Promise<FileChange[]> => {
     const removedLimit = pLimit(MAX_PROMISES_ALLOWED);
+
+    const newChanges: FileChange[] = [...changes] as FileChange[];
 
     const removedFilesPromises = oldDirFileNames.map((fileName) =>
         removedLimit(async () => {
@@ -208,7 +214,7 @@ const processRemovedFiles = async (
                         oldContent: oldFileContents,
                         startLineNumber: 1,
                     };
-                    changes.push({
+                    newChanges.push({
                         fileName: fullPath,
                         isBinary: isBinaryFile(fileName),
                         lineChangeGroups: [changeGroup],
@@ -225,6 +231,8 @@ const processRemovedFiles = async (
     );
 
     await Promise.allSettled(removedFilesPromises);
+
+    return newChanges;
 };
 
 export const diffDirectories = async ({
@@ -246,7 +254,7 @@ export const diffDirectories = async ({
         newDir = {};
     }
 
-    const changes: FileChange[] = [];
+    let changes: FileChange[] = [];
 
     // Every time we see a file, we will remove it from this list
     // so that we can determine which files were deleted
@@ -262,13 +270,15 @@ export const diffDirectories = async ({
                     ? `${parentPath}/${fileName}`
                     : fileName;
 
-                await processFileChange(
+                const newChanges = await processFileChange(
                     fileName,
                     newFileContents as string,
                     oldFileContents as string,
                     fullPath,
                     changes
                 );
+
+                changes = newChanges;
             } catch (error) {
                 console.error(`Error processing file ${fileName}:`, error);
                 throw error;
@@ -279,7 +289,14 @@ export const diffDirectories = async ({
     await Promise.all(promises);
 
     if (!ignoreRemovedFiles) {
-        await processRemovedFiles(oldDirFileNames, oldDir, parentPath, changes);
+        const newChanges = await processRemovedFiles(
+            oldDirFileNames,
+            oldDir,
+            parentPath,
+            changes
+        );
+
+        changes = newChanges;
     }
 
     return changes;

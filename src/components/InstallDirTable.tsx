@@ -16,6 +16,7 @@ interface Props {
     installDirs: InstallDirectory[];
     onAddedInstallDirectory: () => void;
     onClickModify: (dirPathBeingModified: string) => void;
+    onClickRestoreBackup: (dir: string) => void;
 }
 
 const openInstallDir = (dir: string): void => {
@@ -41,6 +42,7 @@ export const InstallDirTable: FC<Props> = ({
     installDirs,
     onAddedInstallDirectory,
     onClickModify,
+    onClickRestoreBackup,
 }) => {
     const [deletePopupOpen, setDeletePopupOpen] = useState<string>('');
 
@@ -156,6 +158,39 @@ export const InstallDirTable: FC<Props> = ({
             <button className="btn btn-primary" onClick={() => addInstall()}>
                 Add Installation
             </button>
+            <table className="table w-full">
+                {/* ...table header */}
+                <tbody>
+                    {installDirs.map((installDir) => (
+                        <tr key={installDir.directory}>
+                            {/* ...existing columns */}
+                            <td>
+                                <div className="flex space-x-2">
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={(): void =>
+                                            onClickModify(installDir.directory)
+                                        }
+                                    >
+                                        Modify
+                                    </button>
+                                    {/* Add this button */}
+                                    <button
+                                        className="btn btn-secondary btn-sm"
+                                        onClick={(): void =>
+                                            onClickRestoreBackup(
+                                                installDir.directory
+                                            )
+                                        }
+                                    >
+                                        Restore Backup
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </>
     );
 };

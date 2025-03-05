@@ -8,10 +8,12 @@ import { applyModsToInstall } from './file/applyModsToInstall';
 import { copyFileToModDir } from './file/copyFileToModDir';
 import { getInstallDirs } from './file/getInstallDirs';
 import { isValidInstall } from './file/isValidInstall';
+import { listBackups } from './file/listBackups';
 import { loadModFileNames } from './file/loadModFileNames';
 import { makeBackup } from './file/makeBackup';
 import { removeFromInstallDirs } from './file/removeFromInstallDirs';
 import { removeModFromMods } from './file/removeModFromMods';
+import { restoreBackup } from './file/restoreBackup';
 import { runGame } from './file/runGame';
 import { selectFolder } from './file/selectFolder';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
@@ -88,6 +90,12 @@ app.whenReady().then(() => {
 
     ipcMain.handle('file:removeFromInstallDirs', (_, dir) =>
         removeFromInstallDirs(dir)
+    );
+
+    ipcMain.handle('file:listBackups', listBackups);
+
+    ipcMain.handle('file:restoreBackup', (_, backupPath, installDir) =>
+        restoreBackup(backupPath, installDir)
     );
 
     ipcMain.handle('file:makeBackup', (_, dir) => makeBackup(dir));

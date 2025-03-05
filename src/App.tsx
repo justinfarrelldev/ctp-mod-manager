@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { themeChange } from 'theme-change';
 
+import { BackupRestoreModal } from './components/BackupRestoreModal';
 import { ErrorModal } from './components/ErrorModal';
 import { ApplyIcon } from './components/icons/apply';
 import { SettingsIcon } from './components/icons/settings';
@@ -45,6 +46,7 @@ export type ElectronWindow = typeof globalThis &
                 ipcCommand: string,
                 dir: string
             ) => Promise<boolean>;
+            listBackups: () => Promise<string[]>;
             loadModFileNames: () => Promise<string[]>;
             makeBackup: (
                 ipcCommand: 'file:makeBackup',
@@ -59,6 +61,11 @@ export type ElectronWindow = typeof globalThis &
             removeModFromMods: (
                 ipcCommand: string,
                 fileDir: string
+            ) => Promise<void>;
+            restoreBackup: (
+                ipcCommand: string,
+                backupPath: string,
+                installDir: string
             ) => Promise<void>;
             runGame: (ipcCommand: 'file:runGame', exeDir: string) => void;
             selectFolder: (ipcCommand: string) => Promise<string>;
@@ -104,6 +111,14 @@ export const App: FC = (): React.ReactElement => {
     const [checkedMods, setCheckedMods] = useState<string[]>([]);
     const [loadingMods, setLoadingMods] = useState<boolean>(false);
     const [applyingMods, setApplyingMods] = useState<boolean>(false);
+
+    const [backupRestoreOpen, setBackupRestoreOpen] = useState<boolean>(false);
+    const [backupInstallDir, setBackupInstallDir] = useState<string>('');
+
+    const handleRestoreBackupClick = (installDir: string): void => {
+        setBackupInstallDir(installDir);
+        setBackupRestoreOpen(true);
+    };
 
     const loadModFileNames = async (): Promise<void> => {
         setLoadingMods(true);
@@ -214,6 +229,12 @@ export const App: FC = (): React.ReactElement => {
     return (
         <div>
             <div className="p-6">
+                {/* Add the BackupRestoreModal */}
+                <BackupRestoreModal
+                    installDir={backupInstallDir}
+                    onClose={() => setBackupRestoreOpen(false)}
+                    open={backupRestoreOpen}
+                />
                 <div className="flex justify-between">
                     <p className="top-2 text-2xl font-bold">
                         Call to Power II Installations
@@ -281,6 +302,7 @@ export const App: FC = (): React.ReactElement => {
                     installDirs={installDirs}
                     onAddedInstallDirectory={() => loadInstallDirs()}
                     onClickModify={(dir) => setDirBeingModified(dir)}
+                    onClickRestoreBackup={handleRestoreBackupClick} // Add this prop
                 />
                 <Modal
                     buttons={[

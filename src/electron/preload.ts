@@ -31,6 +31,9 @@ contextBridge.exposeInMainWorld('api', {
     isValidInstall: (_: Event, fileDir: string) =>
         ipcRenderer.invoke('file:isValidInstall', fileDir),
 
+    // List available backups
+    listBackups: () => ipcRenderer.invoke('file:listBackups'),
+
     // Loads the names of the mod files
     loadModFileNames: () => ipcRenderer.invoke('file:loadModFileNames'),
 
@@ -52,6 +55,10 @@ contextBridge.exposeInMainWorld('api', {
     // Removes a mod from the mods directory
     removeModFromMods: (_: Event, fileName: string) =>
         ipcRenderer.invoke('file:removeModFromMods', fileName),
+
+    // Restore a backup
+    restoreBackup: (_: Event, backupPath: string, installDir: string) =>
+        ipcRenderer.invoke('file:restoreBackup', backupPath, installDir),
 
     // Runs the game from a specified executable directory
     runGame: (_: Event, exeDir: string) =>

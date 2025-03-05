@@ -465,7 +465,8 @@ describe('processFileChange', () => {
         expect(result).toHaveLength(1);
         expect(result[0].fileName).toBe(fullPath);
         expect(result[0].isBinary).toBeTruthy();
-        expect(result[0].lineChangeGroups[0].changeType).toBe('add');
+        // all binary changes are 'replace' changes
+        expect(result[0].lineChangeGroups[0].changeType).toBe('replace');
         expect(result[0].lineChangeGroups[0].newContent).toBe(newFileContents);
     });
 
@@ -489,7 +490,8 @@ describe('processFileChange', () => {
         expect(result).toHaveLength(1);
         expect(result[0].fileName).toBe(fullPath);
         expect(result[0].isBinary).toBeTruthy();
-        expect(result[0].lineChangeGroups[0].changeType).toBe('remove');
+        // all binary changes are 'replace' changes
+        expect(result[0].lineChangeGroups[0].changeType).toBe('replace');
         expect(result[0].lineChangeGroups[0].oldContent).toBe(oldFileContents);
     });
 

@@ -57,6 +57,7 @@ export const countLines = (str: string): number => {
 const hashFileContents = (contents: string): string => {
     return crypto.createHash('sha256').update(contents).digest('hex');
 };
+
 const processFileChange = async (
     fileName: string,
     newFileContents: string,
@@ -64,11 +65,13 @@ const processFileChange = async (
     fullPath: string,
     changes: ReadonlyDeep<FileChange[]>
 ): Promise<void> => {
+    console.log(`Processing file change for: ${fileName}`);
     const oldIsFile = typeof oldFileContents === 'string';
     const newIsFile = typeof newFileContents === 'string';
 
     if (!oldIsFile && !newIsFile) {
         // This is a directory, we want to recursively call this on it and append the results
+        console.log(`Directory detected: ${fullPath}`);
         const subChanges = await diffDirectories({
             newDir: newFileContents as DirectoryContents,
             oldDir: oldFileContents as DirectoryContents,
@@ -80,6 +83,7 @@ const processFileChange = async (
 
     if (!oldIsFile && newIsFile) {
         // This is a file that is being added
+        console.log(`File added: ${fullPath}`);
         const changeGroup: LineChangeGroup = {
             changeType: 'add',
             endLineNumber: countLines(newFileContents),
@@ -96,6 +100,7 @@ const processFileChange = async (
 
     if (oldIsFile && !newIsFile) {
         // This is a file that is being removed
+        console.log(`File removed: ${fullPath}`);
         const changeGroup: LineChangeGroup = {
             changeType: 'remove',
             endLineNumber: countLines(oldFileContents),
@@ -112,6 +117,7 @@ const processFileChange = async (
 
     if (oldIsFile && newIsFile && isBinaryFile(fileName)) {
         // This is a binary file that is being changed
+        console.log(`Binary file changed: ${fullPath}`);
         const changeGroup: LineChangeGroup = {
             changeType: 'replace',
             endLineNumber: countLines(newFileContents),
@@ -128,11 +134,13 @@ const processFileChange = async (
     }
 
     if (oldIsFile && newIsFile) {
+        console.log(`Text file changed: ${fullPath}`);
         const oldFileHash = hashFileContents(oldFileContents);
         const newFileHash = hashFileContents(newFileContents);
 
         if (oldFileHash === newFileHash) {
             // Files are the same, skip further processing
+            console.log(`Files are identical, skipping: ${fullPath}`);
             return;
         }
 
@@ -142,6 +150,7 @@ const processFileChange = async (
 
         for (const diff of diffs) {
             if (diff.added) {
+                console.log(`Line added at ${lineCount} in ${fullPath}`);
                 const changeGroup: LineChangeGroup = {
                     changeType: 'add',
                     endLineNumber: lineCount,
@@ -154,6 +163,7 @@ const processFileChange = async (
                     lineChangeGroups: [changeGroup],
                 });
             } else if (diff.removed) {
+                console.log(`Line removed at ${lineCount} in ${fullPath}`);
                 const changeGroup: LineChangeGroup = {
                     changeType: 'remove',
                     endLineNumber: lineCount,

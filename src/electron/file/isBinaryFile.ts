@@ -17,6 +17,7 @@ const SPECIAL_FILE_EXTENSIONS: string[] = [
     '.dll',
     '.ogg',
     '.exe',
+    '.avi',
 ];
 
 /**

@@ -426,11 +426,15 @@ export const applyModFileChanges = ({
     installDir: string;
     modFileChanges: ModFileChanges[];
 }>): void => {
-    for (const { fileChanges } of modFileChanges) {
+    for (const { fileChanges, mod } of modFileChanges) {
         for (const fileChange of fileChanges) {
             const textFileChange = fileChange as TextFileChange;
 
+            console.log(`Processing file change for: ${fileChange.fileName}`);
+
             if (!fs.existsSync(installDir + '\\' + fileChange.fileName)) {
+                console.log(`File ${fileChange.fileName} does not exist.`);
+
                 if (
                     textFileChange.lineChangeGroups.length !== 1 ||
                     textFileChange.lineChangeGroups[0].changeType !== 'add'
@@ -445,7 +449,10 @@ export const applyModFileChanges = ({
                 let lineMap = new Map<number, number>(
                     lines.map((_, index) => [index, index])
                 );
+
                 for (const lineChangeGroup of textFileChange.lineChangeGroups) {
+                    console.log(`Adding lines to file: ${fileChange.fileName}`);
+
                     try {
                         const { lineMap: newLineMap, lines: newLines } =
                             addLinesToFile({
@@ -466,6 +473,8 @@ export const applyModFileChanges = ({
                     }
                 }
             } else {
+                console.log(`File ${fileChange.fileName} exists.`);
+
                 const fileData: string = fs.readFileSync(
                     installDir + '\\' + fileChange.fileName,
                     'utf-8'
@@ -479,6 +488,9 @@ export const applyModFileChanges = ({
                 for (const lineChangeGroup of textFileChange.lineChangeGroups) {
                     switch (lineChangeGroup.changeType) {
                         case 'add':
+                            console.log(
+                                `Adding lines to file: ${fileChange.fileName}`
+                            );
                             try {
                                 const { lineMap: newLineMap, lines: newLines } =
                                     addLinesToFile({
@@ -497,9 +509,11 @@ export const applyModFileChanges = ({
                                     `Failed to add lines to file ${fileChange.fileName}: ${error.message}`
                                 );
                             }
-
                             break;
                         case 'remove':
+                            console.log(
+                                `Removing lines from file: ${fileChange.fileName}`
+                            );
                             try {
                                 const { lineMap: newLineMap, lines: newLines } =
                                     removeLinesFromFile({
@@ -518,6 +532,9 @@ export const applyModFileChanges = ({
                             }
                             break;
                         case 'replace':
+                            console.log(
+                                `Replacing lines in file: ${fileChange.fileName}`
+                            );
                             try {
                                 const newLines = replaceLinesInFile({
                                     fileName: fileChange.fileName,
@@ -535,13 +552,9 @@ export const applyModFileChanges = ({
                             break;
                     }
                 }
-
-                // fs.writeFileSync(
-                //     installDir + '\\' + fileChange.fileName,
-                //     lines.join('\n'),
-                //     'utf-8'
-                // );
             }
         }
+
+        console.log('Finished file changes for mod: ', mod);
     }
 };

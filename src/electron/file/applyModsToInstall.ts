@@ -72,6 +72,7 @@ export const applyModsToInstall = async (
                 fileChanges: changes,
                 mod,
             });
+            console.log(`${changes.length} changes found for the mod ${mod}.`);
         } catch (err) {
             console.error(
                 `An error occurred within applying mods to install while copying the directory ${`${DEFAULT_MOD_DIR}\\${mod}`} to ${DEFAULT_MOD_DIR}: ${err}`
@@ -79,9 +80,7 @@ export const applyModsToInstall = async (
         }
     }
 
-    console.log(
-        `${changesArr.length} changes found for all ${queuedMods.length} mods. Applying changes...`
-    );
+    console.log('Consolidating changes for all mods...');
 
     // First consolidate line change groups within each file change object
     changesArr = changesArr.map((modFileChange) => {
@@ -101,6 +100,10 @@ export const applyModsToInstall = async (
             fileChanges: consolidatedFileChanges,
         };
     });
+
+    console.log(
+        'Line changes consolidated within each file change object. Starting merge of changes that target the same file...'
+    );
 
     // Now merge file change objects that target the same file
     changesArr = changesArr.map((modFileChange) => {
@@ -135,6 +138,10 @@ export const applyModsToInstall = async (
             fileChanges: Array.from(fileMap.values()),
         };
     });
+
+    console.log(
+        `Changes merged. Now have ${changesArr.reduce((prev, curr) => prev + curr.fileChanges.length, 0)} remaining changes. Applying...`
+    );
 
     applyFileChanges({ installDir, modFileChanges: changesArr });
 

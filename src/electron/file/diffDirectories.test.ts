@@ -2,8 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { countLines, diffDirectories } from './diffDirectories';
-import { TextFileChange } from './fileChange';
+import {
+    countLines,
+    diffDirectories,
+    processFileChange,
+} from './diffDirectories';
+import { FileChange, TextFileChange } from './fileChange';
 
 vi.mock('electron', () => ({
     app: {
@@ -363,5 +367,174 @@ describe('countLines', () => {
 
         const result = countLines('Line 1\n\nLine 3\nLine 4\n\nLine 6');
         expect(result).toBe(6);
+    });
+});
+describe('processFileChange', () => {
+    it('should handle added text files', async () => {
+        expect.hasAssertions();
+        const fileName = 'newFile.txt';
+        const newFileContents = 'This is a new file';
+        const oldFileContents = '';
+        const fullPath = '/mock/path/newFile.txt';
+        const changes: FileChange[] = [];
+
+        const result = await processFileChange(
+            fileName,
+            newFileContents,
+            oldFileContents,
+            fullPath,
+            changes
+        );
+
+        expect(result).toHaveLength(1);
+        expect(result[0].fileName).toBe(fullPath);
+        expect(result[0].isBinary).toBeFalsy();
+        expect(result[0].lineChangeGroups[0].changeType).toBe('add');
+        expect(result[0].lineChangeGroups[0].newContent).toBe(newFileContents);
+    });
+
+    it('should handle removed text files', async () => {
+        expect.hasAssertions();
+
+        const fileName = 'oldFile.txt';
+        const newFileContents = '';
+        const oldFileContents = 'This is an old file';
+        const fullPath = '/mock/path/oldFile.txt';
+        const changes: FileChange[] = [];
+
+        const result = await processFileChange(
+            fileName,
+            newFileContents,
+            oldFileContents,
+            fullPath,
+            changes
+        );
+
+        expect(result).toHaveLength(1);
+        expect(result[0].fileName).toBe(fullPath);
+        expect(result[0].isBinary).toBeFalsy();
+        expect(result[0].lineChangeGroups[0].changeType).toBe('remove');
+        expect(result[0].lineChangeGroups[0].oldContent).toBe(oldFileContents);
+    });
+
+    it('should handle changed text files', async () => {
+        expect.hasAssertions();
+
+        const fileName = 'changedFile.txt';
+        const newFileContents = 'This is the new content';
+        const oldFileContents = 'This is the old content';
+        const fullPath = '/mock/path/changedFile.txt';
+        const changes: FileChange[] = [];
+
+        const result = await processFileChange(
+            fileName,
+            newFileContents,
+            oldFileContents,
+            fullPath,
+            changes
+        );
+
+        expect(result).toHaveLength(2);
+        expect(result[0].fileName).toBe(fullPath);
+        expect(result[0].isBinary).toBeFalsy();
+        expect(result[0].lineChangeGroups[0].changeType).toBe('remove');
+        expect(result[0].lineChangeGroups[0].oldContent).toBe(oldFileContents);
+        expect(result[1].fileName).toBe(fullPath);
+        expect(result[1].isBinary).toBeFalsy();
+        expect(result[1].lineChangeGroups[0].changeType).toBe('add');
+        expect(result[1].lineChangeGroups[0].newContent).toBe(newFileContents);
+    });
+
+    it('should handle added binary files', async () => {
+        expect.hasAssertions();
+
+        const fileName = 'newFile.avi';
+        const newFileContents = 'binary content';
+        const oldFileContents = '';
+        const fullPath = '/mock/path/newFile.avi';
+        const changes: FileChange[] = [];
+
+        const result = await processFileChange(
+            fileName,
+            newFileContents,
+            oldFileContents,
+            fullPath,
+            changes
+        );
+
+        expect(result).toHaveLength(1);
+        expect(result[0].fileName).toBe(fullPath);
+        expect(result[0].isBinary).toBeTruthy();
+        expect(result[0].lineChangeGroups[0].changeType).toBe('add');
+        expect(result[0].lineChangeGroups[0].newContent).toBe(newFileContents);
+    });
+
+    it('should handle removed binary files', async () => {
+        expect.hasAssertions();
+
+        const fileName = 'oldFile.avi';
+        const newFileContents = '';
+        const oldFileContents = 'binary content';
+        const fullPath = '/mock/path/oldFile.avi';
+        const changes: FileChange[] = [];
+
+        const result = await processFileChange(
+            fileName,
+            newFileContents,
+            oldFileContents,
+            fullPath,
+            changes
+        );
+
+        expect(result).toHaveLength(1);
+        expect(result[0].fileName).toBe(fullPath);
+        expect(result[0].isBinary).toBeTruthy();
+        expect(result[0].lineChangeGroups[0].changeType).toBe('remove');
+        expect(result[0].lineChangeGroups[0].oldContent).toBe(oldFileContents);
+    });
+
+    it('should handle changed binary files', async () => {
+        expect.hasAssertions();
+
+        const fileName = 'changedFile.avi';
+        const newFileContents = 'new binary content';
+        const oldFileContents = 'old binary content';
+        const fullPath = '/mock/path/changedFile.avi';
+        const changes: FileChange[] = [];
+
+        const result = await processFileChange(
+            fileName,
+            newFileContents,
+            oldFileContents,
+            fullPath,
+            changes
+        );
+
+        expect(result).toHaveLength(1);
+        expect(result[0].fileName).toBe(fullPath);
+        expect(result[0].isBinary).toBeTruthy();
+        expect(result[0].lineChangeGroups[0].changeType).toBe('replace');
+        expect(result[0].lineChangeGroups[0].newContent).toBe(newFileContents);
+        expect(result[0].lineChangeGroups[0].oldContent).toBe(oldFileContents);
+    });
+
+    it('should handle unchanged files', async () => {
+        expect.hasAssertions();
+
+        const fileName = 'unchangedFile.txt';
+        const newFileContents = 'same content';
+        const oldFileContents = 'same content';
+        const fullPath = '/mock/path/unchangedFile.txt';
+        const changes: FileChange[] = [];
+
+        const result = await processFileChange(
+            fileName,
+            newFileContents,
+            oldFileContents,
+            fullPath,
+            changes
+        );
+
+        expect(result).toHaveLength(0);
     });
 });

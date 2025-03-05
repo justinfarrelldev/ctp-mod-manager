@@ -58,7 +58,7 @@ const hashFileContents = (contents: string): string => {
     return crypto.createHash('sha256').update(contents).digest('hex');
 };
 
-const processFileChange = async (
+export const processFileChange = async (
     fileName: string,
     newFileContents: string,
     oldFileContents: string,

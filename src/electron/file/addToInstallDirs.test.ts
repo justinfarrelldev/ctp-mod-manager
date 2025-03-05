@@ -33,6 +33,7 @@ describe('addToInstallDirs', () => {
     });
 
     it('should ensure the installs folder exists', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(
             () => ({ isDirectory: () => true, isFile: () => true }) as fs.Stats
         );
@@ -45,6 +46,7 @@ describe('addToInstallDirs', () => {
     });
 
     it('should create the installs folder if it does not exist', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('not found');
         });
@@ -63,6 +65,7 @@ describe('addToInstallDirs', () => {
     });
 
     it('should create the installs file if it does not exist', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(
             () => ({ isDirectory: () => true, isFile: () => true }) as fs.Stats
         );
@@ -80,6 +83,7 @@ describe('addToInstallDirs', () => {
     });
 
     it('should add a new directory to the installs file', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(
             () => ({ isDirectory: () => true, isFile: () => true }) as fs.Stats
         );
@@ -95,6 +99,7 @@ describe('addToInstallDirs', () => {
     });
 
     it('should not add a directory if it already exists in the installs file', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(
             () => ({ isDirectory: () => true, isFile: () => true }) as fs.Stats
         );
@@ -107,6 +112,7 @@ describe('addToInstallDirs', () => {
     });
 
     it('should handle errors during file operations', async () => {
+        expect.hasAssertions();
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {});
@@ -125,6 +131,7 @@ describe('ensureInstallsFolderExists', () => {
     });
 
     it('should ensure the installs folder exists', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(
             () => ({ isDirectory: () => true, isFile: () => true }) as fs.Stats
         );
@@ -135,6 +142,7 @@ describe('ensureInstallsFolderExists', () => {
     });
 
     it('should create the installs folder if it does not exist', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('not found');
         });
@@ -147,6 +155,7 @@ describe('ensureInstallsFolderExists', () => {
     });
 
     it('should create the installs folder if the path is not a directory', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(
             () => ({ isDirectory: () => false, isFile: () => true }) as fs.Stats
         );
@@ -158,6 +167,7 @@ describe('ensureInstallsFolderExists', () => {
         );
     });
     it('should handle errors during folder operations', async () => {
+        expect.hasAssertions();
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {});
@@ -178,6 +188,7 @@ describe('ensureInstallFileExists', () => {
     });
 
     it('should create the installs file with the provided directory if it does not exist', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('not found');
         });
@@ -192,6 +203,7 @@ describe('ensureInstallFileExists', () => {
     });
 
     it('should create the installs file with an empty array if no directory is provided and the file does not exist', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('not found');
         });
@@ -206,6 +218,7 @@ describe('ensureInstallFileExists', () => {
     });
 
     it('should not create the installs file if it already exists', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(
             () => ({ isDirectory: () => false, isFile: () => true }) as fs.Stats
         );
@@ -217,6 +230,7 @@ describe('ensureInstallFileExists', () => {
     });
 
     it('should handle errors during file operations', async () => {
+        expect.hasAssertions();
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {});
@@ -233,6 +247,7 @@ describe('ensureInstallFileExists', () => {
     });
 
     it('should create the installs file if the path is not a file', async () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'statSync').mockImplementationOnce(
             () => ({ isDirectory: () => true, isFile: () => false }) as fs.Stats
         );
@@ -252,6 +267,7 @@ describe('parseInstallFileIntoJSON', () => {
     });
 
     it('should parse the installs file into JSON', () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'readFileSync').mockReturnValueOnce('["/existing/dir"]');
 
         const result = parseInstallFileIntoJSON();
@@ -260,6 +276,7 @@ describe('parseInstallFileIntoJSON', () => {
     });
 
     it('should return an empty array if the installs file is empty', () => {
+        expect.hasAssertions();
         vi.spyOn(fs, 'readFileSync').mockReturnValueOnce('');
 
         const result = parseInstallFileIntoJSON();
@@ -268,6 +285,7 @@ describe('parseInstallFileIntoJSON', () => {
     });
 
     it('should handle errors during file reading', () => {
+        expect.hasAssertions();
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {});
@@ -284,6 +302,7 @@ describe('parseInstallFileIntoJSON', () => {
     });
 
     it('should handle errors during JSON parsing', () => {
+        expect.hasAssertions();
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {});
@@ -303,6 +322,7 @@ describe('writeJsonArrayToFile', () => {
     });
 
     it('should write the JSON array to the file', () => {
+        expect.hasAssertions();
         const jsonArray = '["/new/dir"]';
         vi.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
 
@@ -315,6 +335,7 @@ describe('writeJsonArrayToFile', () => {
     });
 
     it('should handle errors during file writing', () => {
+        expect.hasAssertions();
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {});

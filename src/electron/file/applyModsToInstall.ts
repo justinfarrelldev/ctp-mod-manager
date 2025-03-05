@@ -105,37 +105,38 @@ export const applyModsToInstall = async (
         'Line changes consolidated within each file change object. Starting merge of changes that target the same file...'
     );
 
-    // Now merge file change objects that target the same file
+    // Merge file change objects that target the same file, minimizing allocations and repeated operations
     changesArr = changesArr.map((modFileChange) => {
-        const fileMap = new Map();
+        const merged: Record<
+            string,
+            (typeof modFileChange.fileChanges)[number]
+        > = Object.create(null);
 
-        modFileChange.fileChanges.forEach((fileChange) => {
-            if ('lineChangeGroups' in fileChange) {
-                const existingChange = fileMap.get(fileChange.fileName);
-
-                if (existingChange) {
-                    // Merge the line change groups from this file change into the existing one
-                    existingChange.lineChangeGroups = [
-                        ...existingChange.lineChangeGroups,
-                        ...fileChange.lineChangeGroups,
-                    ];
-                    // Re-consolidate after merging
-                    existingChange.lineChangeGroups =
-                        consolidateLineChangeGroups(
-                            existingChange.lineChangeGroups
-                        );
-                } else {
-                    fileMap.set(fileChange.fileName, fileChange);
-                }
-            } else {
-                // For binary files or other types
-                fileMap.set(fileChange.fileName, fileChange);
+        for (let i = 0; i < modFileChange.fileChanges.length; i++) {
+            const fc = modFileChange.fileChanges[i];
+            const existing = merged[fc.fileName];
+            if (!existing) {
+                merged[fc.fileName] = fc;
+            } else if (
+                'lineChangeGroups' in fc &&
+                'lineChangeGroups' in existing
+            ) {
+                existing.lineChangeGroups.push(...fc.lineChangeGroups);
             }
-        });
+        }
+
+        for (const filename in merged) {
+            const fc = merged[filename];
+            if ('lineChangeGroups' in fc) {
+                fc.lineChangeGroups = consolidateLineChangeGroups(
+                    fc.lineChangeGroups
+                );
+            }
+        }
 
         return {
             ...modFileChange,
-            fileChanges: Array.from(fileMap.values()),
+            fileChanges: Object.values(merged),
         };
     });
 

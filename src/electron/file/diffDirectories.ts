@@ -57,13 +57,13 @@ export const countLines = (str: string): number => {
 const hashFileContents = (contents: string): string => {
     return crypto.createHash('sha256').update(contents).digest('hex');
 };
-
 export const processFileChange = async (
     fileName: string,
     newFileContents: string,
     oldFileContents: string,
     fullPath: string,
-    changes: ReadonlyDeep<FileChange[]>
+    changes: ReadonlyDeep<FileChange[]>,
+    ignoreRemovedFiles: boolean
 ): Promise<FileChange[]> => {
     console.log(`Processing file change for: ${fileName}`);
     const oldIsFile = typeof oldFileContents === 'string';
@@ -75,6 +75,7 @@ export const processFileChange = async (
         // This is a directory, we want to recursively call this on it and append the results
         console.log(`Directory detected: ${fullPath}`);
         const subChanges = await diffDirectories({
+            ignoreRemovedFiles,
             newDir: newFileContents as DirectoryContents,
             oldDir: oldFileContents as DirectoryContents,
             parentPath: fullPath,
@@ -100,7 +101,7 @@ export const processFileChange = async (
         return newChanges;
     }
 
-    if (oldIsFile && !newIsFile) {
+    if (oldIsFile && !newIsFile && !ignoreRemovedFiles) {
         // This is a file that is being removed
         console.log(`File removed: ${fullPath}`);
         const changeGroup: LineChangeGroup = {
@@ -256,15 +257,17 @@ export const diffDirectories = async ({
 
     let changes: FileChange[] = [];
 
-    // Every time we see a file, we will remove it from this list
-    // so that we can determine which files were deleted
+    // Every time we see a file, remove it from this list so we can detect which were deleted
     const oldDirFileNames: string[] = Object.keys(oldDir);
     const limit = pLimit(MAX_PROMISES_ALLOWED);
 
     const promises = Object.entries(newDir).map(([fileName, newFileContents]) =>
         limit(async () => {
             try {
-                oldDirFileNames.splice(oldDirFileNames.indexOf(fileName), 1);
+                const index = oldDirFileNames.indexOf(fileName);
+                if (index !== -1) {
+                    oldDirFileNames.splice(index, 1);
+                }
                 const oldFileContents = oldDir[fileName];
                 const fullPath = parentPath
                     ? `${parentPath}/${fileName}`
@@ -275,7 +278,8 @@ export const diffDirectories = async ({
                     newFileContents as string,
                     oldFileContents as string,
                     fullPath,
-                    changes
+                    changes,
+                    ignoreRemovedFiles // Pass through to handle removals
                 );
 
                 changes = newChanges;
@@ -288,6 +292,7 @@ export const diffDirectories = async ({
 
     await Promise.all(promises);
 
+    // Only process removed files if the option is not set to ignore them
     if (!ignoreRemovedFiles) {
         const newChanges = await processRemovedFiles(
             oldDirFileNames,

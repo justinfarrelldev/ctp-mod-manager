@@ -1,6 +1,7 @@
 // Applies the file changes that are passed to it
 
 import * as fs from 'fs';
+import path from 'node:path';
 import { ReadonlyDeep } from 'type-fest';
 
 import { FileChange, TextFileChange } from './fileChange';
@@ -219,8 +220,6 @@ export const addLinesToFile = ({
     const newLineMap: Map<number, number> = new Map(lineMap),
         newLines: string[] = [...lines];
 
-    // TODO WHEN I GET BACK ON
-    // There is something that is making the first line of files not be written, I need to figure that out
     const newContentSplit = newContent.split('\n');
 
     if (endLineNumber > newLines.length + 1) {
@@ -238,6 +237,15 @@ export const addLinesToFile = ({
     console.log(
         `(add) Writing ${newLines.length} lines to ${installDir + '\\' + fileName}`
     );
+
+    // Ensure the directory exists before writing the file
+    const dir = path.join(installDir, path.dirname(fileName));
+    if (!fs.existsSync(dir)) {
+        console.log('Making directory: ', dir);
+        // This function is able to create files from scratch and thus it needs to be able to make new folders
+        fs.mkdirSync(dir, { recursive: true });
+    }
+
     fs.writeFileSync(
         installDir + '\\' + fileName,
         newLines.join('\n'),
@@ -468,7 +476,7 @@ export const applyModFileChanges = ({
                         lineMap = newLineMap;
                     } catch (error) {
                         throw new ModApplicationError(
-                            `Failed to add lines to file ${fileChange.fileName}: ${error.message}`
+                            `Failed to add lines to file that does not exist of name ${fileChange.fileName}: ${error.message}`
                         );
                     }
                 }

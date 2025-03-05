@@ -297,6 +297,7 @@ export const getFileChangesToApplyMod = async (
             changes to deduce incompatible files. This can be done with as many mods as we like...
             */
             result = diffDirectories({
+                ignoreRemovedFiles: true,
                 newDir: modDirStructure,
                 oldDir: gameDirStructure,
             });

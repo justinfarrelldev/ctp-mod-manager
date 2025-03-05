@@ -7,7 +7,8 @@ import {
     diffDirectories,
     processFileChange,
 } from './diffDirectories';
-import { FileChange, TextFileChange } from './fileChange';
+import { BinaryFileChange, FileChange, TextFileChange } from './fileChange';
+import { LineChangeGroupReplace } from './lineChangeGroup';
 
 vi.mock('electron', () => ({
     app: {
@@ -466,8 +467,15 @@ describe('processFileChange', () => {
         expect(result[0].fileName).toBe(fullPath);
         expect(result[0].isBinary).toBeTruthy();
         // all binary changes are 'replace' changes
-        expect(result[0].lineChangeGroups[0].changeType).toBe('replace');
-        expect(result[0].lineChangeGroups[0].newContent).toBe(newFileContents);
+        expect(
+            (result[0] as TextFileChange).lineChangeGroups[0].changeType
+        ).toBe('replace');
+        expect(
+            (
+                (result[0] as TextFileChange)
+                    .lineChangeGroups[0] as LineChangeGroupReplace
+            ).newContent
+        ).toBe(newFileContents);
     });
 
     it('should handle removed binary files', async () => {
@@ -491,8 +499,15 @@ describe('processFileChange', () => {
         expect(result[0].fileName).toBe(fullPath);
         expect(result[0].isBinary).toBeTruthy();
         // all binary changes are 'replace' changes
-        expect(result[0].lineChangeGroups[0].changeType).toBe('replace');
-        expect(result[0].lineChangeGroups[0].oldContent).toBe(oldFileContents);
+        expect(
+            (result[0] as TextFileChange).lineChangeGroups[0].changeType
+        ).toBe('replace');
+        expect(
+            (
+                (result[0] as TextFileChange)
+                    .lineChangeGroups[0] as LineChangeGroupReplace
+            ).oldContent
+        ).toBe(oldFileContents);
     });
 
     it('should handle changed binary files', async () => {
@@ -515,9 +530,21 @@ describe('processFileChange', () => {
         expect(result).toHaveLength(1);
         expect(result[0].fileName).toBe(fullPath);
         expect(result[0].isBinary).toBeTruthy();
-        expect(result[0].lineChangeGroups[0].changeType).toBe('replace');
-        expect(result[0].lineChangeGroups[0].newContent).toBe(newFileContents);
-        expect(result[0].lineChangeGroups[0].oldContent).toBe(oldFileContents);
+        expect(
+            (result[0] as TextFileChange).lineChangeGroups[0].changeType
+        ).toBe('replace');
+        expect(
+            (
+                (result[0] as TextFileChange)
+                    .lineChangeGroups[0] as LineChangeGroupReplace
+            ).newContent
+        ).toBe(newFileContents);
+        expect(
+            (
+                (result[0] as TextFileChange)
+                    .lineChangeGroups[0] as LineChangeGroupReplace
+            ).oldContent
+        ).toBe(oldFileContents);
     });
 
     it('should handle unchanged files', async () => {

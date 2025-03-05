@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+// Disabled the above for convenience
+// FIXME fix the above at some point
 import * as fs from 'fs';
 import { afterAll, describe, expect, it, vi } from 'vitest';
 
@@ -272,7 +275,7 @@ describe('parseInstallFileIntoJSON', () => {
 
         const result = parseInstallFileIntoJSON();
 
-        expect(result).toEqual(['/existing/dir']);
+        expect(result).toStrictEqual(['/existing/dir']);
     });
 
     it('should return an empty array if the installs file is empty', () => {
@@ -281,7 +284,7 @@ describe('parseInstallFileIntoJSON', () => {
 
         const result = parseInstallFileIntoJSON();
 
-        expect(result).toEqual([]);
+        expect(result).toStrictEqual([]);
     });
 
     it('should handle errors during file reading', () => {
@@ -298,7 +301,7 @@ describe('parseInstallFileIntoJSON', () => {
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             `An error occurred while reading the file ${DEFAULT_INSTALLS_FILE}: Error: read error`
         );
-        expect(result).toEqual([]);
+        expect(result).toStrictEqual([]);
     });
 
     it('should handle errors during JSON parsing', () => {
@@ -313,7 +316,7 @@ describe('parseInstallFileIntoJSON', () => {
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'An error occurred while converting the file contents to JSON: SyntaxError: Unexpected token i in JSON at position 0'
         );
-        expect(result).toEqual([]);
+        expect(result).toStrictEqual([]);
     });
 });
 describe('writeJsonArrayToFile', () => {

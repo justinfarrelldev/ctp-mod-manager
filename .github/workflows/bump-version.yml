@@ -1,12 +1,13 @@
-# example 2: on merge to master from pull request (recommended)
 name: Bump version
 on:
     push:
         branches:
             - main
+        paths-ignore:
+            - '.github/**' # Prevent workflow loops when committing workflow files
 
 jobs:
-    build:
+    bump-version:
         runs-on: ubuntu-22.04
         permissions:
             contents: write
@@ -16,8 +17,12 @@ jobs:
                   fetch-depth: '0'
 
             - name: Bump version and push tag
+              id: tag_version
               uses: anothrNick/github-tag-action@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}
                   WITH_V: true
                   PRERELEASE: true
+
+            - name: Output new tag
+              run: echo "Created new tag ${{ steps.tag_version.outputs.new_tag }}"

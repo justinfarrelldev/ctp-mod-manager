@@ -14,6 +14,8 @@ const config: ForgeConfig = {
         new MakerDeb({}),
     ],
     packagerConfig: {
+        asar: true,
+        ignore: [/^\/node_modules$/],
         tmpdir: 'C:\\tmp',
     },
     plugins: [

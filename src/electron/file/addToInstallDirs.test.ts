@@ -333,7 +333,7 @@ describe('parseInstallFileIntoJSON', () => {
         const result = parseInstallFileIntoJSON();
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'An error occurred while converting the file contents to JSON: SyntaxError: Unexpected token i in JSON at position 0'
+            `An error occurred while converting the file contents to JSON: SyntaxError: Unexpected token 'i', "invalid json" is not valid JSON`
         );
         expect(result).toStrictEqual([]);
     });

@@ -1,5 +1,5 @@
-name: test-backend
-run-name: Test Backend
+name: Test, Build & Release
+run-name: Test, Build & Release
 on:
     push:
         branches:
@@ -9,20 +9,47 @@ on:
     pull_request:
         branches:
             - main
-        tags:
-            - v*
+
 jobs:
-    build:
+    test:
+        name: Run Tests
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Use Node.js ${{ matrix.node-version }}
+            - name: Use Node.js
               uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci
+            - name: Run tests
+              run: npm test
+
+    build-and-release:
+        name: Build & Release
+        needs: test
+        runs-on: windows-latest
+        if: success() && startsWith(github.ref, 'refs/tags/')
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci
+            - name: Build application
+              run: npm run make
+            - name: Create Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      out/make/squirrel.windows/x64/*.exe
+                      out/make/zip/win32/x64/*.zip
+                  generate_release_notes: true
+                  draft: false
+                  prerelease: false
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  tag: ${{ github.ref_name }}
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: 'npm'
-            - run: npm ci
-            - run: npm test

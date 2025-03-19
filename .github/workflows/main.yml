@@ -1,5 +1,7 @@
 name: Test, Build & Release
 run-name: Test, Build & Release
+permissions:
+    contents: write
 on:
     push:
         branches:

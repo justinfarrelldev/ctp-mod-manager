@@ -52,7 +52,7 @@ export type ElectronWindow = typeof globalThis &
                 ipcCommand: 'file:makeBackup',
                 installDir: string
             ) => Promise<void>;
-            openInstallDir: (ipcCommand: string, dir: string) => void;
+            openDirectory: (ipcCommand: string, dir: string) => void;
             openModsDir: (ipcCommand: string) => void;
             removeFromInstallDirs: (
                 ipcCommand: 'file:removeFromInstallDirs',

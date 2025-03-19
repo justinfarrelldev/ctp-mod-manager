@@ -42,8 +42,8 @@ contextBridge.exposeInMainWorld('api', {
         ipcRenderer.invoke('file:makeBackup', dir),
 
     // Opens a specified installation directory
-    openInstallDir: (_: Event, dir: string) =>
-        ipcRenderer.send('file:openInstallDir', dir),
+    openDirectory: (_: Event, dir: string) =>
+        ipcRenderer.send('file:openDirectory', dir),
 
     // Opens the mods directory
     openModsDir: () => ipcRenderer.send('file:openModsDir'),

@@ -19,9 +19,9 @@ interface Props {
     onClickRestoreBackup: (dir: string) => void;
 }
 
-const openInstallDir = (dir: string): void => {
+const openDirectory = (dir: string): void => {
     console.log('opening install dir: ', dir);
-    (window as ElectronWindow).api.openInstallDir('file:openInstallDir', dir);
+    (window as ElectronWindow).api.openDirectory('file:openInstallDir', dir);
 };
 
 const addToInstallDirs = async (dir: string): Promise<void> => {
@@ -117,9 +117,7 @@ export const InstallDirTable: FC<Props> = ({
                         <div className="space-x-10">
                             <span>
                                 <button
-                                    onClick={() =>
-                                        openInstallDir(dir.directory)
-                                    }
+                                    onClick={() => openDirectory(dir.directory)}
                                 >
                                     <FolderIcon />
                                 </button>

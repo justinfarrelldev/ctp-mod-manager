@@ -56,7 +56,7 @@ const createWindow = (): void => {
 app.whenReady().then(() => {
     ipcMain.handle('load:getCtp2InstallDir', getInstallDirectories);
 
-    ipcMain.on('file:openInstallDir', (_, dir) => shell.openPath(dir));
+    ipcMain.on('file:openDirectory', (_, dir) => shell.openPath(dir));
 
     ipcMain.on('file:openModsDir', () => shell.openPath(DEFAULT_MOD_DIR));
 

@@ -42,15 +42,32 @@ export const makeBackup = async (installDir: string): Promise<void> => {
         console.log('added zip');
         const installDirAsFileName = installDir
             .replaceAll('\\', '-')
+            .replaceAll('/', '-')
             .replaceAll(' ', '')
             .replaceAll(':', '')
             .replaceAll('(', '')
             .replaceAll(')', '');
+        const now = new Date();
+        const timestamp =
+            now.getFullYear() +
+            '-' +
+            String(now.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(now.getDate()).padStart(2, '0') +
+            '_' +
+            String(now.getHours()).padStart(2, '0') +
+            '-' +
+            String(now.getMinutes()).padStart(2, '0') +
+            '-' +
+            String(now.getSeconds()).padStart(2, '0');
+
         console.log(
             'writing zip to: ',
-            `${DEFAULT_BACKUPS_FOLDER}\\${installDirAsFileName}.zip`
+            `${DEFAULT_BACKUPS_FOLDER}\\${installDirAsFileName}_${timestamp}.zip`
         );
-        zip.writeZip(`${DEFAULT_BACKUPS_FOLDER}\\${installDirAsFileName}.zip`);
+        zip.writeZip(
+            `${DEFAULT_BACKUPS_FOLDER}\\${installDirAsFileName}_${timestamp}.zip`
+        );
         console.log('wrote zip there...');
     } catch (err) {
         console.error(

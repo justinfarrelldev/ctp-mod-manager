@@ -198,6 +198,25 @@ export const InstallDirTable: FC<Props> = ({
                                     >
                                         Restore Backup
                                     </button>
+                                    <button
+                                        className="btn btn-secondary btn-sm"
+                                        onClick={async (): Promise<void> => {
+                                            try {
+                                                await (
+                                                    window as ElectronWindow
+                                                ).api.makeBackup(
+                                                    'file:makeBackup',
+                                                    installDir.directory
+                                                );
+                                            } catch (err) {
+                                                console.error(
+                                                    `Failed to create backup: ${err}`
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        Create Backup
+                                    </button>
                                 </div>
                             </td>
                         </tr>

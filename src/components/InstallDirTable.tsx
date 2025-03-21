@@ -56,7 +56,7 @@ export const InstallDirTable: FC<Props> = ({
 }) => {
     const [deletePopupOpen, setDeletePopupOpen] = useState<string>('');
 
-    const addInstall = async () => {
+    const addInstall = async (): Promise<void> => {
         const folder = await (window as ElectronWindow).api.selectFolder(
             'file:selectFolder'
         );
@@ -73,12 +73,12 @@ export const InstallDirTable: FC<Props> = ({
         }
     };
 
-    const removeInstall = async (dir: string) => {
+    const removeInstall = async (dir: string): Promise<void> => {
         removeFromInstallDirs(dir);
         onAddedInstallDirectory();
     };
 
-    const runGame = (dir: string) => {
+    const runGame = (dir: string): void => {
         (window as ElectronWindow).api.runGame(
             'file:runGame',
             `${dir}\\ctp2_program\\ctp\\ctp2.exe`
@@ -100,7 +100,7 @@ export const InstallDirTable: FC<Props> = ({
                             buttons={[
                                 {
                                     color: 'primary',
-                                    onClick: () => {
+                                    onClick: (): void => {
                                         removeInstall(deletePopupOpen);
                                         setDeletePopupOpen('');
                                     },
@@ -108,14 +108,14 @@ export const InstallDirTable: FC<Props> = ({
                                 },
                                 {
                                     color: 'neutral',
-                                    onClick: () => {
+                                    onClick: (): void => {
                                         setDeletePopupOpen('');
                                     },
                                     text: 'No',
                                 },
                             ]}
                             modalName="Remove Installation From Mod Manager"
-                            onClose={() => setDeletePopupOpen('')}
+                            onClose={(): void => setDeletePopupOpen('')}
                             open={deletePopupOpen !== ''}
                             text={
                                 'This will remove the installation from the "installations" list in the mod manager, but it will not delete any actual files. Are you sure you want to do this?'
@@ -127,14 +127,16 @@ export const InstallDirTable: FC<Props> = ({
                         <div className="space-x-10">
                             <span>
                                 <button
-                                    onClick={() => openDirectory(dir.directory)}
+                                    onClick={(): void =>
+                                        openDirectory(dir.directory)
+                                    }
                                 >
                                     <FolderIcon />
                                 </button>
                             </span>
                             <span>
                                 <button
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         setDeletePopupOpen(dir.directory);
                                     }}
                                 >
@@ -143,7 +145,7 @@ export const InstallDirTable: FC<Props> = ({
                             </span>
                             <span>
                                 <button
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         //onClickModify(dir.directory);
                                         runGame(dir.directory);
                                     }}
@@ -164,16 +166,10 @@ export const InstallDirTable: FC<Props> = ({
                 </div>
             ))}
             <div className="flex space-x-4 mb-4">
-                <button
-                    className="btn btn-primary"
-                    onClick={() => addInstall()}
-                >
+                <button className="btn btn-primary" onClick={addInstall}>
                     Add Installation
                 </button>
-                <button
-                    className="btn btn-secondary"
-                    onClick={() => openModsDir()}
-                >
+                <button className="btn btn-secondary" onClick={openModsDir}>
                     Open Mods Directory
                 </button>
             </div>
@@ -210,7 +206,7 @@ export const InstallDirTable: FC<Props> = ({
                                             creatingBackup ===
                                             installDir.directory
                                         }
-                                        onClick={() =>
+                                        onClick={async (): Promise<void> =>
                                             onClickCreateBackup(
                                                 installDir.directory
                                             )
@@ -228,7 +224,7 @@ export const InstallDirTable: FC<Props> = ({
                                     </button>
                                     <button
                                         className="btn btn-error btn-sm"
-                                        onClick={() =>
+                                        onClick={(): void =>
                                             onClickDeleteBackup(
                                                 installDir.directory
                                             )

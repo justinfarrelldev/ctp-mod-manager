@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const vitest = require('eslint-plugin-vitest');
 
 module.exports = {
@@ -142,6 +143,7 @@ module.exports = {
                 ],
                 'functional/no-let': 'off',
                 'functional/no-loop-statements': 'off',
+                'functional/no-mixed-types': 'off',
                 'functional/no-return-void': 'off',
                 'functional/no-throw-statements': 'off',
                 'no-undef': 'off',
@@ -172,8 +174,10 @@ module.exports = {
                 'functional/immutable-data': 'off',
                 'functional/no-expression-statements': 'off',
                 'functional/no-let': 'off',
+                'functional/no-mixed-types': 'off',
                 'functional/no-return-void': 'off',
                 'functional/no-throw-statements': 'off',
+
                 'no-undef': 'off',
                 'no-unused-vars': 'off',
                 'vitest/max-expects': 'off',
@@ -198,6 +202,7 @@ module.exports = {
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-unused-expressions': 'error',
         'functional/no-let': 'off',
+        'functional/no-mixed-types': 'off',
         'no-undef': 'off',
         'no-unused-expressions': 'off',
         'no-unused-vars': 'off',

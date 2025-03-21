@@ -1,8 +1,17 @@
 import React, { FC } from 'react';
+import { ReadonlyDeep } from 'type-fest';
 
 export interface ModalProps {
     buttons: {
-        color: 'accent' | 'neutral' | 'primary' | 'secondary';
+        color:
+            | 'accent'
+            | 'error'
+            | 'info'
+            | 'neutral'
+            | 'primary'
+            | 'secondary'
+            | 'success'
+            | 'warning';
         onClick: () => any;
         text: string;
     }[];
@@ -16,7 +25,7 @@ export interface ModalProps {
 }
 
 export const Modal: FC<ModalProps> = (
-    props: ModalProps
+    props: ReadonlyDeep<ModalProps>
 ): React.ReactElement => {
     return (
         <dialog className="modal" id={props.modalName} open={props.open}>

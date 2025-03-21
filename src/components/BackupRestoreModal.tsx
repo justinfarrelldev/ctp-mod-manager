@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
+import { ReadonlyDeep } from 'type-fest';
 
 import { ElectronWindow } from '../App';
 import { Modal } from './Modal';
@@ -71,7 +72,7 @@ export const BackupRestoreModal: FC<BackupRestoreModalProps> = ({
         }
     }, [open]);
 
-    const formatDate = (date: Date): string => {
+    const formatDate = (date: ReadonlyDeep<Date>): string => {
         return new Date(date).toLocaleString();
     };
 
@@ -134,7 +135,7 @@ export const BackupRestoreModal: FC<BackupRestoreModalProps> = ({
                                             <td>
                                                 <button
                                                     className="btn btn-primary btn-sm"
-                                                    onClick={() => {
+                                                    onClick={(): void => {
                                                         setSelectedBackup(
                                                             backup
                                                         );
@@ -167,7 +168,7 @@ export const BackupRestoreModal: FC<BackupRestoreModalProps> = ({
                     },
                 ]}
                 modalName="Confirm Restore"
-                onClose={() => setConfirmOpen(false)}
+                onClose={(): void => setConfirmOpen(false)}
                 open={confirmOpen}
                 text={`Are you sure you want to restore this backup? This will completely replace your current installation at ${installDir}.`}
                 width="50%"

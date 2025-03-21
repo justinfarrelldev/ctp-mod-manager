@@ -69,7 +69,7 @@ export const DeleteBackupModal: FC<Props> = ({
         <>
             <ErrorModal
                 errorMessage={error}
-                onClose={() => setError('')}
+                onClose={(): void => setError('')}
                 open={error !== ''}
             />
 
@@ -126,7 +126,7 @@ export const DeleteBackupModal: FC<Props> = ({
                                                                 deletingBackup ===
                                                                 backup.path
                                                             }
-                                                            onClick={() =>
+                                                            onClick={async (): Promise<void> =>
                                                                 handleDeleteBackup(
                                                                     backup.path
                                                                 )
@@ -144,7 +144,7 @@ export const DeleteBackupModal: FC<Props> = ({
                                                         </button>
                                                         <button
                                                             className="btn btn-neutral btn-sm"
-                                                            onClick={() =>
+                                                            onClick={(): void =>
                                                                 setConfirmDelete(
                                                                     ''
                                                                 )
@@ -156,7 +156,7 @@ export const DeleteBackupModal: FC<Props> = ({
                                                 ) : (
                                                     <button
                                                         className="btn btn-error btn-sm"
-                                                        onClick={() =>
+                                                        onClick={(): void =>
                                                             setConfirmDelete(
                                                                 backup.path
                                                             )

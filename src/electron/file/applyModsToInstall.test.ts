@@ -24,6 +24,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should log an error if the install directory is invalid', () => {
+        expect.assertions(1);
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {});
@@ -38,6 +39,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should log an error if a mod is not a directory', async () => {
+        expect.assertions(1);
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
         vi.spyOn(fs, 'statSync').mockReturnValueOnce({
             isDirectory: () => false,
@@ -54,6 +56,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should log an error if there is an issue getting the stats for a mod directory', async () => {
+        expect.assertions(1);
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('stat error');
@@ -70,6 +73,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should log an error if getFileChangesToApplyMod throws an error', async () => {
+        expect.assertions(2);
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
         vi.spyOn(fs, 'statSync').mockReturnValueOnce({
             isDirectory: () => true,
@@ -93,6 +97,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should copy the mod directory and call getFileChangesToApplyMod if valid', async () => {
+        expect.assertions(1);
         // ensure the install directory is valid
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
 

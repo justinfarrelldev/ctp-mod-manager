@@ -13,8 +13,10 @@ import { InstallationPathText } from './InstallationPathText';
 import { Modal } from './Modal';
 
 interface Props {
+    creatingBackup: string; // Add new prop
     installDirs: InstallDirectory[];
     onAddedInstallDirectory: () => void;
+    onClickCreateBackup: (dir: string) => Promise<void>; // Add new prop
     onClickModify: (dirPathBeingModified: string) => void;
     onClickRestoreBackup: (dir: string) => void;
 }
@@ -43,8 +45,10 @@ const removeFromInstallDirs = async (dir: string): Promise<void> => {
 };
 
 export const InstallDirTable: FC<Props> = ({
+    creatingBackup,
     installDirs,
     onAddedInstallDirectory,
+    onClickCreateBackup,
     onClickModify,
     onClickRestoreBackup,
 }) => {
@@ -200,22 +204,25 @@ export const InstallDirTable: FC<Props> = ({
                                     </button>
                                     <button
                                         className="btn btn-secondary btn-sm"
-                                        onClick={async (): Promise<void> => {
-                                            try {
-                                                await (
-                                                    window as ElectronWindow
-                                                ).api.makeBackup(
-                                                    'file:makeBackup',
-                                                    installDir.directory
-                                                );
-                                            } catch (err) {
-                                                console.error(
-                                                    `Failed to create backup: ${err}`
-                                                );
-                                            }
-                                        }}
+                                        disabled={
+                                            creatingBackup ===
+                                            installDir.directory
+                                        }
+                                        onClick={() =>
+                                            onClickCreateBackup(
+                                                installDir.directory
+                                            )
+                                        }
                                     >
-                                        Create Backup
+                                        {creatingBackup ===
+                                        installDir.directory ? (
+                                            <>
+                                                <span className="loading loading-spinner loading-xs"></span>
+                                                Creating...
+                                            </>
+                                        ) : (
+                                            'Create Backup'
+                                        )}
                                     </button>
                                 </div>
                             </td>

@@ -114,10 +114,28 @@ export const App: FC = (): React.ReactElement => {
 
     const [backupRestoreOpen, setBackupRestoreOpen] = useState<boolean>(false);
     const [backupInstallDir, setBackupInstallDir] = useState<string>('');
+    const [creatingBackup, setCreatingBackup] = useState<string>(''); // Add state for tracking backup creation
 
     const handleRestoreBackupClick = (installDir: string): void => {
         setBackupInstallDir(installDir);
         setBackupRestoreOpen(true);
+    };
+
+    const handleCreateBackupClick = async (
+        installDir: string
+    ): Promise<void> => {
+        setCreatingBackup(installDir);
+        try {
+            await (window as ElectronWindow).api.makeBackup(
+                'file:makeBackup',
+                installDir
+            );
+        } catch (err) {
+            console.error(`Failed to create backup: ${err}`);
+            setError(`Failed to create backup: ${err}`);
+        } finally {
+            setCreatingBackup('');
+        }
     };
 
     const loadModFileNames = async (): Promise<void> => {
@@ -299,10 +317,12 @@ export const App: FC = (): React.ReactElement => {
                 )}
 
                 <InstallDirTable
+                    creatingBackup={creatingBackup} // Pass the current creating backup state
                     installDirs={installDirs}
                     onAddedInstallDirectory={() => loadInstallDirs()}
+                    onClickCreateBackup={handleCreateBackupClick} // Add new prop
                     onClickModify={(dir) => setDirBeingModified(dir)}
-                    onClickRestoreBackup={handleRestoreBackupClick} // Add this prop
+                    onClickRestoreBackup={handleRestoreBackupClick}
                 />
                 <Modal
                     buttons={[

@@ -27,7 +27,9 @@ export const runGame = (exeDir: string): void => {
             return;
         }
 
-        const game = spawn(exeDir, [], { shell: platform() === 'win32' });
+        const game = spawn(`"${exeDir}"`, [], {
+            shell: platform() === 'win32',
+        });
 
         game.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);

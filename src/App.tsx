@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { themeChange } from 'theme-change';
+import { ReadonlyDeep } from 'type-fest';
 
 import { BackupRestoreModal } from './components/BackupRestoreModal';
 import { DeleteBackupModal } from './components/DeleteBackupModal';
@@ -23,7 +24,7 @@ export type ElectronWindow = typeof globalThis &
             applyModsToInstall: (
                 ipcCommand: 'file:applyModsToInstall',
                 installDir: string,
-                mods: string[]
+                mods: ReadonlyDeep<string[]>
             ) => Promise<void>;
             copyFileToModDir: (
                 ipcCommand: string,
@@ -221,7 +222,7 @@ export const App: FC = (): React.ReactElement => {
     };
 
     const handleFileSelected = async (
-        e: React.ChangeEvent<HTMLInputElement>
+        e: ReadonlyDeep<React.ChangeEvent<HTMLInputElement>>
     ): Promise<void> => {
         setLoadingMods(true);
         const files = Array.from(e.target.files);
@@ -268,13 +269,13 @@ export const App: FC = (): React.ReactElement => {
                 {/* Add the DeleteBackupModal */}
                 <DeleteBackupModal
                     installDir={deletingBackupDir}
-                    onClose={() => setDeleteBackupOpen(false)}
+                    onClose={(): void => setDeleteBackupOpen(false)}
                     open={deleteBackupOpen}
                 />
                 {/* Existing BackupRestoreModal */}
                 <BackupRestoreModal
                     installDir={backupInstallDir}
-                    onClose={() => setBackupRestoreOpen(false)}
+                    onClose={(): void => setBackupRestoreOpen(false)}
                     open={backupRestoreOpen}
                 />
                 <div className="flex justify-between">
@@ -282,7 +283,7 @@ export const App: FC = (): React.ReactElement => {
                         Call to Power II Installations
                     </p>
                     <div className="right-0 top-2 h-16 w-16">
-                        <button onClick={() => setSettingsOpen(true)}>
+                        <button onClick={(): void => setSettingsOpen(true)}>
                             <SettingsIcon />
                         </button>
                     </div>
@@ -290,7 +291,7 @@ export const App: FC = (): React.ReactElement => {
                 {error && (
                     <ErrorModal
                         errorMessage={error}
-                        onClose={() => {
+                        onClose={(): void => {
                             setError('');
                         }}
                         open={error.length > 0}
@@ -309,7 +310,7 @@ export const App: FC = (): React.ReactElement => {
                             },
                         ]}
                         modalName="Settings"
-                        onClose={() => setSettingsOpen(false)}
+                        onClose={(): void => setSettingsOpen(false)}
                         open={settingsOpen}
                         text=""
                         width="50%"
@@ -327,7 +328,7 @@ export const App: FC = (): React.ReactElement => {
                             },
                         ]}
                         modalName="Applying Mods"
-                        onClose={() => setApplyingMods(false)}
+                        onClose={(): void => setApplyingMods(false)}
                         open={applyingMods}
                         text=""
                         width="50%"
@@ -343,10 +344,10 @@ export const App: FC = (): React.ReactElement => {
                 <InstallDirTable
                     creatingBackup={creatingBackup} // Pass the current creating backup state
                     installDirs={installDirs}
-                    onAddedInstallDirectory={() => loadInstallDirs()}
+                    onAddedInstallDirectory={loadInstallDirs}
                     onClickCreateBackup={handleCreateBackupClick} // Add new prop
                     onClickDeleteBackup={handleDeleteBackupClick}
-                    onClickModify={(dir) => setDirBeingModified(dir)}
+                    onClickModify={setDirBeingModified}
                     onClickRestoreBackup={handleRestoreBackupClick}
                 />
                 <Modal
@@ -359,9 +360,7 @@ export const App: FC = (): React.ReactElement => {
                     ]}
                     height="100%"
                     modalName="Modify Installation"
-                    onClose={() => {
-                        setDirBeingModified('');
-                    }}
+                    onClose={(): void => setDirBeingModified('')}
                     open={dirBeingModified !== ''}
                     text=""
                     width="100%"
@@ -369,8 +368,10 @@ export const App: FC = (): React.ReactElement => {
                     <ModifyInstallView
                         addedMods={modNamesAdded}
                         dirBeingModified={dirBeingModified}
-                        onBackClicked={() => setDirBeingModified('')}
-                        onDequeueMod={async (modName: string) => {
+                        onBackClicked={(): void => setDirBeingModified('')}
+                        onDequeueMod={async (
+                            modName: string
+                        ): Promise<void> => {
                             setModNamesQueued(
                                 modNamesQueued.filter(
                                     (value) => value !== modName
@@ -379,8 +380,8 @@ export const App: FC = (): React.ReactElement => {
                             setModNamesAdded([...modNamesAdded, modName]);
                         }}
                         onModSelected={handleFileSelected}
-                        onOpenModsDir={() => openModsDir()}
-                        onQueueMod={async (modName: string) => {
+                        onOpenModsDir={openModsDir}
+                        onQueueMod={async (modName: string): Promise<void> => {
                             setModNamesQueued([...modNamesQueued, modName]);
                             setModNamesAdded(
                                 modNamesAdded.filter(
@@ -398,7 +399,7 @@ export const App: FC = (): React.ReactElement => {
                     buttons={[
                         {
                             color: 'primary',
-                            onClick: () => {
+                            onClick: (): void => {
                                 findInstallDirs();
                                 handleInstallDirModalClose();
                             },
@@ -406,7 +407,7 @@ export const App: FC = (): React.ReactElement => {
                         },
                         {
                             color: 'neutral',
-                            onClick: () => {
+                            onClick: (): void => {
                                 handleInstallDirModalClose();
                             },
                             text: 'No',
@@ -427,7 +428,8 @@ export const App: FC = (): React.ReactElement => {
                     <p>
                         You have not added any Call to Power II mods just yet.
                         Add one below, then apply it to one of your
-                        installations listed above using the "Modify" menu.
+                        installations listed above using the &quot;Modify&quot;
+                        menu.
                     </p>
                 )}
                 {modNamesAdded !== undefined &&
@@ -445,10 +447,12 @@ export const App: FC = (): React.ReactElement => {
                                 {modNamesAdded.map((name) => (
                                     <tr key={name}>
                                         <th>
-                                            <label>
+                                            <label
+                                                aria-label={`Select mod: ${name}`}
+                                            >
                                                 <input
                                                     className="checkbox"
-                                                    onChange={(event) => {
+                                                    onChange={(event): void => {
                                                         if (
                                                             event.target.checked
                                                         ) {
@@ -481,7 +485,7 @@ export const App: FC = (): React.ReactElement => {
                                 <tr>
                                     <td className="space-x-10">
                                         <button
-                                            onClick={() => {
+                                            onClick={(): void => {
                                                 for (const mod of checkedMods) {
                                                     (
                                                         window as ElectronWindow
@@ -497,7 +501,7 @@ export const App: FC = (): React.ReactElement => {
                                             <TrashIcon />
                                         </button>
                                         <button
-                                            onClick={async () => {
+                                            onClick={async (): Promise<void> => {
                                                 setApplyingMods(true);
 
                                                 await (
@@ -529,7 +533,7 @@ export const App: FC = (): React.ReactElement => {
                 />
                 <button
                     className="btn btn-primary"
-                    onClick={() => {
+                    onClick={(): void => {
                         document.getElementById('add-mod-button').click();
                     }}
                 >

@@ -6,6 +6,7 @@ import { DEFAULT_MOD_DIR } from './constants';
 import { addToInstallDirs } from './file/addToInstallDirs';
 import { applyModsToInstall } from './file/applyModsToInstall';
 import { copyFileToModDir } from './file/copyFileToModDir';
+import { deleteBackup } from './file/deleteBackup';
 import { getInstallDirs } from './file/getInstallDirs';
 import { isValidInstall } from './file/isValidInstall';
 import { listBackups } from './file/listBackups';
@@ -103,6 +104,10 @@ app.whenReady().then(() => {
     ipcMain.handle(
         'file:applyModsToInstall',
         async (_, dir, mods) => await applyModsToInstall(dir, mods)
+    );
+
+    ipcMain.handle('file:deleteBackup', (_, backupPath) =>
+        deleteBackup(backupPath)
     );
 
     createWindow();

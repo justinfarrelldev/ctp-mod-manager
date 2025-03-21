@@ -17,6 +17,7 @@ interface Props {
     installDirs: InstallDirectory[];
     onAddedInstallDirectory: () => void;
     onClickCreateBackup: (dir: string) => Promise<void>; // Add new prop
+    onClickDeleteBackup: (dir: string) => void;
     onClickModify: (dirPathBeingModified: string) => void;
     onClickRestoreBackup: (dir: string) => void;
 }
@@ -49,6 +50,7 @@ export const InstallDirTable: FC<Props> = ({
     installDirs,
     onAddedInstallDirectory,
     onClickCreateBackup,
+    onClickDeleteBackup,
     onClickModify,
     onClickRestoreBackup,
 }) => {
@@ -223,6 +225,17 @@ export const InstallDirTable: FC<Props> = ({
                                         ) : (
                                             'Create Backup'
                                         )}
+                                    </button>
+                                    <button
+                                        className="btn btn-error btn-sm"
+                                        onClick={() =>
+                                            onClickDeleteBackup(
+                                                installDir.directory
+                                            )
+                                        }
+                                    >
+                                        {' '}
+                                        Delete Backup
                                     </button>
                                 </div>
                             </td>

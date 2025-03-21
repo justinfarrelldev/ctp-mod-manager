@@ -14,6 +14,10 @@ contextBridge.exposeInMainWorld('api', {
     copyFileToModDir: (_: Event, fileDir: string) =>
         ipcRenderer.invoke('file:copyFileToModDir', fileDir),
 
+    // Deletes a backup file
+    deleteBackup: (_: Event, backupPath: string) =>
+        ipcRenderer.invoke('file:deleteBackup', backupPath),
+
     // Retrieves the Call to Power II installation directory
     getCtp2InstallDir: () => ipcRenderer.invoke('load:getCtp2InstallDir'),
 

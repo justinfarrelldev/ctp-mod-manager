@@ -2,6 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { themeChange } from 'theme-change';
 
 import { BackupRestoreModal } from './components/BackupRestoreModal';
+import { DeleteBackupModal } from './components/DeleteBackupModal';
 import { ErrorModal } from './components/ErrorModal';
 import { ApplyIcon } from './components/icons/apply';
 import { SettingsIcon } from './components/icons/settings';
@@ -28,6 +29,10 @@ export type ElectronWindow = typeof globalThis &
                 ipcCommand: string,
                 fileDir: string
             ) => Promise<void>;
+            deleteBackup: (
+                ipcCommand: 'file:deleteBackup',
+                backupPath: string
+            ) => Promise<void>;
             getCtp2InstallDir: () => Promise<
                 [
                     {
@@ -46,7 +51,13 @@ export type ElectronWindow = typeof globalThis &
                 ipcCommand: string,
                 dir: string
             ) => Promise<boolean>;
-            listBackups: () => Promise<string[]>;
+            listBackups: () => Promise<
+                Array<{
+                    creationDate: Date;
+                    filename: string;
+                    path: string;
+                }>
+            >;
             loadModFileNames: () => Promise<string[]>;
             makeBackup: (
                 ipcCommand: 'file:makeBackup',
@@ -115,6 +126,8 @@ export const App: FC = (): React.ReactElement => {
     const [backupRestoreOpen, setBackupRestoreOpen] = useState<boolean>(false);
     const [backupInstallDir, setBackupInstallDir] = useState<string>('');
     const [creatingBackup, setCreatingBackup] = useState<string>(''); // Add state for tracking backup creation
+    const [deleteBackupOpen, setDeleteBackupOpen] = useState<boolean>(false);
+    const [deletingBackupDir, setDeletingBackupDir] = useState<string>('');
 
     const handleRestoreBackupClick = (installDir: string): void => {
         setBackupInstallDir(installDir);
@@ -136,6 +149,11 @@ export const App: FC = (): React.ReactElement => {
         } finally {
             setCreatingBackup('');
         }
+    };
+
+    const handleDeleteBackupClick = (installDir: string): void => {
+        setDeletingBackupDir(installDir);
+        setDeleteBackupOpen(true);
     };
 
     const loadModFileNames = async (): Promise<void> => {
@@ -247,7 +265,13 @@ export const App: FC = (): React.ReactElement => {
     return (
         <div>
             <div className="p-6">
-                {/* Add the BackupRestoreModal */}
+                {/* Add the DeleteBackupModal */}
+                <DeleteBackupModal
+                    installDir={deletingBackupDir}
+                    onClose={() => setDeleteBackupOpen(false)}
+                    open={deleteBackupOpen}
+                />
+                {/* Existing BackupRestoreModal */}
                 <BackupRestoreModal
                     installDir={backupInstallDir}
                     onClose={() => setBackupRestoreOpen(false)}
@@ -321,6 +345,7 @@ export const App: FC = (): React.ReactElement => {
                     installDirs={installDirs}
                     onAddedInstallDirectory={() => loadInstallDirs()}
                     onClickCreateBackup={handleCreateBackupClick} // Add new prop
+                    onClickDeleteBackup={handleDeleteBackupClick}
                     onClickModify={(dir) => setDirBeingModified(dir)}
                     onClickRestoreBackup={handleRestoreBackupClick}
                 />

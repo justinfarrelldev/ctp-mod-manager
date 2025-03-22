@@ -61,3 +61,223 @@ If we wanted to add another mod that overwrote line 5, we would need to:
     -   If they are not, warn the user that the mods may be incompatible and show the mod diff if they care
     -   If they still say they want to apply, then add the lines underneath of the old ones
 -   I can use TDD to test for this logic and ensure it is correct
+
+
+
+
+    /*
+    CASE 1
+
+    Original File: 
+    
+        interface TestInterface {
+            health: number;
+            stamina: number;
+
+            happiness: number;
+        }
+    
+    Mod File: 
+
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            magicka: number;
+        }
+
+    Desired Output: 
+
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            magicka: number;
+        }
+
+    Explanation: since the happiness is not there, we can just delete that portion until the closing bracket of the interface
+    */
+
+    /*
+    CASE 2
+
+    Original File: 
+    
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            happiness: number;
+        }
+    
+    Mod File: 
+
+        interface TestInterface {
+            happiness: number;
+            health: number;
+            stamina: number;
+        }
+
+    Desired Output: 
+
+        interface TestInterface {
+            happiness: number;
+            health: number;
+            stamina: number;
+        }
+
+    Explanation: we add the new happiness property to the front and delete the one at the end
+    */
+
+    /*
+    CASE 3
+
+    Original File: 
+    
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            happiness_indicator: number;
+        }
+    
+    Mod File: 
+
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            happiness: number;
+        }
+
+    Desired Output: 
+
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            happiness: number;
+        }
+
+    Explanation: we add the new happiness property to the front and delete the happiness_indicator one
+    */
+
+    /*
+    CASE 4
+
+    Original File: 
+
+        function IsCool() {
+            return true;
+        }
+    
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            happiness: number;
+
+            isInvulnerable: false;
+
+            customChar: 'anna'
+        }
+    
+    Mod File: 
+
+        interface TestInterface {
+            health: number;
+            isInvulnerable: true;
+            stamina: number;
+            customChar: 'Dave';
+            happiness: number;
+
+        }
+
+        function IsCool() {
+            return true;
+        }
+
+    Desired Output: 
+
+        interface TestInterface {
+            health: number;
+            isInvulnerable: true;
+            stamina: number;
+            customChar: 'Dave';
+            happiness: number;
+
+        }
+
+        function IsCool() {
+            return true;
+        }
+
+    Explanation: we add the new happiness property to the front and delete the happiness_indicator one
+    */
+
+    /*
+    CASE 5
+
+    Original File: 
+
+        function IsCool() {
+            return true;
+        }
+    
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            happiness: number;
+
+            isInvulnerable: false;
+
+            customChar: 'anna'
+        }
+    
+    Mod File 1: 
+
+        interface TestInterface {
+            health: number;
+            isInvulnerable: true;
+            stamina: number;
+            customChar: 'Dave';
+            happiness: number;
+
+        }
+
+        function IsCool() {
+            return true;
+        }
+
+    Mod File 2: 
+
+        interface TestInterface {
+            health: number;
+            stamina: number;
+            happiness: number;
+            IsReallyCool: true;
+
+            isInvulnerable: false;
+
+            customChar: 'anna'
+        }
+
+        function IsCool() {
+            return true;
+        }
+
+    Desired Output: 
+
+        interface TestInterface {
+            health: number;
+            isInvulnerable: true;
+            stamina: number;
+            customChar: 'Dave';
+            happiness: number;
+            IsReallyCool: true;
+
+        }
+
+        function IsCool() {
+            return true;
+        }
+
+    Explanation: isInvulnerable is set to false in the initial installation, so since mod 1 sets it to true, we keep that modification (assuming that mod 2 is just keeping the setting from the installation).
+                Same with the customChar property.
+                IsReallyCool is set to the same value by both mod 1 and mod 2, so we keep it as true. Since the values are equivalent, the mods should NOT be marked as incompatible. 
+                IsCool() was moved for both mod 1 and mod 2 from the initial spot in the initial installation, so we desire the modified version. 
+                Spacing / ordering is largely irrelevant.
+    */

@@ -1,8 +1,11 @@
 import * as fs from 'fs';
-import { afterAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFAULT_MOD_DIR } from '../constants';
+import * as applyFileChanges from './applyFileChanges';
 import { applyModsToInstall } from './applyModsToInstall';
 import * as getFileChangesToApplyMod from './getFileChangesToApplyMod';
+import * as consolidateLineChangeGroups from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
 // import { DEFAULT_MOD_DIR } from '../constants';
 
@@ -125,5 +128,313 @@ describe('applyModsToInstall', () => {
             'mod1',
             '/valid/install'
         );
+    });
+});
+vi.mock('fs');
+vi.mock('./isValidInstall', () => ({
+    isValidInstall: vi.fn(),
+}));
+vi.mock('./applyFileChanges', () => ({
+    applyFileChanges: vi.fn(),
+}));
+vi.mock('./getFileChangesToApplyMod', () => ({
+    consolidateLineChangeGroups: vi.fn((x) => x),
+    getFileChangesToApplyMod: vi.fn(),
+}));
+
+vi.mock('electron', () => ({
+    app: {
+        getName: vi.fn().mockReturnValue('mock-name'),
+        getPath: vi.fn().mockReturnValue('/mock/path'),
+    },
+}));
+
+describe('applyModsToInstall', () => {
+    afterAll(() => {
+        vi.clearAllMocks();
+    });
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    it('should log an error if the install directory is invalid', async () => {
+        vi.mocked(isValidInstall).mockReturnValue(false);
+
+        await applyModsToInstall('/invalid/install', ['mod1']);
+
+        expect(console.error).toHaveBeenCalledWith(
+            'Invalid install passed to applyModsToInstall! Install passed: /invalid/install'
+        );
+        expect(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).not.toHaveBeenCalled();
+    });
+
+    it('should log an error if a mod is not a directory', async () => {
+        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.spyOn(fs, 'statSync').mockReturnValueOnce({
+            isDirectory: () => false,
+        } as fs.Stats);
+
+        await applyModsToInstall('/valid/install', ['mod1']);
+
+        expect(console.error).toHaveBeenCalledWith(
+            expect.stringContaining('is not a directory')
+        );
+    });
+
+    it('should log an error if there is an issue getting the stats for a mod directory', async () => {
+        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
+            throw new Error('stat error');
+        });
+
+        await applyModsToInstall('/valid/install', ['mod1']);
+
+        expect(console.error).toHaveBeenCalledWith(
+            expect.stringContaining('An error occurred while getting the stats')
+        );
+    });
+
+    it('should apply changes for a single mod (Case 1: property replacement)', async () => {
+        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.spyOn(fs, 'statSync').mockReturnValue({
+            isDirectory: () => true,
+        } as fs.Stats);
+
+        const mockChanges = [
+            {
+                fileName: 'test.ts',
+                lineChangeGroups: [
+                    {
+                        endLine: 6,
+                        replacementLines: ['            magicka: number;'],
+                        startLine: 4,
+                    },
+                ],
+            },
+        ];
+
+        vi.mocked(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).mockResolvedValueOnce(mockChanges);
+
+        await applyModsToInstall('/valid/install', ['mod1']);
+
+        expect(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).toHaveBeenCalledWith('mod1', '/valid/install');
+        expect(applyFileChanges.applyFileChanges).toHaveBeenCalledWith({
+            installDir: '/valid/install',
+            modFileChanges: [
+                {
+                    fileChanges: mockChanges,
+                    mod: 'mod1',
+                },
+            ],
+        });
+    });
+
+    it('should apply changes for a single mod (Case 2: property reordering)', async () => {
+        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.spyOn(fs, 'statSync').mockReturnValue({
+            isDirectory: () => true,
+        } as fs.Stats);
+
+        const mockChanges = [
+            {
+                fileName: 'test.ts',
+                lineChangeGroups: [
+                    {
+                        endLine: 5,
+                        replacementLines: [
+                            '            happiness: number;',
+                            '            health: number;',
+                            '            stamina: number;',
+                        ],
+                        startLine: 2,
+                    },
+                ],
+            },
+        ];
+
+        vi.mocked(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).mockResolvedValueOnce(mockChanges);
+
+        await applyModsToInstall('/valid/install', ['mod1']);
+
+        expect(applyFileChanges.applyFileChanges).toHaveBeenCalledWith({
+            installDir: '/valid/install',
+            modFileChanges: [
+                {
+                    fileChanges: mockChanges,
+                    mod: 'mod1',
+                },
+            ],
+        });
+    });
+
+    it('should apply changes for a single mod (Case 3: property replacement with similar name)', async () => {
+        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.spyOn(fs, 'statSync').mockReturnValue({
+            isDirectory: () => true,
+        } as fs.Stats);
+
+        const mockChanges = [
+            {
+                fileName: 'test.ts',
+                lineChangeGroups: [
+                    {
+                        endLine: 4,
+                        replacementLines: ['            happiness: number;'],
+                        startLine: 4,
+                    },
+                ],
+            },
+        ];
+
+        vi.mocked(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).mockResolvedValueOnce(mockChanges);
+
+        await applyModsToInstall('/valid/install', ['mod1']);
+
+        expect(applyFileChanges.applyFileChanges).toHaveBeenCalledWith({
+            installDir: '/valid/install',
+            modFileChanges: [
+                {
+                    fileChanges: mockChanges,
+                    mod: 'mod1',
+                },
+            ],
+        });
+    });
+
+    it('should apply changes for a single mod (Case 4: multiple changes with reordering)', async () => {
+        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.spyOn(fs, 'statSync').mockReturnValue({
+            isDirectory: () => true,
+        } as fs.Stats);
+
+        const mockChanges = [
+            {
+                fileName: 'test.ts',
+                lineChangeGroups: [
+                    {
+                        endLine: 13,
+                        replacementLines: [
+                            'interface TestInterface {',
+                            '            health: number;',
+                            '            isInvulnerable: true;',
+                            '            stamina: number;',
+                            "            customChar: 'Dave';",
+                            '            happiness: number;',
+                            '',
+                            '        }',
+                            '',
+                            '        function IsCool() {',
+                            '            return true;',
+                            '        }',
+                        ],
+                        startLine: 1,
+                    },
+                ],
+            },
+        ];
+
+        vi.mocked(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).mockResolvedValueOnce(mockChanges);
+
+        await applyModsToInstall('/valid/install', ['mod1']);
+
+        expect(applyFileChanges.applyFileChanges).toHaveBeenCalledWith({
+            installDir: '/valid/install',
+            modFileChanges: [
+                {
+                    fileChanges: mockChanges,
+                    mod: 'mod1',
+                },
+            ],
+        });
+    });
+
+    it('should apply changes for multiple mods sequentially (Case 5)', async () => {
+        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.spyOn(fs, 'statSync').mockReturnValue({
+            isDirectory: () => true,
+        } as fs.Stats);
+
+        const mockChanges1 = [
+            {
+                fileName: 'test.ts',
+                lineChangeGroups: [
+                    {
+                        endLine: 15,
+                        replacementLines: [
+                            'interface TestInterface {',
+                            '            health: number;',
+                            '            isInvulnerable: true;',
+                            '            stamina: number;',
+                            "            customChar: 'Dave';",
+                            '            happiness: number;',
+                            '',
+                            '        }',
+                            '',
+                            '        function IsCool() {',
+                            '            return true;',
+                            '        }',
+                        ],
+                        startLine: 1,
+                    },
+                ],
+            },
+        ];
+
+        const mockChanges2 = [
+            {
+                fileName: 'test.ts',
+                lineChangeGroups: [
+                    {
+                        endLine: 5,
+                        replacementLines: ['            IsReallyCool: true;'],
+                        startLine: 5,
+                    },
+                ],
+            },
+        ];
+
+        vi.mocked(getFileChangesToApplyMod.getFileChangesToApplyMod)
+            .mockResolvedValueOnce(mockChanges1)
+            .mockResolvedValueOnce(mockChanges2);
+
+        vi.mocked(
+            consolidateLineChangeGroups.consolidateLineChangeGroups
+        ).mockImplementation((groups) => groups);
+
+        await applyModsToInstall('/valid/install', ['mod1', 'mod2']);
+
+        expect(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).toHaveBeenCalledTimes(2);
+        expect(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).toHaveBeenNthCalledWith(1, 'mod1', '/valid/install');
+        expect(
+            getFileChangesToApplyMod.getFileChangesToApplyMod
+        ).toHaveBeenNthCalledWith(2, 'mod2', '/valid/install');
+
+        // The most important part is that applyFileChanges gets called with both mod changes
+        expect(applyFileChanges.applyFileChanges).toHaveBeenCalledWith({
+            installDir: '/valid/install',
+            modFileChanges: expect.arrayContaining([
+                expect.objectContaining({ mod: 'mod1' }),
+                expect.objectContaining({ mod: 'mod2' }),
+            ]),
+        });
     });
 });

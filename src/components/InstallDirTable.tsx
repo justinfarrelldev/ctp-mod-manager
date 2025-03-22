@@ -123,7 +123,7 @@ export const InstallDirTable: FC<Props> = ({
                     </p>
                 </div>
             ) : (
-                <div className="overflow-x-auto bg-base-200 rounded-lg">
+                <div className="overflow-x-auto overflow-auto bg-base-200 rounded-lg">
                     <table className="table w-full">
                         <thead>
                             <tr>
@@ -210,7 +210,12 @@ export const InstallDirTable: FC<Props> = ({
                                                     Backup Options
                                                 </button>
                                                 <ul
-                                                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                                                    className="dropdown-content z-[9999] menu p-2 shadow bg-base-100 rounded-box w-52"
+                                                    style={{
+                                                        maxHeight: '300px',
+                                                        overflowY: 'auto',
+                                                        position: 'relative', // FIXME a very temporary fix until I can figure this out in Tailwind
+                                                    }}
                                                     tabIndex={0}
                                                 >
                                                     <li>

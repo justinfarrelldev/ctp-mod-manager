@@ -5,6 +5,7 @@
 import React, { FC, useState } from 'react';
 
 import { ElectronWindow, InstallDirectory } from '../App';
+import { BackupIcon } from './icons/backup';
 import { FolderIcon } from './icons/folder';
 import { PlayIcon } from './icons/play';
 import { TrashIcon } from './icons/trash';
@@ -149,6 +150,19 @@ export const InstallDirTable: FC<Props> = ({
                                     <td>
                                         <div className="flex flex-wrap gap-2">
                                             <button
+                                                aria-label="Run game"
+                                                className="btn btn-sm btn-success"
+                                                data-tip="Run Game"
+                                                onClick={(): void =>
+                                                    runGame(
+                                                        installDir.directory
+                                                    )
+                                                }
+                                            >
+                                                <PlayIcon />
+                                                <span>Run Game</span>
+                                            </button>
+                                            <button
                                                 aria-label="Open Directory"
                                                 className="btn btn-sm btn-accent"
                                                 data-tip="Open Directory"
@@ -176,38 +190,14 @@ export const InstallDirTable: FC<Props> = ({
                                                 <TrashIcon />
                                                 <span>Remove Installation</span>
                                             </button>
-                                            <button
-                                                aria-label="Run game"
-                                                className="btn btn-sm btn-success"
-                                                data-tip="Run Game"
-                                                onClick={(): void =>
-                                                    runGame(
-                                                        installDir.directory
-                                                    )
-                                                }
-                                            >
-                                                <PlayIcon />
-                                                <span>Run Game</span>
-                                            </button>
-                                            <button
-                                                aria-label="Modify installation"
-                                                className="btn btn-sm btn-primary"
-                                                onClick={(): void =>
-                                                    onClickModify(
-                                                        installDir.directory
-                                                    )
-                                                }
-                                            >
-                                                <WrenchIcon />
-                                                <span>Modify</span>
-                                            </button>
                                             <div className="dropdown dropdown-end">
                                                 <button
                                                     aria-label="Backup options"
                                                     className="btn btn-sm btn-secondary"
                                                     tabIndex={0}
                                                 >
-                                                    Backup Options
+                                                    <BackupIcon />
+                                                    <span>Backup Options</span>
                                                 </button>
                                                 <ul
                                                     className="dropdown-content z-[9999] menu p-2 shadow bg-base-100 rounded-box w-52"

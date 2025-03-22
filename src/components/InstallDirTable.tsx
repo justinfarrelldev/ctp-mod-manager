@@ -151,7 +151,7 @@ export const InstallDirTable: FC<Props> = ({
                                         <div className="flex flex-wrap gap-2">
                                             <button
                                                 aria-label="Run game"
-                                                className="btn btn-sm btn-success"
+                                                className="btn btn-sm btn-primary"
                                                 data-tip="Run Game"
                                                 onClick={(): void =>
                                                     runGame(
@@ -164,7 +164,7 @@ export const InstallDirTable: FC<Props> = ({
                                             </button>
                                             <button
                                                 aria-label="Open Directory"
-                                                className="btn btn-sm btn-accent"
+                                                className="btn btn-sm btn-primary"
                                                 data-tip="Open Directory"
                                                 onClick={(): void =>
                                                     openDirectory(
@@ -177,23 +177,10 @@ export const InstallDirTable: FC<Props> = ({
                                                     Open Installation Folder
                                                 </span>
                                             </button>
-                                            <button
-                                                aria-label="Remove installation"
-                                                className="btn btn-sm btn-error"
-                                                data-tip="Remove"
-                                                onClick={(): void =>
-                                                    setDeletePopupOpen(
-                                                        installDir.directory
-                                                    )
-                                                }
-                                            >
-                                                <TrashIcon />
-                                                <span>Remove Installation</span>
-                                            </button>
                                             <div className="dropdown dropdown-end">
                                                 <button
                                                     aria-label="Backup options"
-                                                    className="btn btn-sm btn-secondary"
+                                                    className="btn btn-sm btn-primary"
                                                     tabIndex={0}
                                                 >
                                                     <BackupIcon />
@@ -259,6 +246,20 @@ export const InstallDirTable: FC<Props> = ({
                                                     </li>
                                                 </ul>
                                             </div>
+
+                                            <button
+                                                aria-label="Remove installation"
+                                                className="btn btn-sm btn-error"
+                                                data-tip="Remove"
+                                                onClick={(): void =>
+                                                    setDeletePopupOpen(
+                                                        installDir.directory
+                                                    )
+                                                }
+                                            >
+                                                <TrashIcon />
+                                                <span>Remove Installation</span>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -278,7 +279,7 @@ export const InstallDirTable: FC<Props> = ({
                 </button>
                 <button
                     aria-label="Open mods directory"
-                    className="btn btn-secondary"
+                    className="btn btn-primary"
                     onClick={openModsDir}
                 >
                     Open Mods Directory

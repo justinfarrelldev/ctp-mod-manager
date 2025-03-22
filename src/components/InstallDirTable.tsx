@@ -84,161 +84,211 @@ export const InstallDirTable: FC<Props> = ({
             `${dir}\\ctp2_program\\ctp\\ctp2.exe`
         );
     };
+
     return (
-        <>
-            {installDirs.length === 0 && (
-                <p className="text-lg">
-                    No installation directories have been added yet. Add one
-                    now?
-                </p>
+        <div className="space-y-4">
+            {deletePopupOpen && (
+                <Modal
+                    buttons={[
+                        {
+                            color: 'error',
+                            onClick: (): void => {
+                                removeInstall(deletePopupOpen);
+                                setDeletePopupOpen('');
+                            },
+                            text: 'Yes, Remove',
+                        },
+                        {
+                            color: 'neutral',
+                            onClick: (): void => {
+                                setDeletePopupOpen('');
+                            },
+                            text: 'Cancel',
+                        },
+                    ]}
+                    modalName="Remove Installation Directory"
+                    onClose={(): void => setDeletePopupOpen('')}
+                    open={deletePopupOpen !== ''}
+                    text={
+                        'This will remove the installation from the list but will not delete any actual files. Continue?'
+                    }
+                    width="50%"
+                />
             )}
 
-            {installDirs.map((dir) => (
-                <div key={dir.directory}>
-                    {deletePopupOpen && (
-                        <Modal
-                            buttons={[
-                                {
-                                    color: 'primary',
-                                    onClick: (): void => {
-                                        removeInstall(deletePopupOpen);
-                                        setDeletePopupOpen('');
-                                    },
-                                    text: 'Yes',
-                                },
-                                {
-                                    color: 'neutral',
-                                    onClick: (): void => {
-                                        setDeletePopupOpen('');
-                                    },
-                                    text: 'No',
-                                },
-                            ]}
-                            modalName="Remove Installation From Mod Manager"
-                            onClose={(): void => setDeletePopupOpen('')}
-                            open={deletePopupOpen !== ''}
-                            text={
-                                'This will remove the installation from the "installations" list in the mod manager, but it will not delete any actual files. Are you sure you want to do this?'
-                            }
-                            width="50%"
-                        />
-                    )}
-                    <div className="flex justify-between p-6">
-                        <div className="space-x-10">
-                            <span>
-                                <button
-                                    onClick={(): void =>
-                                        openDirectory(dir.directory)
-                                    }
-                                >
-                                    <FolderIcon />
-                                </button>
-                            </span>
-                            <span>
-                                <button
-                                    onClick={(): void => {
-                                        setDeletePopupOpen(dir.directory);
-                                    }}
-                                >
-                                    <TrashIcon />
-                                </button>
-                            </span>
-                            <span>
-                                <button
-                                    onClick={(): void => {
-                                        //onClickModify(dir.directory);
-                                        runGame(dir.directory);
-                                    }}
-                                >
-                                    <PlayIcon />
-                                </button>
-                            </span>
-                        </div>
-                        <InstallationPathText
-                            dir={dir.directory}
-                            installationType={
-                                dir.installationType.toUpperCase() as
-                                    | 'gog'
-                                    | 'steam'
-                            }
-                        />
-                    </div>
+            {installDirs.length === 0 ? (
+                <div className="bg-base-200 p-4 rounded-lg text-center">
+                    <p className="text-lg mb-4">
+                        No installation directories have been added yet.
+                    </p>
                 </div>
-            ))}
-            <div className="flex space-x-4 mb-4">
-                <button className="btn btn-primary" onClick={addInstall}>
+            ) : (
+                <div className="overflow-x-auto bg-base-200 rounded-lg">
+                    <table className="table w-full">
+                        <thead>
+                            <tr>
+                                <th>Installation</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {installDirs.map((installDir) => (
+                                <tr
+                                    className="hover"
+                                    key={installDir.directory}
+                                >
+                                    <td className="font-medium break-all">
+                                        {installDir.directory}
+                                    </td>
+                                    <td>
+                                        <span className="badge badge-neutral text-xs">
+                                            {installDir.installationType.toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-wrap gap-2">
+                                            <button
+                                                aria-label="Open Directory"
+                                                className="btn btn-sm btn-accent"
+                                                data-tip="Open Directory"
+                                                onClick={(): void =>
+                                                    openDirectory(
+                                                        installDir.directory
+                                                    )
+                                                }
+                                            >
+                                                <FolderIcon />
+                                                <span>
+                                                    Open Installation Folder
+                                                </span>
+                                            </button>
+                                            <button
+                                                aria-label="Remove installation"
+                                                className="btn btn-sm btn-error"
+                                                data-tip="Remove"
+                                                onClick={(): void =>
+                                                    setDeletePopupOpen(
+                                                        installDir.directory
+                                                    )
+                                                }
+                                            >
+                                                <TrashIcon />
+                                                <span>Remove Installation</span>
+                                            </button>
+                                            <button
+                                                aria-label="Run game"
+                                                className="btn btn-sm btn-success"
+                                                data-tip="Run Game"
+                                                onClick={(): void =>
+                                                    runGame(
+                                                        installDir.directory
+                                                    )
+                                                }
+                                            >
+                                                <PlayIcon />
+                                                <span>Run Game</span>
+                                            </button>
+                                            <button
+                                                aria-label="Modify installation"
+                                                className="btn btn-sm btn-primary"
+                                                onClick={(): void =>
+                                                    onClickModify(
+                                                        installDir.directory
+                                                    )
+                                                }
+                                            >
+                                                <WrenchIcon />
+                                                <span>Modify</span>
+                                            </button>
+                                            <div className="dropdown dropdown-end">
+                                                <button
+                                                    aria-label="Backup options"
+                                                    className="btn btn-sm btn-secondary"
+                                                    tabIndex={0}
+                                                >
+                                                    Backup Options
+                                                </button>
+                                                <ul
+                                                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                                                    tabIndex={0}
+                                                >
+                                                    <li>
+                                                        <button
+                                                            aria-label="Restore backup"
+                                                            onClick={(): void =>
+                                                                onClickRestoreBackup(
+                                                                    installDir.directory
+                                                                )
+                                                            }
+                                                        >
+                                                            Restore Backup
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button
+                                                            aria-label="Create backup"
+                                                            disabled={
+                                                                creatingBackup ===
+                                                                installDir.directory
+                                                            }
+                                                            onClick={async (): Promise<void> =>
+                                                                onClickCreateBackup(
+                                                                    installDir.directory
+                                                                )
+                                                            }
+                                                        >
+                                                            {creatingBackup ===
+                                                            installDir.directory ? (
+                                                                <>
+                                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                                    Creating...
+                                                                </>
+                                                            ) : (
+                                                                'Create Backup'
+                                                            )}
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button
+                                                            aria-label="Delete backup"
+                                                            className="text-error"
+                                                            onClick={(): void =>
+                                                                onClickDeleteBackup(
+                                                                    installDir.directory
+                                                                )
+                                                            }
+                                                        >
+                                                            Delete Backup
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            <div className="flex flex-wrap gap-3 mt-4">
+                <button
+                    aria-label="Add new installation directory"
+                    className="btn btn-primary"
+                    onClick={addInstall}
+                >
                     Add Installation
                 </button>
-                <button className="btn btn-secondary" onClick={openModsDir}>
+                <button
+                    aria-label="Open mods directory"
+                    className="btn btn-secondary"
+                    onClick={openModsDir}
+                >
                     Open Mods Directory
                 </button>
             </div>
-            <table className="table w-full">
-                {/* ...table header */}
-                <tbody>
-                    {installDirs.map((installDir) => (
-                        <tr key={installDir.directory}>
-                            {/* ...existing columns */}
-                            <td>
-                                <div className="flex space-x-2">
-                                    <button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={(): void =>
-                                            onClickModify(installDir.directory)
-                                        }
-                                    >
-                                        Modify
-                                    </button>
-                                    {/* Add this button */}
-                                    <button
-                                        className="btn btn-secondary btn-sm"
-                                        onClick={(): void =>
-                                            onClickRestoreBackup(
-                                                installDir.directory
-                                            )
-                                        }
-                                    >
-                                        Restore Backup
-                                    </button>
-                                    <button
-                                        className="btn btn-secondary btn-sm"
-                                        disabled={
-                                            creatingBackup ===
-                                            installDir.directory
-                                        }
-                                        onClick={async (): Promise<void> =>
-                                            onClickCreateBackup(
-                                                installDir.directory
-                                            )
-                                        }
-                                    >
-                                        {creatingBackup ===
-                                        installDir.directory ? (
-                                            <>
-                                                <span className="loading loading-spinner loading-xs"></span>
-                                                Creating...
-                                            </>
-                                        ) : (
-                                            'Create Backup'
-                                        )}
-                                    </button>
-                                    <button
-                                        className="btn btn-error btn-sm"
-                                        onClick={(): void =>
-                                            onClickDeleteBackup(
-                                                installDir.directory
-                                            )
-                                        }
-                                    >
-                                        {' '}
-                                        Delete Backup
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </>
+        </div>
     );
 };

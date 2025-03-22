@@ -88,12 +88,32 @@ export const DeleteBackupModal: FC<Props> = ({
                 width="50%"
             >
                 {loading ? (
-                    <span className="loading loading-bars loading-md block"></span>
+                    <div className="flex justify-center p-8">
+                        <span
+                            aria-label="Loading backups"
+                            className="loading loading-spinner loading-lg"
+                        ></span>
+                    </div>
                 ) : backups.length === 0 ? (
-                    <p>No backups found. Create a backup first.</p>
+                    <div className="alert mb-4">
+                        <svg
+                            className="stroke-info shrink-0 w-6 h-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                            ></path>
+                        </svg>
+                        <span>No backups found. Create a backup first.</span>
+                    </div>
                 ) : (
                     <>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto bg-base-200 rounded-lg">
                             <table className="table table-zebra w-full">
                                 <thead>
                                     <tr>
@@ -104,7 +124,7 @@ export const DeleteBackupModal: FC<Props> = ({
                                 </thead>
                                 <tbody>
                                     {backups.map((backup) => (
-                                        <tr key={backup.path}>
+                                        <tr className="hover" key={backup.path}>
                                             <td>
                                                 {backup.filename.replace(
                                                     '.zip',
@@ -119,8 +139,9 @@ export const DeleteBackupModal: FC<Props> = ({
                                             <td>
                                                 {confirmDelete ===
                                                 backup.path ? (
-                                                    <div className="flex space-x-2">
+                                                    <div className="flex flex-wrap gap-2">
                                                         <button
+                                                            aria-label={`Confirm deletion of backup: ${backup.filename}`}
                                                             className="btn btn-error btn-sm"
                                                             disabled={
                                                                 deletingBackup ===
@@ -143,6 +164,7 @@ export const DeleteBackupModal: FC<Props> = ({
                                                             )}
                                                         </button>
                                                         <button
+                                                            aria-label="Cancel deletion"
                                                             className="btn btn-neutral btn-sm"
                                                             onClick={(): void =>
                                                                 setConfirmDelete(
@@ -155,6 +177,7 @@ export const DeleteBackupModal: FC<Props> = ({
                                                     </div>
                                                 ) : (
                                                     <button
+                                                        aria-label={`Delete backup: ${backup.filename}`}
                                                         className="btn btn-error btn-sm"
                                                         onClick={(): void =>
                                                             setConfirmDelete(

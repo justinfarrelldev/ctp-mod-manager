@@ -98,21 +98,57 @@ export const BackupRestoreModal: FC<BackupRestoreModalProps> = ({
                 width="70%"
             >
                 {loading ? (
-                    <span className="loading loading-bars loading-md block"></span>
+                    <div className="flex justify-center p-8">
+                        <span
+                            aria-label="Loading backups"
+                            className="loading loading-spinner loading-lg"
+                        ></span>
+                    </div>
                 ) : backups.length === 0 ? (
-                    <p>No backups found. Create a backup first.</p>
+                    <div className="alert mb-4">
+                        <svg
+                            className="stroke-info shrink-0 w-6 h-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                            ></path>
+                        </svg>
+                        <span>No backups found. Create a backup first.</span>
+                    </div>
                 ) : (
                     <>
                         {error && (
                             <div className="alert alert-error mb-4">
-                                {error}
+                                <svg
+                                    className="stroke-current shrink-0 h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                    />
+                                </svg>
+                                <span>{error}</span>
                             </div>
                         )}
                         <p className="mb-4">
                             Select a backup to restore to{' '}
-                            <strong>{installDir}</strong>:
+                            <code className="bg-base-300 px-1 py-0.5 rounded">
+                                {installDir}
+                            </code>
+                            :
                         </p>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto bg-base-200 rounded-lg">
                             <table className="table table-zebra w-full">
                                 <thead>
                                     <tr>
@@ -123,7 +159,7 @@ export const BackupRestoreModal: FC<BackupRestoreModalProps> = ({
                                 </thead>
                                 <tbody>
                                     {backups.map((backup) => (
-                                        <tr key={backup.path}>
+                                        <tr className="hover" key={backup.path}>
                                             <td>
                                                 {getBackupName(backup.filename)}
                                             </td>
@@ -134,6 +170,7 @@ export const BackupRestoreModal: FC<BackupRestoreModalProps> = ({
                                             </td>
                                             <td>
                                                 <button
+                                                    aria-label={`Restore backup: ${getBackupName(backup.filename)}`}
                                                     className="btn btn-primary btn-sm"
                                                     onClick={(): void => {
                                                         setSelectedBackup(
@@ -176,7 +213,12 @@ export const BackupRestoreModal: FC<BackupRestoreModalProps> = ({
                 {restoring && (
                     <div className="mt-4">
                         <p>Restoring backup, please wait...</p>
-                        <span className="loading loading-bars loading-md block"></span>
+                        <div className="flex justify-center mt-2">
+                            <span
+                                aria-label="Restoring backup"
+                                className="loading loading-bars loading-md"
+                            ></span>
+                        </div>
                     </div>
                 )}
             </Modal>

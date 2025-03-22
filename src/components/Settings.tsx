@@ -19,14 +19,30 @@ export const Settings: FC = (): React.ReactElement => {
     }, []);
 
     return (
-        <>
-            <p className="text-xl">General Settings</p>
-            <p className="text-lg">Theme</p>
-            <select data-choose-theme>
-                <option value="light">Default</option>
-                <option value="dark">Dark</option>
-                <option value="synthwave">Synthwave</option>
-            </select>
-        </>
+        <div className="space-y-6">
+            <section>
+                <h3 className="text-xl font-semibold mb-4">General Settings</h3>
+
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text text-lg">Theme</span>
+                    </label>
+                    <select
+                        aria-label="Select theme"
+                        className="select select-bordered w-full max-w-xs"
+                        data-choose-theme
+                    >
+                        <option value="light">Default (Light)</option>
+                        <option value="dark">Dark</option>
+                        <option value="synthwave">Synthwave</option>
+                    </select>
+                    <span className="label-text-alt mt-1">
+                        Change the application's visual theme
+                    </span>
+                </div>
+            </section>
+
+            {/* Additional settings sections can be added here */}
+        </div>
     );
 };

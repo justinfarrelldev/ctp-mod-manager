@@ -6,10 +6,12 @@ type Props = {
 };
 
 export const InstallationPathText: FC<Props> = (props: Props) => (
-    <div className="flex justify-start space-x-4">
+    <div className="flex items-center gap-2">
         {props.installationType && (
-            <p className="text-lg font-bold text-primary">{`[${props.installationType.toUpperCase()}]`}</p>
+            <span className="badge badge-outline font-semibold">
+                {props.installationType.toUpperCase()}
+            </span>
         )}
-        <p className="text-lg text-primary">{`${props.dir}`}</p>
+        <span className="text-base text-opacity-90 break-all">{props.dir}</span>
     </div>
 );

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { ReadonlyDeep } from 'type-fest';
 
 export interface ModalProps {
@@ -27,17 +27,50 @@ export interface ModalProps {
 export const Modal: FC<ModalProps> = (
     props: ReadonlyDeep<ModalProps>
 ): React.ReactElement => {
+    // Handle escape key press to close modal
+    useEffect(() => {
+        const handleEscKey = (event: KeyboardEvent): void => {
+            if (event.key === 'Escape' && props.open) {
+                props.onClose();
+            }
+        };
+
+        document.addEventListener('keydown', handleEscKey);
+        return () => {
+            document.removeEventListener('keydown', handleEscKey);
+        };
+    }, [props.open, props.onClose]);
+
+    if (!props.open) return null;
+
     return (
-        <dialog className="modal" id={props.modalName} open={props.open}>
-            <div className="modal-box">
-                <p className="pb-4 text-xl font-bold">{props.modalName}</p>
-                <p className="text-l">{props.text}</p>
-                {props.children && <>{props.children}</>}
-                <div className="flex justify-between pt-4">
-                    {props.buttons.map((btn) => (
+        <dialog
+            aria-labelledby={`modal-title-${props.modalName.replace(/\s+/g, '-').toLowerCase()}`}
+            aria-modal="true"
+            className="modal modal-open"
+            id={props.modalName.replace(/\s+/g, '-').toLowerCase()}
+            role="dialog"
+        >
+            <div
+                className="modal-box max-w-3xl"
+                style={{ height: props.height, width: props.width }}
+            >
+                <h3
+                    className="text-xl font-bold mb-4"
+                    id={`modal-title-${props.modalName.replace(/\s+/g, '-').toLowerCase()}`}
+                >
+                    {props.modalName}
+                </h3>
+
+                {props.text && <p className="mb-4">{props.text}</p>}
+
+                {props.children && <div className="my-4">{props.children}</div>}
+
+                <div className="modal-action mt-6 flex-wrap gap-2">
+                    {props.buttons.map((btn, index) => (
                         <button
                             className={`btn btn-${btn.color}`}
-                            key={btn.text.replaceAll(' ', '')}
+                            key={`${btn.text.replace(/\s+/g, '-').toLowerCase()}-${index}`}
                             onClick={btn.onClick}
                         >
                             {btn.text}
@@ -45,8 +78,15 @@ export const Modal: FC<ModalProps> = (
                     ))}
                 </div>
             </div>
+
             <form className="modal-backdrop" method="dialog">
-                <button onClick={props.onClose}>close</button>
+                <button
+                    aria-label="Close modal"
+                    className="cursor-default focus:outline-none"
+                    onClick={props.onClose}
+                >
+                    close
+                </button>
             </form>
         </dialog>
     );

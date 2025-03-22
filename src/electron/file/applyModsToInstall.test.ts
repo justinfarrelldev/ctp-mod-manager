@@ -3,7 +3,7 @@ import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_MOD_DIR } from '../constants';
 import * as applyFileChanges from './applyFileChanges';
-import { applyModsToInstall } from './applyModsToInstall';
+import { applyModsToInstallWithMerge } from './applyModsToInstall';
 import * as getFileChangesToApplyMod from './getFileChangesToApplyMod';
 import * as consolidateLineChangeGroups from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
@@ -34,7 +34,7 @@ describe('applyModsToInstall', () => {
 
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]);
 
-        applyModsToInstall('/invalid/install', ['mod1']);
+        applyModsToInstallWithMerge('/invalid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'Invalid install passed to applyModsToInstall! Install passed: /invalid/install'
@@ -51,7 +51,7 @@ describe('applyModsToInstall', () => {
             .spyOn(console, 'error')
             .mockImplementation(() => {});
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'Error: /mock/path\\mock-name\\Mods\\mod1 is not a directory.'
@@ -68,7 +68,7 @@ describe('applyModsToInstall', () => {
             .spyOn(console, 'error')
             .mockImplementation(() => {});
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'An error occurred while getting the stats for the file /mock/path\\mock-name\\Mods\\mod1: Error: stat error'
@@ -88,7 +88,7 @@ describe('applyModsToInstall', () => {
             .spyOn(console, 'error')
             .mockImplementation(() => {});
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'An error occurred within applying mods to install while copying the directory /mock/path\\mock-name\\Mods\\mod1 to /mock/path\\mock-name\\Mods: Error: getFileChangesToApplyMod error'
@@ -121,7 +121,7 @@ describe('applyModsToInstall', () => {
             .mockResolvedValueOnce([]);
 
         // now run the function
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         // confirm that getFileChangesToApplyMod was called
         expect(getFileChangesToApplyModMock).toHaveBeenCalledWith(
@@ -164,7 +164,7 @@ describe('applyModsToInstall', () => {
         expect.assertions(2);
         vi.mocked(isValidInstall).mockReturnValue(false);
 
-        await applyModsToInstall('/invalid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/invalid/install', ['mod1']);
 
         expect(console.error).toHaveBeenCalledWith(
             'Invalid install passed to applyModsToInstall! Install passed: /invalid/install'
@@ -181,7 +181,7 @@ describe('applyModsToInstall', () => {
             isDirectory: () => false,
         } as fs.Stats);
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(console.error).toHaveBeenCalledWith(
             expect.stringContaining('is not a directory')
@@ -195,7 +195,7 @@ describe('applyModsToInstall', () => {
             throw new Error('stat error');
         });
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(console.error).toHaveBeenCalledWith(
             expect.stringContaining('An error occurred while getting the stats')
@@ -226,7 +226,7 @@ describe('applyModsToInstall', () => {
             getFileChangesToApplyMod.getFileChangesToApplyMod
         ).mockResolvedValueOnce(mockChanges);
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(
             getFileChangesToApplyMod.getFileChangesToApplyMod
@@ -270,7 +270,7 @@ describe('applyModsToInstall', () => {
             getFileChangesToApplyMod.getFileChangesToApplyMod
         ).mockResolvedValueOnce(mockChanges);
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(applyFileChanges.applyFileChanges).toHaveBeenCalledWith({
             installDir: '/valid/install',
@@ -307,7 +307,7 @@ describe('applyModsToInstall', () => {
             getFileChangesToApplyMod.getFileChangesToApplyMod
         ).mockResolvedValueOnce(mockChanges);
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(applyFileChanges.applyFileChanges).toHaveBeenCalledWith({
             installDir: '/valid/install',
@@ -357,7 +357,7 @@ describe('applyModsToInstall', () => {
             getFileChangesToApplyMod.getFileChangesToApplyMod
         ).mockResolvedValueOnce(mockChanges);
 
-        await applyModsToInstall('/valid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(applyFileChanges.applyFileChanges).toHaveBeenCalledWith({
             installDir: '/valid/install',
@@ -424,7 +424,7 @@ describe('applyModsToInstall', () => {
             consolidateLineChangeGroups.consolidateLineChangeGroups
         ).mockImplementation((groups) => groups);
 
-        await applyModsToInstall('/valid/install', ['mod1', 'mod2']);
+        await applyModsToInstallWithMerge('/valid/install', ['mod1', 'mod2']);
 
         expect(
             getFileChangesToApplyMod.getFileChangesToApplyMod

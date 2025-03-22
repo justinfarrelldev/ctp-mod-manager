@@ -9,6 +9,55 @@ import {
 } from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
 
+export const applyModsToInstall = async (
+    installDir: Readonly<string>,
+    queuedMods: ReadonlyDeep<string[]>
+): Promise<void> => {
+    if (!isValidInstall(installDir)) {
+        console.error(
+            `Invalid install passed to applyModsToInstall! Install passed: ${installDir}`
+        );
+        return;
+    }
+
+    // Loop through mods and copy each one into the install dir, overwriting
+    for await (const mod of queuedMods) {
+        let statsOfFile: fs.Stats | undefined;
+        try {
+            statsOfFile = fs.statSync(`${DEFAULT_MOD_DIR}\\${mod}`);
+        } catch (err) {
+            console.error(
+                `An error occurred while getting the stats for ${DEFAULT_MOD_DIR}\\${mod}: ${err}`
+            );
+            return;
+        }
+
+        if (statsOfFile && !statsOfFile.isDirectory()) {
+            console.error(
+                `Error: ${DEFAULT_MOD_DIR}\\${mod} is not a directory.`
+            );
+            return;
+        }
+
+        try {
+            // Copy files wholesale, overwriting existing files
+            console.log(
+                `Copying ${DEFAULT_MOD_DIR}\\${mod} to installation at ${installDir}`
+            );
+            fs.cpSync(`${DEFAULT_MOD_DIR}\\${mod}`, installDir, {
+                force: true, // or use "force" if your Node.js version supports it
+                recursive: true,
+            });
+        } catch (err) {
+            console.error(
+                `Error copying ${DEFAULT_MOD_DIR}\\${mod} to ${installDir}: ${err}`
+            );
+        }
+    }
+
+    console.log('All mods copied to the install directory.');
+};
+
 /**
  * Applies the queued mods to the specified installation directory.
  * @param installDir - The directory of the installation where mods will be applied.
@@ -21,7 +70,7 @@ import { isValidInstall } from './isValidInstall';
  * @throws Will log an error if a mod is not a directory.
  * @throws Will log an error if there is an issue copying the mod directory.
  */
-export const applyModsToInstall = async (
+export const applyModsToInstallWithMerge = async (
     installDir: Readonly<string>,
     queuedMods: ReadonlyDeep<string[]>
 ): Promise<void> => {

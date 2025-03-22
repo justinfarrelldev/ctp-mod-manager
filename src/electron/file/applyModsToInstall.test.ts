@@ -161,6 +161,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should log an error if the install directory is invalid', async () => {
+        expect.assertions(2);
         vi.mocked(isValidInstall).mockReturnValue(false);
 
         await applyModsToInstall('/invalid/install', ['mod1']);
@@ -174,6 +175,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should log an error if a mod is not a directory', async () => {
+        expect.assertions(1);
         vi.mocked(isValidInstall).mockReturnValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValueOnce({
             isDirectory: () => false,
@@ -187,6 +189,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should log an error if there is an issue getting the stats for a mod directory', async () => {
+        expect.assertions(1);
         vi.mocked(isValidInstall).mockReturnValue(true);
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('stat error');
@@ -200,6 +203,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should apply changes for a single mod (Case 1: property replacement)', async () => {
+        expect.assertions(2);
         vi.mocked(isValidInstall).mockReturnValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
@@ -239,6 +243,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should apply changes for a single mod (Case 2: property reordering)', async () => {
+        expect.assertions(1);
         vi.mocked(isValidInstall).mockReturnValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
@@ -279,6 +284,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should apply changes for a single mod (Case 3: property replacement with similar name)', async () => {
+        expect.assertions(1);
         vi.mocked(isValidInstall).mockReturnValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
@@ -315,6 +321,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should apply changes for a single mod (Case 4: multiple changes with reordering)', async () => {
+        expect.assertions(1);
         vi.mocked(isValidInstall).mockReturnValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
@@ -364,6 +371,7 @@ describe('applyModsToInstall', () => {
     });
 
     it('should apply changes for multiple mods sequentially (Case 5)', async () => {
+        expect.assertions(4);
         vi.mocked(isValidInstall).mockReturnValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,

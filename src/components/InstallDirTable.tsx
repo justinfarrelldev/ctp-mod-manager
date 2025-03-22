@@ -187,7 +187,7 @@ export const InstallDirTable: FC<Props> = ({
                                                     <span>Backup Options</span>
                                                 </button>
                                                 <ul
-                                                    className="dropdown-content z-[9999] menu p-2 shadow bg-base-100 rounded-box w-52"
+                                                    className="dropdown-content z-9999 menu p-2 shadow-sm bg-base-100 rounded-box w-52"
                                                     style={{
                                                         maxHeight: '300px',
                                                         overflowY: 'auto',

@@ -1,6 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin "daisyui" {
+    themes:
+        light --default,
+        dark --prefersdark,
+        synthwave,
+        cupcake;
+}
 
 .tooltip {
     @apply invisible absolute;

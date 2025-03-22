@@ -82,7 +82,7 @@ export const Modal: FC<ModalProps> = (
             <form className="modal-backdrop" method="dialog">
                 <button
                     aria-label="Close modal"
-                    className="cursor-default focus:outline-none"
+                    className="cursor-default focus:outline-hidden"
                     onClick={props.onClose}
                 >
                     close

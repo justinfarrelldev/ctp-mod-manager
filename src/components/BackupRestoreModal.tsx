@@ -143,7 +143,7 @@ export const BackupRestoreModal: FC<BackupRestoreModalProps> = ({
                         )}
                         <p className="mb-4">
                             Select a backup to restore to{' '}
-                            <code className="bg-base-300 px-1 py-0.5 rounded">
+                            <code className="bg-base-300 px-1 py-0.5 rounded-sm">
                                 {installDir}
                             </code>
                             :

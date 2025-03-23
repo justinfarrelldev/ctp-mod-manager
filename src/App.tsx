@@ -10,9 +10,9 @@ import { ErrorModal } from './components/ErrorModal';
 import { ApplyIcon } from './components/icons/apply';
 import { SettingsIcon } from './components/icons/settings';
 import { TrashIcon } from './components/icons/trash';
+import { InstallationPathText } from './components/InstallationPathText';
 import { InstallDirTable } from './components/InstallDirTable';
 import { Modal } from './components/Modal';
-import { ModifyInstallView } from './components/ModifyInstallView';
 import { Settings as SettingsMenu } from './components/Settings';
 import { AUTO_DETECT_INSTALL_TEXT } from './constants';
 
@@ -439,30 +439,9 @@ export const App: FC = (): React.ReactElement => {
                     text=""
                     width="100%"
                 >
-                    <ModifyInstallView
-                        addedMods={state.modNamesAdded}
-                        dirBeingModified={state.dirBeingModified}
-                        onBackClicked={(): void =>
-                            dispatch({
-                                payload: '',
-                                type: 'SET_DIR_BEING_MODIFIED',
-                            })
-                        }
-                        onDequeueMod={async (
-                            modName: string
-                        ): Promise<void> => {
-                            dispatch({ payload: modName, type: 'DEQUEUE_MOD' });
-                        }}
-                        onModSelected={handleFileSelected}
-                        onOpenModsDir={openModsDir}
-                        onQueueMod={async (modName: string): Promise<void> => {
-                            dispatch({ payload: modName, type: 'QUEUE_MOD' });
-                            viewFileDirsInZip(
-                                `${await getModsDir()}\\${modName}`
-                            ); // FIXME 100% temporary
-                        }}
-                        queuedMods={state.modNamesQueued}
-                    />
+                    <div>
+                        <InstallationPathText dir={state.dirBeingModified} />
+                    </div>
                 </Modal>
 
                 <Modal

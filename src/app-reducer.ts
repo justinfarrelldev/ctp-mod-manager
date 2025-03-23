@@ -1,3 +1,5 @@
+/* eslint-disable no-case-declarations */
+// The above eslint rule is disabled because it is okay in this case
 import { Draft } from 'immer';
 
 import { InstallDirectory } from './App';
@@ -68,7 +70,13 @@ export const initialState: AppState = {
 };
 
 // Create the reducer function
-export const appReducer = (draft: Draft<AppState>, action: AppAction): void => {
+export const appReducer = (
+    // This is the way that Immer works
+    // eslint-disable-next-line functional/prefer-immutable-types
+    draft: Draft<AppState>,
+    // eslint-disable-next-line functional/prefer-immutable-types
+    action: AppAction
+): void => {
     switch (action.type) {
         case 'ADD_TO_INSTALL_DIRS':
             draft.installDirs.push(...action.payload);

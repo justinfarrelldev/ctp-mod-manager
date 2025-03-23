@@ -1,4 +1,5 @@
 import AdmZip from 'adm-zip';
+import path from 'node:path';
 import { afterAll, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_MOD_DIR } from '../constants';
@@ -33,7 +34,7 @@ describe('unzipInModDir', () => {
         await unzipInModDir('/path/to/zipfile.zip', 'zipfile.zip');
 
         expect(mockExtractAllToAsync).toHaveBeenCalledWith(
-            `${DEFAULT_MOD_DIR}\\zipfile`,
+            path.join(DEFAULT_MOD_DIR, 'zipfile'),
             false,
             false,
             expect.any(Function)

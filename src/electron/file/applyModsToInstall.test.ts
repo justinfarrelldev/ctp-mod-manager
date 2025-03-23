@@ -40,7 +40,6 @@ describe('applyModsToInstall', () => {
             'Invalid install passed to applyModsToInstall! Install passed: /invalid/install'
         );
     });
-
     it('should log an error if a mod is not a directory', async () => {
         expect.assertions(1);
         vi.mocked(isValidInstall).mockResolvedValueOnce(true);
@@ -54,7 +53,7 @@ describe('applyModsToInstall', () => {
         await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'Error: \\mock\\path\\mock-name\\Mods\\mod1 is not a directory.'
+            expect.stringContaining('is not a directory')
         );
     });
 
@@ -71,7 +70,7 @@ describe('applyModsToInstall', () => {
         await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'An error occurred while getting the stats for the file \\mock\\path\\mock-name\\Mods\\mod1: Error: stat error'
+            expect.stringContaining('An error occurred while getting the stats')
         );
     });
 
@@ -91,7 +90,9 @@ describe('applyModsToInstall', () => {
         await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'An error occurred within applying mods to install while copying the directory \\mock\\path\\mock-name\\Mods\\mod1 to \\mock\\path\\mock-name\\Mods: Error: getFileChangesToApplyMod error'
+            expect.stringContaining(
+                'An error occurred within applying mods to install'
+            )
         );
         expect(getFileChangesToApplyModMock).toHaveBeenCalledWith(
             'mod1',

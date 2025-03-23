@@ -78,6 +78,7 @@
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-vitest": "^0.5.4",
+        "immer": "^10.1.1",
         "js-cookie": "^3.0.5",
         "klaw-sync": "^6.0.0",
         "p-limit": "^5.0.0",
@@ -87,6 +88,7 @@
         "react-router-dom": "^6.10.0",
         "theme-change": "^2.5.0",
         "type-fest": "^4.37.0",
-        "typescript-eslint": "^8.26.0"
+        "typescript-eslint": "^8.26.0",
+        "use-immer": "^0.11.0"
     }
 }

@@ -1,7 +1,9 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect } from 'react';
 import { themeChange } from 'theme-change';
 import { ReadonlyDeep } from 'type-fest';
+import { useImmerReducer } from 'use-immer';
 
+import { appReducer, initialState } from './app-reducer';
 import { BackupRestoreModal } from './components/BackupRestoreModal';
 import { DeleteBackupModal } from './components/DeleteBackupModal';
 import { ErrorModal } from './components/ErrorModal';
@@ -114,39 +116,17 @@ type LineChangeGroup = {
 };
 
 export const App: FC = (): React.ReactElement => {
-    const [loadingDirs, setLoadingDirs] = useState<boolean>();
-    const [installDirModalOpen, setInstallDirModalOpen] =
-        useState<boolean>(false);
-    const [installDirs, setInstallDirs] = useState<InstallDirectory[]>([]);
-    const [dirBeingModified, setDirBeingModified] = useState<string>('');
-    const [settingsOpen, setSettingsOpen] = useState<boolean>();
-    const [modNamesAdded, setModNamesAdded] = useState<string[] | undefined>(
-        undefined
-    );
-    const [modNamesQueued, setModNamesQueued] = useState<string[]>([]);
-    const [error, setError] = useState<string>();
-    const [checkedMods, setCheckedMods] = useState<string[]>([]);
-    const [loadingMods, setLoadingMods] = useState<boolean>(false);
-    const [applyingMods, setApplyingMods] = useState<boolean>(false);
-
-    const [backupRestoreOpen, setBackupRestoreOpen] = useState<boolean>(false);
-    const [backupInstallDir, setBackupInstallDir] = useState<string>('');
-    const [creatingBackup, setCreatingBackup] = useState<string>(''); // Add state for tracking backup creation
-    const [deleteBackupOpen, setDeleteBackupOpen] = useState<boolean>(false);
-    const [deletingBackupDir, setDeletingBackupDir] = useState<string>('');
-    const [selectedInstallations, setSelectedInstallations] = useState<
-        number[]
-    >([]);
+    const [state, dispatch] = useImmerReducer(appReducer, initialState);
 
     const handleRestoreBackupClick = (installDir: string): void => {
-        setBackupInstallDir(installDir);
-        setBackupRestoreOpen(true);
+        dispatch({ payload: installDir, type: 'SET_BACKUP_INSTALL_DIR' });
+        dispatch({ payload: true, type: 'SET_BACKUP_RESTORE_OPEN' });
     };
 
     const handleCreateBackupClick = async (
         installDir: string
     ): Promise<void> => {
-        setCreatingBackup(installDir);
+        dispatch({ payload: installDir, type: 'SET_CREATING_BACKUP' });
         try {
             await (window as ElectronWindow).api.makeBackup(
                 'file:makeBackup',
@@ -154,93 +134,104 @@ export const App: FC = (): React.ReactElement => {
             );
         } catch (err) {
             console.error(`Failed to create backup: ${err}`);
-            setError(`Failed to create backup: ${err}`);
+            dispatch({
+                payload: `Failed to create backup: ${err}`,
+                type: 'SET_ERROR',
+            });
         } finally {
-            setCreatingBackup('');
+            dispatch({ payload: '', type: 'SET_CREATING_BACKUP' });
         }
     };
 
     const handleDeleteBackupClick = (installDir: string): void => {
-        setDeletingBackupDir(installDir);
-        setDeleteBackupOpen(true);
+        dispatch({ payload: installDir, type: 'SET_DELETING_BACKUP_DIR' });
+        dispatch({ payload: true, type: 'SET_DELETE_BACKUP_OPEN' });
     };
 
     const loadModFileNames = async (): Promise<void> => {
-        setLoadingMods(true);
+        dispatch({ payload: true, type: 'SET_LOADING_MODS' });
         try {
             const loadedMods = await (
                 window as ElectronWindow
             ).api.loadModFileNames();
-            setModNamesAdded(loadedMods);
+            dispatch({ payload: loadedMods, type: 'SET_MOD_NAMES_ADDED' });
         } catch (err) {
             console.error(
                 `An error occurred within App while setting mod names: ${err}`
             );
-            setError(
-                `An error occurred while attempting to load mods: ${err}.`
-            );
-            setLoadingMods(false);
+            dispatch({
+                payload: `An error occurred while attempting to load mods: ${err}.`,
+                type: 'SET_ERROR',
+            });
+        } finally {
+            dispatch({ payload: false, type: 'SET_LOADING_MODS' });
         }
-        setLoadingMods(false);
     };
 
     const loadInstallDirs = async (): Promise<void> => {
-        setLoadingDirs(true);
-        const dirsFromFile = await (
-            window as ElectronWindow
-        ).api.getInstallDirs('file:getInstallDirs');
+        dispatch({ payload: true, type: 'SET_LOADING_DIRS' });
+        try {
+            const dirsFromFile = await (
+                window as ElectronWindow
+            ).api.getInstallDirs('file:getInstallDirs');
 
-        setInstallDirs(
-            dirsFromFile.map((dir) => ({
+            const dirs = dirsFromFile.map((dir) => ({
                 directory: dir,
-                installationType: 'steam',
-                os: 'win32',
-            }))
-        );
-        setLoadingDirs(false);
-        if (dirsFromFile.length === 0) {
-            setInstallDirModalOpen(true);
+                installationType: 'steam' as const,
+                os: 'win32' as const,
+            }));
+
+            dispatch({ payload: dirs, type: 'SET_INSTALL_DIRS' });
+
+            if (dirsFromFile.length === 0) {
+                dispatch({ payload: true, type: 'SET_INSTALL_DIR_MODAL_OPEN' });
+            }
+        } finally {
+            dispatch({ payload: false, type: 'SET_LOADING_DIRS' });
         }
     };
 
     const findInstallDirs = async (): Promise<void> => {
-        setLoadingDirs(true);
-        const dirs: InstallDirectory[] = await (
-            window as ElectronWindow
-        ).api.getCtp2InstallDir();
+        dispatch({ payload: true, type: 'SET_LOADING_DIRS' });
+        try {
+            const dirs: InstallDirectory[] = await (
+                window as ElectronWindow
+            ).api.getCtp2InstallDir();
 
-        for (const dir of dirs) {
-            // For the sake of speed, I am disabling this
-            // eslint-disable-next-line no-await-in-loop
-            await (window as ElectronWindow).api.addToInstallDirs(
-                'file:addToInstallDirs',
-                dir.directory
-            );
+            for (const dir of dirs) {
+                // For the sake of speed, I am disabling this
+                // eslint-disable-next-line no-await-in-loop
+                await (window as ElectronWindow).api.addToInstallDirs(
+                    'file:addToInstallDirs',
+                    dir.directory
+                );
+            }
+
+            dispatch({ payload: dirs, type: 'ADD_TO_INSTALL_DIRS' });
+            await loadModFileNames();
+        } finally {
+            dispatch({ payload: false, type: 'SET_LOADING_DIRS' });
         }
-
-        setInstallDirs([...installDirs, ...dirs]);
-
-        await loadModFileNames();
-
-        setLoadingDirs(false);
     };
 
     const handleInstallDirModalClose = (): void => {
-        setInstallDirModalOpen(false);
+        dispatch({ payload: false, type: 'SET_INSTALL_DIR_MODAL_OPEN' });
     };
 
     const handleFileSelected = async (
         e: ReadonlyDeep<React.ChangeEvent<HTMLInputElement>>
     ): Promise<void> => {
-        setLoadingMods(true);
-        const files = Array.from(e.target.files);
-        await (window as ElectronWindow).api.copyFileToModDir(
-            'file:copy',
-            (files[0] as File & { path: string }).path
-        );
-
-        setLoadingMods(false);
-        await loadModFileNames();
+        dispatch({ payload: true, type: 'SET_LOADING_MODS' });
+        try {
+            const files = Array.from(e.target.files);
+            await (window as ElectronWindow).api.copyFileToModDir(
+                'file:copy',
+                (files[0] as File & { path: string }).path
+            );
+            await loadModFileNames();
+        } finally {
+            dispatch({ payload: false, type: 'SET_LOADING_MODS' });
+        }
     };
 
     const openModsDir = (): void => {
@@ -250,12 +241,10 @@ export const App: FC = (): React.ReactElement => {
     const viewFileDirsInZip = async (
         zipFilePath: string
     ): Promise<string[]> => {
-        const contents = await (window as ElectronWindow).api.viewFileDirsInZip(
+        return await (window as ElectronWindow).api.viewFileDirsInZip(
             'file:viewFileDirsInZip',
             zipFilePath
         );
-
-        return contents;
     };
 
     const getModsDir = async (): Promise<string> => {
@@ -275,15 +264,22 @@ export const App: FC = (): React.ReactElement => {
         <div className="container mx-auto p-4 max-w-6xl">
             {/* Add the DeleteBackupModal */}
             <DeleteBackupModal
-                installDir={deletingBackupDir}
-                onClose={(): void => setDeleteBackupOpen(false)}
-                open={deleteBackupOpen}
+                installDir={state.deletingBackupDir}
+                onClose={(): void =>
+                    dispatch({ payload: false, type: 'SET_DELETE_BACKUP_OPEN' })
+                }
+                open={state.deleteBackupOpen}
             />
             {/* Existing BackupRestoreModal */}
             <BackupRestoreModal
-                installDir={backupInstallDir}
-                onClose={(): void => setBackupRestoreOpen(false)}
-                open={backupRestoreOpen}
+                installDir={state.backupInstallDir}
+                onClose={(): void =>
+                    dispatch({
+                        payload: false,
+                        type: 'SET_BACKUP_RESTORE_OPEN',
+                    })
+                }
+                open={state.backupRestoreOpen}
             />
 
             <header className="flex justify-between items-center mb-6 border-b pb-4">
@@ -293,19 +289,21 @@ export const App: FC = (): React.ReactElement => {
                 <button
                     aria-label="Open Settings"
                     className="btn btn-ghost btn-circle"
-                    onClick={(): void => setSettingsOpen(true)}
+                    onClick={(): void =>
+                        dispatch({ payload: true, type: 'SET_SETTINGS_OPEN' })
+                    }
                 >
                     <SettingsIcon />
                 </button>
             </header>
 
-            {error && (
+            {state.error && (
                 <ErrorModal
-                    errorMessage={error}
-                    onClose={(): void => {
-                        setError('');
-                    }}
-                    open={error.length > 0}
+                    errorMessage={state.error}
+                    onClose={(): void =>
+                        dispatch({ payload: undefined, type: 'SET_ERROR' })
+                    }
+                    open={!!state.error}
                 />
             )}
 
@@ -314,7 +312,7 @@ export const App: FC = (): React.ReactElement => {
                     Installation Directories
                 </h2>
 
-                {loadingDirs && (
+                {state.loadingDirs && (
                     <div className="flex justify-center my-4">
                         <span
                             aria-label="Loading installation directories"
@@ -323,18 +321,27 @@ export const App: FC = (): React.ReactElement => {
                     </div>
                 )}
 
-                {settingsOpen && (
+                {state.settingsOpen && (
                     <Modal
                         buttons={[
                             {
                                 color: 'neutral',
-                                onClick: () => setSettingsOpen(false),
+                                onClick: () =>
+                                    dispatch({
+                                        payload: false,
+                                        type: 'SET_SETTINGS_OPEN',
+                                    }),
                                 text: 'Close',
                             },
                         ]}
                         modalName="Settings"
-                        onClose={(): void => setSettingsOpen(false)}
-                        open={settingsOpen}
+                        onClose={(): void =>
+                            dispatch({
+                                payload: false,
+                                type: 'SET_SETTINGS_OPEN',
+                            })
+                        }
+                        open={state.settingsOpen}
                         text=""
                         width="50%"
                     >
@@ -342,18 +349,27 @@ export const App: FC = (): React.ReactElement => {
                     </Modal>
                 )}
 
-                {applyingMods && (
+                {state.applyingMods && (
                     <Modal
                         buttons={[
                             {
                                 color: 'neutral',
-                                onClick: () => setApplyingMods(false),
+                                onClick: () =>
+                                    dispatch({
+                                        payload: false,
+                                        type: 'SET_APPLYING_MODS',
+                                    }),
                                 text: 'Cancel',
                             },
                         ]}
                         modalName="Applying Mods"
-                        onClose={(): void => setApplyingMods(false)}
-                        open={applyingMods}
+                        onClose={(): void =>
+                            dispatch({
+                                payload: false,
+                                type: 'SET_APPLYING_MODS',
+                            })
+                        }
+                        open={state.applyingMods}
                         text=""
                         width="50%"
                     >
@@ -371,26 +387,23 @@ export const App: FC = (): React.ReactElement => {
                 )}
 
                 <InstallDirTable
-                    creatingBackup={creatingBackup}
-                    installDirs={installDirs}
+                    creatingBackup={state.creatingBackup}
+                    installDirs={state.installDirs}
                     onAddedInstallDirectory={loadInstallDirs}
                     onClickCreateBackup={handleCreateBackupClick}
                     onClickDeleteBackup={handleDeleteBackupClick}
-                    onClickModify={setDirBeingModified}
+                    onClickModify={(dir): void =>
+                        dispatch({
+                            payload: dir,
+                            type: 'SET_DIR_BEING_MODIFIED',
+                        })
+                    }
                     onClickRestoreBackup={handleRestoreBackupClick}
                     onSelectInstallation={(index): void => {
-                        if (selectedInstallations.includes(index)) {
-                            const installations = selectedInstallations.filter(
-                                (value) => value !== index
-                            );
-
-                            setSelectedInstallations(installations);
-                        } else {
-                            setSelectedInstallations([
-                                ...selectedInstallations,
-                                index,
-                            ]);
-                        }
+                        dispatch({
+                            payload: index,
+                            type: 'TOGGLE_SELECTED_INSTALLATION',
+                        });
                     }}
                 />
 
@@ -398,45 +411,49 @@ export const App: FC = (): React.ReactElement => {
                     buttons={[
                         {
                             color: 'neutral',
-                            onClick: () => setDirBeingModified(''),
+                            onClick: () =>
+                                dispatch({
+                                    payload: '',
+                                    type: 'SET_DIR_BEING_MODIFIED',
+                                }),
                             text: 'Close',
                         },
                     ]}
                     height="100%"
                     modalName="Modify Installation"
-                    onClose={(): void => setDirBeingModified('')}
-                    open={dirBeingModified !== ''}
+                    onClose={(): void =>
+                        dispatch({
+                            payload: '',
+                            type: 'SET_DIR_BEING_MODIFIED',
+                        })
+                    }
+                    open={state.dirBeingModified !== ''}
                     text=""
                     width="100%"
                 >
                     <ModifyInstallView
-                        addedMods={modNamesAdded}
-                        dirBeingModified={dirBeingModified}
-                        onBackClicked={(): void => setDirBeingModified('')}
+                        addedMods={state.modNamesAdded}
+                        dirBeingModified={state.dirBeingModified}
+                        onBackClicked={(): void =>
+                            dispatch({
+                                payload: '',
+                                type: 'SET_DIR_BEING_MODIFIED',
+                            })
+                        }
                         onDequeueMod={async (
                             modName: string
                         ): Promise<void> => {
-                            setModNamesQueued(
-                                modNamesQueued.filter(
-                                    (value) => value !== modName
-                                )
-                            );
-                            setModNamesAdded([...modNamesAdded, modName]);
+                            dispatch({ payload: modName, type: 'DEQUEUE_MOD' });
                         }}
                         onModSelected={handleFileSelected}
                         onOpenModsDir={openModsDir}
                         onQueueMod={async (modName: string): Promise<void> => {
-                            setModNamesQueued([...modNamesQueued, modName]);
-                            setModNamesAdded(
-                                modNamesAdded.filter(
-                                    (value) => value !== modName
-                                )
-                            );
+                            dispatch({ payload: modName, type: 'QUEUE_MOD' });
                             viewFileDirsInZip(
                                 `${await getModsDir()}\\${modName}`
                             ); // FIXME 100% temporary
                         }}
-                        queuedMods={modNamesQueued}
+                        queuedMods={state.modNamesQueued}
                     />
                 </Modal>
 
@@ -460,7 +477,7 @@ export const App: FC = (): React.ReactElement => {
                     ]}
                     modalName="Installation Auto-Detection"
                     onClose={handleInstallDirModalClose}
-                    open={installDirModalOpen}
+                    open={state.installDirModalOpen}
                     text={AUTO_DETECT_INSTALL_TEXT}
                     width="50%"
                 />
@@ -469,18 +486,19 @@ export const App: FC = (): React.ReactElement => {
             <section className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Available Mods</h2>
 
-                {modNamesAdded !== undefined && modNamesAdded.length === 0 && (
-                    <div className="bg-base-200 p-4 rounded-lg">
-                        <p>
-                            You have not added any Call to Power II mods yet.
-                            Add one below, then apply it to one of your
-                            installations listed above by selecting it and
-                            clicking on Apply Selected.
-                        </p>
-                    </div>
-                )}
+                {state.modNamesAdded !== undefined &&
+                    state.modNamesAdded.length === 0 && (
+                        <div className="bg-base-200 p-4 rounded-lg">
+                            <p>
+                                You have not added any Call to Power II mods
+                                yet. Add one below, then apply it to one of your
+                                installations listed above by selecting it and
+                                clicking on Apply Selected.
+                            </p>
+                        </div>
+                    )}
 
-                {loadingMods && (
+                {state.loadingMods && (
                     <div className="flex justify-center my-4">
                         <span
                             aria-label="Loading mods"
@@ -489,9 +507,9 @@ export const App: FC = (): React.ReactElement => {
                     </div>
                 )}
 
-                {modNamesAdded !== undefined &&
-                    !loadingMods &&
-                    modNamesAdded.length > 0 && (
+                {state.modNamesAdded !== undefined &&
+                    !state.loadingMods &&
+                    state.modNamesAdded.length > 0 && (
                         <div className="overflow-x-auto bg-base-200 rounded-lg">
                             <table className="table w-full">
                                 <thead>
@@ -502,34 +520,22 @@ export const App: FC = (): React.ReactElement => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {modNamesAdded.map((name) => (
+                                    {state.modNamesAdded.map((name) => (
                                         <tr className="hover" key={name}>
                                             <th>
                                                 <label className="cursor-pointer">
                                                     <input
                                                         aria-label={`Select mod: ${name}`}
+                                                        checked={state.checkedMods.includes(
+                                                            name
+                                                        )}
                                                         className="checkbox checkbox-primary"
-                                                        onChange={(
-                                                            event
-                                                        ): void => {
-                                                            if (
-                                                                event.target
-                                                                    .checked
-                                                            ) {
-                                                                setCheckedMods([
-                                                                    ...checkedMods,
-                                                                    name,
-                                                                ]);
-                                                            } else {
-                                                                setCheckedMods([
-                                                                    ...checkedMods.filter(
-                                                                        (mod) =>
-                                                                            mod !==
-                                                                            name
-                                                                    ),
-                                                                ]);
-                                                            }
-                                                        }}
+                                                        onChange={(): void =>
+                                                            dispatch({
+                                                                payload: name,
+                                                                type: 'TOGGLE_CHECKED_MOD',
+                                                            })
+                                                        }
                                                         type="checkbox"
                                                     />
                                                     <span className="sr-only">
@@ -548,11 +554,12 @@ export const App: FC = (): React.ReactElement => {
                                                     aria-label="Delete selected mods"
                                                     className="btn btn-error btn-sm"
                                                     disabled={
-                                                        checkedMods.length === 0
+                                                        state.checkedMods
+                                                            .length === 0
                                                     }
-                                                    onClick={(): void => {
-                                                        for (const mod of checkedMods) {
-                                                            (
+                                                    onClick={async (): Promise<void> => {
+                                                        for (const mod of state.checkedMods) {
+                                                            await (
                                                                 window as ElectronWindow
                                                             ).api.removeModFromMods(
                                                                 'file:removeModFromMods',
@@ -569,27 +576,38 @@ export const App: FC = (): React.ReactElement => {
                                                     aria-label="Apply selected mods"
                                                     className="btn btn-primary btn-sm"
                                                     disabled={
-                                                        checkedMods.length ===
-                                                            0 ||
-                                                        installDirs.length ===
-                                                            0 ||
-                                                        selectedInstallations.length ===
-                                                            0
+                                                        state.checkedMods
+                                                            .length === 0 ||
+                                                        state.installDirs
+                                                            .length === 0 ||
+                                                        state
+                                                            .selectedInstallations
+                                                            .length === 0
                                                     }
                                                     onClick={async (): Promise<void> => {
-                                                        setApplyingMods(true);
-                                                        for (const installationIndex in selectedInstallations) {
-                                                            await (
-                                                                window as ElectronWindow
-                                                            ).api.applyModsToInstall(
-                                                                'file:applyModsToInstall',
-                                                                installDirs[
-                                                                    installationIndex
-                                                                ].directory,
-                                                                checkedMods
-                                                            );
+                                                        dispatch({
+                                                            payload: true,
+                                                            type: 'SET_APPLYING_MODS',
+                                                        });
+                                                        try {
+                                                            for (const installIndex of state.selectedInstallations) {
+                                                                await (
+                                                                    window as ElectronWindow
+                                                                ).api.applyModsToInstall(
+                                                                    'file:applyModsToInstall',
+                                                                    state
+                                                                        .installDirs[
+                                                                        installIndex
+                                                                    ].directory,
+                                                                    state.checkedMods
+                                                                );
+                                                            }
+                                                        } finally {
+                                                            dispatch({
+                                                                payload: false,
+                                                                type: 'SET_APPLYING_MODS',
+                                                            });
                                                         }
-                                                        setApplyingMods(false);
                                                     }}
                                                 >
                                                     <ApplyIcon />

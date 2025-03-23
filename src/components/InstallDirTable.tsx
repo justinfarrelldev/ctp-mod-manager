@@ -21,6 +21,7 @@ interface Props {
     onClickDeleteBackup: (dir: string) => void;
     onClickModify: (dirPathBeingModified: string) => void;
     onClickRestoreBackup: (dir: string) => void;
+    onSelectInstallation: (index: number) => void;
 }
 
 const openDirectory = (dir: string): void => {
@@ -54,6 +55,7 @@ export const InstallDirTable: FC<Props> = ({
     onClickDeleteBackup,
     onClickModify,
     onClickRestoreBackup,
+    onSelectInstallation,
 }) => {
     const [deletePopupOpen, setDeletePopupOpen] = useState<string>('');
 
@@ -128,17 +130,33 @@ export const InstallDirTable: FC<Props> = ({
                     <table className="table w-full">
                         <thead>
                             <tr>
+                                <th>Select</th>
                                 <th>Installation</th>
                                 <th>Type</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {installDirs.map((installDir) => (
+                            {installDirs.map((installDir, idx) => (
                                 <tr
                                     className="hover"
                                     key={installDir.directory}
                                 >
+                                    <th>
+                                        <label className="cursor-pointer">
+                                            <input
+                                                aria-label={`Select installation: ${installDir.directory}`}
+                                                className="checkbox checkbox-primary"
+                                                onChange={(): void => {
+                                                    onSelectInstallation(idx);
+                                                }}
+                                                type="checkbox"
+                                            />
+                                            <span className="sr-only">
+                                                Select {installDir.directory}
+                                            </span>
+                                        </label>
+                                    </th>
                                     <td className="font-medium break-all">
                                         {installDir.directory}
                                     </td>
@@ -193,7 +211,6 @@ export const InstallDirTable: FC<Props> = ({
                                                         overflowY: 'auto',
                                                         position: 'relative', // FIXME a very temporary fix until I can figure this out in Tailwind
                                                     }}
-                                                    tabIndex={0}
                                                 >
                                                     <li>
                                                         <button

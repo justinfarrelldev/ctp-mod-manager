@@ -129,6 +129,9 @@ export const App: FC = (): React.ReactElement => {
     const [creatingBackup, setCreatingBackup] = useState<string>(''); // Add state for tracking backup creation
     const [deleteBackupOpen, setDeleteBackupOpen] = useState<boolean>(false);
     const [deletingBackupDir, setDeletingBackupDir] = useState<string>('');
+    const [selectedInstallations, setSelectedInstallations] = useState<
+        number[]
+    >([]);
 
     const handleRestoreBackupClick = (installDir: string): void => {
         setBackupInstallDir(installDir);
@@ -370,6 +373,20 @@ export const App: FC = (): React.ReactElement => {
                     onClickDeleteBackup={handleDeleteBackupClick}
                     onClickModify={setDirBeingModified}
                     onClickRestoreBackup={handleRestoreBackupClick}
+                    onSelectInstallation={(index): void => {
+                        if (selectedInstallations.includes(index)) {
+                            const installations = selectedInstallations.filter(
+                                (value) => value !== index
+                            );
+
+                            setSelectedInstallations(installations);
+                        } else {
+                            setSelectedInstallations([
+                                ...selectedInstallations,
+                                index,
+                            ]);
+                        }
+                    }}
                 />
 
                 <Modal
@@ -549,18 +566,24 @@ export const App: FC = (): React.ReactElement => {
                                                     disabled={
                                                         checkedMods.length ===
                                                             0 ||
-                                                        installDirs.length === 0
+                                                        installDirs.length ===
+                                                            0 ||
+                                                        selectedInstallations.length ===
+                                                            0
                                                     }
                                                     onClick={async (): Promise<void> => {
                                                         setApplyingMods(true);
-                                                        await (
-                                                            window as ElectronWindow
-                                                        ).api.applyModsToInstall(
-                                                            'file:applyModsToInstall',
-                                                            installDirs[0]
-                                                                .directory,
-                                                            checkedMods
-                                                        );
+                                                        for (const installationIndex in selectedInstallations) {
+                                                            await (
+                                                                window as ElectronWindow
+                                                            ).api.applyModsToInstall(
+                                                                'file:applyModsToInstall',
+                                                                installDirs[
+                                                                    installationIndex
+                                                                ].directory,
+                                                                checkedMods
+                                                            );
+                                                        }
                                                         setApplyingMods(false);
                                                     }}
                                                 >

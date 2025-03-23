@@ -28,11 +28,10 @@ jobs:
             - name: Run tests
               run: npm test
 
-    build-and-release:
-        name: Build & Release
+    build-windows-x64:
+        name: Build Windows x64
         needs: test
         runs-on: windows-latest
-        # Only run this job for tag pushes (not branch pushes)
         if: startsWith(github.ref, 'refs/tags/')
         steps:
             - uses: actions/checkout@v3
@@ -43,32 +42,153 @@ jobs:
                   cache: 'npm'
             - name: Install dependencies
               run: npm ci
-
-            # Debug information
-            - name: Display tag information
-              run: echo "Building release for tag ${{ github.ref_name }}"
-
             - name: Build application
-              run: npm run make
-
-            # Check what files were actually created
+              run: npm run make -- --arch=x64
             - name: List build artifacts
               shell: cmd
-              run: |
-                  echo "Checking build outputs..."
-                  dir out\make /s
+              run: dir out\make /s
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: windows-x64-artifacts
+                  path: |
+                      out/make/squirrel.windows/x64/*.exe
+                      out/make/zip/win32/x64/*.zip
+
+    build-windows-ia32:
+        name: Build Windows x86
+        needs: test
+        runs-on: windows-latest
+        if: startsWith(github.ref, 'refs/tags/')
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci
+            - name: Build application
+              run: npm run make -- --arch=ia32
+            - name: List build artifacts
+              shell: cmd
+              run: dir out\make /s
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: windows-ia32-artifacts
+                  path: |
+                      out/make/squirrel.windows/ia32/*.exe
+                      out/make/zip/win32/ia32/*.zip
+
+    build-linux-debian:
+        name: Build Linux (Debian)
+        needs: test
+        runs-on: ubuntu-latest
+        if: startsWith(github.ref, 'refs/tags/')
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci
+            - name: Build application
+              run: npm run make -- --platform=linux --targets=@electron-forge/maker-deb
+            - name: List build artifacts
+              run: find out/make -type f
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: linux-deb-artifacts
+                  path: out/make/deb/x64/*.deb
+
+    build-linux-arch:
+        name: Build Linux (Arch)
+        needs: test
+        runs-on: ubuntu-latest
+        if: startsWith(github.ref, 'refs/tags/')
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci
+            - name: Build application
+              run: npm run make -- --platform=linux --targets=@electron-forge/maker-zip
+            - name: List build artifacts
+              run: find out/make -type f
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: linux-arch-artifacts
+                  path: out/make/zip/linux/x64/*.zip
+
+    build-macos:
+        name: Build macOS
+        needs: test
+        runs-on: macos-latest
+        if: startsWith(github.ref, 'refs/tags/')
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci
+            - name: Build application
+              run: npm run make -- --platform=darwin
+            - name: List build artifacts
+              run: find out/make -type f
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: macos-artifacts
+                  path: |
+                      out/make/zip/darwin/x64/*.zip
+                      out/make/*.dmg
+
+    create-release:
+        name: Create Release
+        needs:
+            [
+                build-windows-x64,
+                build-windows-ia32,
+                build-linux-debian,
+                build-linux-arch,
+                build-macos,
+            ]
+        runs-on: ubuntu-latest
+        if: startsWith(github.ref, 'refs/tags/')
+        steps:
+            - name: Download all artifacts
+              uses: actions/download-artifact@v3
+              with:
+                  path: artifacts
+
+            - name: Display tag information
+              run: echo "Creating release for tag ${{ github.ref_name }}"
 
             - name: Create Release
               uses: softprops/action-gh-release@v1
               with:
-                  # Adjust these paths if needed based on the dir output
                   files: |
-                      out/make/squirrel.windows/x64/*.exe
-                      out/make/zip/win32/x64/*.zip
+                      artifacts/windows-x64-artifacts/**
+                      artifacts/windows-ia32-artifacts/**
+                      artifacts/linux-deb-artifacts/**
+                      artifacts/linux-arch-artifacts/**
+                      artifacts/macos-artifacts/**
                   generate_release_notes: true
                   draft: false
                   prerelease: ${{ contains(github.ref, '-pre') }}
-                  # Use the tag name directly since we only run on tag events
                   tag_name: ${{ github.ref_name }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

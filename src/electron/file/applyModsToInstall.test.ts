@@ -54,7 +54,7 @@ describe('applyModsToInstall', () => {
         await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'Error: /mock/path\\mock-name\\Mods\\mod1 is not a directory.'
+            'Error: \\mock\\path\\mock-name\\Mods\\mod1 is not a directory.'
         );
     });
 
@@ -71,7 +71,7 @@ describe('applyModsToInstall', () => {
         await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'An error occurred while getting the stats for the file /mock/path\\mock-name\\Mods\\mod1: Error: stat error'
+            'An error occurred while getting the stats for the file \\mock\\path\\mock-name\\Mods\\mod1: Error: stat error'
         );
     });
 
@@ -91,7 +91,7 @@ describe('applyModsToInstall', () => {
         await applyModsToInstallWithMerge('/valid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'An error occurred within applying mods to install while copying the directory /mock/path\\mock-name\\Mods\\mod1 to /mock/path\\mock-name\\Mods: Error: getFileChangesToApplyMod error'
+            'An error occurred within applying mods to install while copying the directory \\mock\\path\\mock-name\\Mods\\mod1 to \\mock\\path\\mock-name\\Mods: Error: getFileChangesToApplyMod error'
         );
         expect(getFileChangesToApplyModMock).toHaveBeenCalledWith(
             'mod1',

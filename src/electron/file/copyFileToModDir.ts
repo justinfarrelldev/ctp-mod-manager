@@ -2,6 +2,7 @@ import AdmZip from 'adm-zip';
 import { app } from 'electron';
 import fs from 'fs';
 import klawSync from 'klaw-sync';
+import path from 'path';
 import { ReadonlyDeep } from 'type-fest';
 
 import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
@@ -15,7 +16,7 @@ export const unzipInModDir = async (
         try {
             const zip = new AdmZip(zipFullPath);
             zip.extractAllToAsync(
-                `${DEFAULT_MOD_DIR}\\${fileFolder}`,
+                path.join(DEFAULT_MOD_DIR, fileFolder),
                 false,
                 false,
                 (err) => {
@@ -112,12 +113,12 @@ const unzipAllFiles = async (destination: string): Promise<void> => {
 
     while (zipFilesInDirs.length > 0) {
         for (const file of zipFilesInDirs) {
-            const splitFile = file.split('\\');
-            const name = splitFile[splitFile.length - 1];
+            const name = path.basename(file);
+            const dirname = path.dirname(file);
 
             const zipFile = new AdmZip(file);
             // eslint-disable-next-line no-await-in-loop
-            await extract(zipFile, file.replace(name, ''));
+            await extract(zipFile, dirname);
             fs.rmSync(file);
             // eslint-disable-next-line no-await-in-loop
             zipFilesInDirs = await findZipFilesInDir(
@@ -167,14 +168,12 @@ const copyDataFolderToModDir = (dir: string): void => {
         );
     }
 
-    const splitDir = dir.split('\\');
-
-    const parentDirName = splitDir[splitDir.length - 2];
-
-    const dirToMove = dir.replace('\\ctp2_data', '');
+    // Use path module to handle platform-specific directory separators
+    const parentDirName = path.basename(path.dirname(dir));
+    const dirToMove = path.dirname(dir);
 
     try {
-        fs.cpSync(dirToMove, `${DEFAULT_MOD_DIR}\\${parentDirName}`, {
+        fs.cpSync(dirToMove, path.join(DEFAULT_MOD_DIR, parentDirName), {
             recursive: true,
         });
     } catch (err) {
@@ -199,8 +198,7 @@ const copyDataFolderToModDir = (dir: string): void => {
  * @throws Will log an error if there is an issue getting the stats for the directory.
  */
 export const copyFileToModDir = async (fileDir: string): Promise<void> => {
-    const split = fileDir.split('\\');
-    const fileName = split[split.length - 1];
+    const fileName = path.basename(fileDir);
     let stats: fs.Stats | undefined;
     try {
         stats = fs.statSync(DEFAULT_MOD_DIR);
@@ -217,7 +215,7 @@ export const copyFileToModDir = async (fileDir: string): Promise<void> => {
             await createAppDataFolder(DEFAULT_MOD_FOLDER_NAME);
     }
 
-    const destination = `${DEFAULT_MOD_DIR}\\${fileName}`;
+    const destination = path.join(DEFAULT_MOD_DIR, fileName);
     await unzipInModDir(fileDir, fileName);
 
     await unzipAllFiles(destination);
@@ -230,12 +228,13 @@ export const copyFileToModDir = async (fileDir: string): Promise<void> => {
 /**
  * Creates a folder in the application's AppData directory with the specified name.
  * @param name - The name of the folder to create.
+ * @returns A promise that resolves when the folder is created.
  * @throws Will throw an error if there is an issue getting the app path or creating the folder.
  */
 export const createAppDataFolder = async (name: string): Promise<void> => {
     let folderPath;
     try {
-        folderPath = `${app.getPath('appData')}\\${app.getName()}\\${name}`;
+        folderPath = path.join(app.getPath('appData'), app.getName(), name);
     } catch (err) {
         // eslint-disable-next-line no-console
         console.error(

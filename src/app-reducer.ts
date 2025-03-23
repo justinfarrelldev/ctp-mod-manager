@@ -13,6 +13,7 @@ export type AppAction =
     | { payload: boolean; type: 'SET_LOADING_DIRS' }
     | { payload: boolean; type: 'SET_LOADING_MODS' }
     | { payload: boolean; type: 'SET_SETTINGS_OPEN' }
+    | { payload: boolean; type: 'SET_SHOW_ALPHA_WARNING' }
     | { payload: InstallDirectory[]; type: 'ADD_TO_INSTALL_DIRS' }
     | { payload: InstallDirectory[]; type: 'SET_INSTALL_DIRS' }
     | { payload: number; type: 'TOGGLE_SELECTED_INSTALLATION' }
@@ -46,6 +47,7 @@ export interface AppState {
     modNamesQueued: string[];
     selectedInstallations: number[];
     settingsOpen: boolean;
+    showAlphaWarning: boolean;
 }
 
 // Define initial state
@@ -67,6 +69,7 @@ export const initialState: AppState = {
     modNamesQueued: [],
     selectedInstallations: [],
     settingsOpen: false,
+    showAlphaWarning: true,
 };
 
 // Create the reducer function
@@ -141,6 +144,9 @@ export const appReducer = (
             break;
         case 'SET_SETTINGS_OPEN':
             draft.settingsOpen = action.payload;
+            break;
+        case 'SET_SHOW_ALPHA_WARNING':
+            draft.showAlphaWarning = action.payload;
             break;
         case 'TOGGLE_CHECKED_MOD':
             const modIndex = draft.checkedMods.indexOf(action.payload);

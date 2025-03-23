@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import { themeChange } from 'theme-change';
 import { ReadonlyDeep } from 'type-fest';
 import { useImmerReducer } from 'use-immer';
@@ -126,37 +126,49 @@ type LineChangeGroup = {
 export const App: FC = (): React.ReactElement => {
     const [state, dispatch] = useImmerReducer(appReducer, initialState);
 
-    const handleRestoreBackupClick = (installDir: string): void => {
-        dispatch({ payload: installDir, type: 'SET_BACKUP_INSTALL_DIR' });
-        dispatch({ payload: true, type: 'SET_BACKUP_RESTORE_OPEN' });
-    };
+    const handleRestoreBackupClick = useCallback(
+        (installDir: string): void => {
+            dispatch({ payload: installDir, type: 'SET_BACKUP_INSTALL_DIR' });
+            dispatch({ payload: true, type: 'SET_BACKUP_RESTORE_OPEN' });
+        },
+        [dispatch]
+    );
 
-    const handleCreateBackupClick = async (
-        installDir: string
-    ): Promise<void> => {
-        dispatch({ payload: installDir, type: 'SET_CREATING_BACKUP' });
-        try {
-            await (window as ElectronWindow).api.makeBackup(
-                'file:makeBackup',
-                installDir
-            );
-        } catch (err) {
-            console.error(`Failed to create backup: ${err}`);
-            dispatch({
-                payload: `Failed to create backup: ${err}`,
-                type: 'SET_ERROR',
-            });
-        } finally {
-            dispatch({ payload: '', type: 'SET_CREATING_BACKUP' });
-        }
-    };
+    const handleCreateBackupClick = useCallback(
+        async (installDir: string): Promise<void> => {
+            dispatch({ payload: installDir, type: 'SET_CREATING_BACKUP' });
+            try {
+                await (window as ElectronWindow).api.makeBackup(
+                    'file:makeBackup',
+                    installDir
+                );
+            } catch (err) {
+                console.error(`Failed to create backup: ${err}`);
+                dispatch({
+                    payload: `Failed to create backup: ${err}`,
+                    type: 'SET_ERROR',
+                });
+            } finally {
+                dispatch({ payload: '', type: 'SET_CREATING_BACKUP' });
+            }
+        },
+        [dispatch]
+    );
 
-    const handleDeleteBackupClick = (installDir: string): void => {
-        dispatch({ payload: installDir, type: 'SET_DELETING_BACKUP_DIR' });
-        dispatch({ payload: true, type: 'SET_DELETE_BACKUP_OPEN' });
-    };
+    const handleDeleteBackupClick = useCallback(
+        (installDir: string): void => {
+            dispatch({ payload: installDir, type: 'SET_DELETING_BACKUP_DIR' });
+            dispatch({ payload: true, type: 'SET_DELETE_BACKUP_OPEN' });
+        },
+        [dispatch]
+    );
 
-    const loadModFileNames = async (): Promise<void> => {
+    const acknowledgeAlphaWarning = useCallback((): void => {
+        localStorage.setItem('alphaWarningAcknowledged', 'true');
+        dispatch({ payload: false, type: 'SET_SHOW_ALPHA_WARNING' });
+    }, [dispatch]);
+
+    const loadModFileNames = useCallback(async (): Promise<void> => {
         dispatch({ payload: true, type: 'SET_LOADING_MODS' });
         try {
             const loadedMods = await (
@@ -174,9 +186,9 @@ export const App: FC = (): React.ReactElement => {
         } finally {
             dispatch({ payload: false, type: 'SET_LOADING_MODS' });
         }
-    };
+    }, [dispatch]);
 
-    const loadInstallDirs = async (): Promise<void> => {
+    const loadInstallDirs = useCallback(async (): Promise<void> => {
         dispatch({ payload: true, type: 'SET_LOADING_DIRS' });
         try {
             const dirsFromFile = await (
@@ -197,9 +209,9 @@ export const App: FC = (): React.ReactElement => {
         } finally {
             dispatch({ payload: false, type: 'SET_LOADING_DIRS' });
         }
-    };
+    }, [dispatch]);
 
-    const findInstallDirs = async (): Promise<void> => {
+    const findInstallDirs = useCallback(async (): Promise<void> => {
         dispatch({ payload: true, type: 'SET_LOADING_DIRS' });
         try {
             const dirs: InstallDirectory[] = await (
@@ -220,56 +232,123 @@ export const App: FC = (): React.ReactElement => {
         } finally {
             dispatch({ payload: false, type: 'SET_LOADING_DIRS' });
         }
-    };
+    }, [dispatch, loadModFileNames]);
 
-    const handleInstallDirModalClose = (): void => {
+    const handleInstallDirModalClose = useCallback((): void => {
         dispatch({ payload: false, type: 'SET_INSTALL_DIR_MODAL_OPEN' });
-    };
+    }, [dispatch]);
 
-    const handleFileSelected = async (
-        e: ReadonlyDeep<React.ChangeEvent<HTMLInputElement>>
-    ): Promise<void> => {
-        dispatch({ payload: true, type: 'SET_LOADING_MODS' });
-        try {
-            const files = Array.from(e.target.files);
-            await (window as ElectronWindow).api.copyFileToModDir(
-                'file:copy',
-                (files[0] as File & { path: string }).path
-            );
-            await loadModFileNames();
-        } finally {
-            dispatch({ payload: false, type: 'SET_LOADING_MODS' });
-        }
-    };
+    const handleFileSelected = useCallback(
+        async (
+            e: ReadonlyDeep<React.ChangeEvent<HTMLInputElement>>
+        ): Promise<void> => {
+            dispatch({ payload: true, type: 'SET_LOADING_MODS' });
+            try {
+                const files = Array.from(e.target.files);
+                await (window as ElectronWindow).api.copyFileToModDir(
+                    'file:copy',
+                    (files[0] as File & { path: string }).path
+                );
+                await loadModFileNames();
+            } finally {
+                dispatch({ payload: false, type: 'SET_LOADING_MODS' });
+            }
+        },
+        [dispatch, loadModFileNames]
+    );
 
-    const openModsDir = (): void => {
+    const openModsDir = useCallback((): void => {
         (window as ElectronWindow).api.openModsDir('file:openModsDir');
-    };
+    }, []);
 
-    const viewFileDirsInZip = async (
-        zipFilePath: string
-    ): Promise<string[]> => {
-        return await (window as ElectronWindow).api.viewFileDirsInZip(
-            'file:viewFileDirsInZip',
-            zipFilePath
-        );
-    };
+    const viewFileDirsInZip = useCallback(
+        async (zipFilePath: string): Promise<string[]> => {
+            return await (window as ElectronWindow).api.viewFileDirsInZip(
+                'file:viewFileDirsInZip',
+                zipFilePath
+            );
+        },
+        []
+    );
 
-    const getModsDir = async (): Promise<string> => {
+    const getModsDir = useCallback(async (): Promise<string> => {
         return await (window as ElectronWindow).api.getModsDir(
             'file:getModsDir'
         );
-    };
+    }, []);
 
     useEffect(() => {
+        // Check if the user has already acknowledged the alpha warning
+        const alphaWarningAcknowledged = localStorage.getItem(
+            'alphaWarningAcknowledged'
+        );
+        if (alphaWarningAcknowledged) {
+            dispatch({ payload: false, type: 'SET_SHOW_ALPHA_WARNING' });
+        }
+
         loadModFileNames();
         loadInstallDirs();
         themeChange(false);
         // 👆 false parameter is required for react project
-    }, []);
+    }, [dispatch, loadModFileNames, loadInstallDirs]);
 
     return (
         <div className="container mx-auto p-4 max-w-6xl">
+            {/* Alpha Warning Modal */}
+            <Modal
+                buttons={[
+                    {
+                        color: 'primary',
+                        onClick: acknowledgeAlphaWarning,
+                        text: 'I Understand and Accept',
+                    },
+                ]}
+                modalName="Alpha Software Warning"
+                onClose={(): void => {
+                    // Don't allow closing without explicit acceptance
+                }}
+                open={state.showAlphaWarning}
+                text=""
+                width="50%"
+            >
+                <div className="alert alert-warning mb-4">
+                    <svg
+                        className="stroke-current shrink-0 h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                        />
+                    </svg>
+                    <div>
+                        <h3 className="font-bold">Alpha Software Warning</h3>
+                        <div>
+                            This is alpha software and is still under active
+                            development. You may encounter bugs, crashes, or
+                            data loss while using this application.
+                        </div>
+                    </div>
+                </div>
+                <p className="my-2">
+                    By continuing to use this software, you acknowledge that:
+                </p>
+                <ul className="list-disc list-inside mb-4 ml-2">
+                    <li>The application may contain bugs or errors</li>
+                    <li>Features may be incomplete or change without notice</li>
+                    <li>Your data may not be preserved between updates</li>
+                    <li>You use this software at your own risk</li>
+                </ul>
+                <p>
+                    Click &quot;I Understand and Accept&quot; to continue using
+                    the application.
+                </p>
+            </Modal>
+
             {/* Add the DeleteBackupModal */}
             <DeleteBackupModal
                 installDir={state.deletingBackupDir}

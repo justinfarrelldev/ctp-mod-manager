@@ -1,5 +1,6 @@
 import AdmZip from 'adm-zip';
 import * as fs from 'fs';
+import * as path from 'path';
 
 import {
     DEFAULT_BACKUPS_FOLDER,
@@ -41,8 +42,8 @@ export const makeBackup = async (installDir: string): Promise<void> => {
         zip.addLocalFolder(installDir);
         console.log('added zip');
         const installDirAsFileName = installDir
-            .replaceAll('\\', '-')
-            .replaceAll('/', '-')
+            .replaceAll(path.sep, '-')
+            .replaceAll(path.posix.sep, '-')
             .replaceAll(' ', '')
             .replaceAll(':', '')
             .replaceAll('(', '')
@@ -61,14 +62,13 @@ export const makeBackup = async (installDir: string): Promise<void> => {
             '-' +
             String(now.getSeconds()).padStart(2, '0');
 
-        console.log(
-            'writing zip to: ',
-            `${DEFAULT_BACKUPS_FOLDER}\\${installDirAsFileName}_${timestamp}.zip`
+        const backupFilePath = path.join(
+            DEFAULT_BACKUPS_FOLDER,
+            `${installDirAsFileName}_${timestamp}.zip`
         );
-        zip.writeZip(
-            `${DEFAULT_BACKUPS_FOLDER}\\${installDirAsFileName}_${timestamp}.zip`
-        );
-        console.log('wrote zip there...');
+        console.log('writing zip to: ', backupFilePath);
+        zip.writeZip(backupFilePath);
+        console.log('wrote zip to: ', backupFilePath);
     } catch (err) {
         console.error(
             `An error occurred while creating a zip file for a backup: ${err}`

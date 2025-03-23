@@ -5,6 +5,7 @@ const DEFAULT_WINDOWS_DIR =
     'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call to Power II';
 const DEFAULT_WSL2_DIR =
     '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';
+const DEFAULT_LINUX_DIR = '/ctp_install';
 
 type InstallInfo = WindowsInstallInfo | WSLInstallInfo;
 
@@ -40,6 +41,14 @@ export const getInstallDirectories = (): InstallInfo[] => {
         if (fs.existsSync(DEFAULT_WSL2_DIR)) {
             installInfos.push({
                 directory: DEFAULT_WSL2_DIR,
+                installationType: 'steam',
+                os: 'linux',
+            });
+        }
+    } else if (process.platform === 'linux') {
+        if (fs.existsSync(DEFAULT_LINUX_DIR)) {
+            installInfos.push({
+                directory: DEFAULT_LINUX_DIR,
                 installationType: 'steam',
                 os: 'linux',
             });

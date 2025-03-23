@@ -1,5 +1,6 @@
 import { Change, diffLines } from 'diff';
 import fs from 'node:fs';
+import path from 'node:path';
 import pLimit from 'p-limit';
 import { ReadonlyDeep } from 'type-fest';
 
@@ -250,22 +251,21 @@ export const getFileChangesToApplyMod = async (
     mod: string,
     installDir: string
 ): Promise<FileChange[]> => {
+    const modPath = path.join(DEFAULT_MOD_DIR, mod);
     let statsOfFile: fs.Stats | undefined;
     try {
-        statsOfFile = fs.statSync(`${DEFAULT_MOD_DIR}\\${mod}`);
+        statsOfFile = fs.statSync(modPath);
     } catch (err) {
         // eslint-disable-next-line no-console
         console.error(
-            `An error occurred while getting the stats for the file ${`${DEFAULT_MOD_DIR}\\${mod}`}: ${err}`
+            `An error occurred while getting the stats for the file ${modPath}: ${err}`
         );
         return [];
     }
 
     if (statsOfFile) {
         if (!statsOfFile.isDirectory()) {
-            console.error(
-                `Error: ${`${DEFAULT_MOD_DIR}\\${mod}`} is not a directory.`
-            );
+            console.error(`Error: ${modPath} is not a directory.`);
             return [];
         }
         let modDirStructure;
@@ -273,10 +273,10 @@ export const getFileChangesToApplyMod = async (
         let result;
 
         try {
-            modDirStructure = readDirectory(`${DEFAULT_MOD_DIR}\\${mod}`);
+            modDirStructure = readDirectory(modPath);
         } catch (err) {
             console.error(
-                `An error occurred while reading the mod directory ${`${DEFAULT_MOD_DIR}\\${mod}`}: ${err}`
+                `An error occurred while reading the mod directory ${modPath}: ${err}`
             );
             return [];
         }

@@ -48,7 +48,7 @@ jobs:
               shell: cmd
               run: dir out\make /s
             - name: Upload artifacts
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: windows-x64-artifacts
                   path: |
@@ -75,7 +75,7 @@ jobs:
               shell: cmd
               run: dir out\make /s
             - name: Upload artifacts
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: windows-ia32-artifacts
                   path: |
@@ -101,7 +101,7 @@ jobs:
             - name: List build artifacts
               run: find out/make -type f
             - name: Upload artifacts
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: linux-deb-artifacts
                   path: out/make/deb/x64/*.deb
@@ -125,7 +125,7 @@ jobs:
             - name: List build artifacts
               run: find out/make -type f
             - name: Upload artifacts
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: linux-arch-artifacts
                   path: out/make/zip/linux/x64/*.zip
@@ -149,7 +149,7 @@ jobs:
             - name: List build artifacts
               run: find out/make -type f
             - name: Upload artifacts
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: macos-artifacts
                   path: |

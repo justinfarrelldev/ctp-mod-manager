@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import { ReadonlyDeep } from 'type-fest';
 
 import { DEFAULT_MOD_DIR } from '../constants';
@@ -22,36 +23,31 @@ export const applyModsToInstall = async (
 
     // Loop through mods and copy each one into the install dir, overwriting
     for await (const mod of queuedMods) {
+        const modPath = path.join(DEFAULT_MOD_DIR, mod);
         let statsOfFile: fs.Stats | undefined;
         try {
-            statsOfFile = fs.statSync(`${DEFAULT_MOD_DIR}\\${mod}`);
+            statsOfFile = fs.statSync(modPath);
         } catch (err) {
             console.error(
-                `An error occurred while getting the stats for ${DEFAULT_MOD_DIR}\\${mod}: ${err}`
+                `An error occurred while getting the stats for ${modPath}: ${err}`
             );
             return;
         }
 
         if (statsOfFile && !statsOfFile.isDirectory()) {
-            console.error(
-                `Error: ${DEFAULT_MOD_DIR}\\${mod} is not a directory.`
-            );
+            console.error(`Error: ${modPath} is not a directory.`);
             return;
         }
 
         try {
             // Copy files wholesale, overwriting existing files
-            console.log(
-                `Copying ${DEFAULT_MOD_DIR}\\${mod} to installation at ${installDir}`
-            );
-            fs.cpSync(`${DEFAULT_MOD_DIR}\\${mod}`, installDir, {
-                force: true, // or use "force" if your Node.js version supports it
+            console.log(`Copying ${modPath} to installation at ${installDir}`);
+            fs.cpSync(modPath, installDir, {
+                force: true,
                 recursive: true,
             });
         } catch (err) {
-            console.error(
-                `Error copying ${DEFAULT_MOD_DIR}\\${mod} to ${installDir}: ${err}`
-            );
+            console.error(`Error copying ${modPath} to ${installDir}: ${err}`);
         }
     }
 

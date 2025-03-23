@@ -145,7 +145,7 @@ jobs:
             - name: Install dependencies
               run: npm ci
             - name: Build application
-              run: npm run make -- --platform=darwin
+              run: npm run make -- --platform=darwin --targets=@electron-forge/maker-zip,@electron-forge/maker-dmg
             - name: List build artifacts
               run: find out/make -type f
             - name: Upload artifacts

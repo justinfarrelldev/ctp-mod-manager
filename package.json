@@ -17,7 +17,9 @@
     "license": "LGPL-2.1-or-later",
     "devDependencies": {
         "@electron-forge/cli": "6.4.2",
+        "@electron-forge/maker-dmg": "^7.7.0",
         "@electron-forge/maker-squirrel": "6.4.2",
+        "@electron-forge/maker-zip": "^7.7.0",
         "@electron-forge/plugin-auto-unpack-natives": "6.4.2",
         "@electron-forge/plugin-vite": "6.4.2",
         "@electron-internal/eslint-config": "^1.0.1",
@@ -53,7 +55,6 @@
     "dependencies": {
         "@electron-forge/maker-deb": "^6.4.2",
         "@electron-forge/maker-rpm": "^6.4.2",
-        "@electron-forge/maker-zip": "^6.4.2",
         "@emotion/react": "^11.10.6",
         "@emotion/styled": "^11.10.6",
         "@mui/icons-material": "^5.11.16",

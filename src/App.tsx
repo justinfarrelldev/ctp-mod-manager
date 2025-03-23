@@ -105,6 +105,7 @@ export type ElectronWindow = typeof globalThis &
 export type InstallDirectory = {
     directory: string;
     installationType: 'gog' | 'steam';
+    isWSL?: boolean;
     os: string;
 };
 

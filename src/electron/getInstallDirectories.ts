@@ -7,7 +7,20 @@ const DEFAULT_WSL2_DIR =
     '/mnt/c/Program Files (x86)/Steam/steamapps/common/Call to Power II';
 const DEFAULT_LINUX_DIR = '/ctp_install';
 
-type InstallInfo = WindowsInstallInfo | WSLInstallInfo;
+type InstallInfo = LinuxInstallInfo | MacInstallInfo | WindowsInstallInfo;
+
+type LinuxInstallInfo = {
+    directory: string;
+    installationType: 'steam';
+    isWSL: boolean;
+    os: 'linux';
+};
+
+type MacInstallInfo = {
+    directory: string;
+    installationType: 'steam';
+    os: 'macos';
+};
 
 type WindowsInstallInfo = {
     directory: string;
@@ -15,14 +28,12 @@ type WindowsInstallInfo = {
     os: 'win32';
 };
 
-type WSLInstallInfo = {
-    directory: string;
-    installationType: 'steam';
-    os: 'linux';
-};
-
 export const getInstallDirectories = (): InstallInfo[] => {
-    const installInfos: (WindowsInstallInfo | WSLInstallInfo)[] = [];
+    const installInfos: (
+        | LinuxInstallInfo
+        | MacInstallInfo
+        | WindowsInstallInfo
+    )[] = [];
 
     if (process.platform === 'win32') {
         if (fs.existsSync(DEFAULT_WINDOWS_DIR)) {
@@ -42,6 +53,7 @@ export const getInstallDirectories = (): InstallInfo[] => {
             installInfos.push({
                 directory: DEFAULT_WSL2_DIR,
                 installationType: 'steam',
+                isWSL: true,
                 os: 'linux',
             });
         }
@@ -50,7 +62,19 @@ export const getInstallDirectories = (): InstallInfo[] => {
             installInfos.push({
                 directory: DEFAULT_LINUX_DIR,
                 installationType: 'steam',
+                isWSL: false,
                 os: 'linux',
+            });
+        }
+    }
+
+    if (process.platform === 'darwin') {
+        if (fs.existsSync(DEFAULT_WSL2_DIR)) {
+            // For now, leave the default install dir on MacOS the same as the Linux one
+            installInfos.push({
+                directory: DEFAULT_LINUX_DIR,
+                installationType: 'steam',
+                os: 'macos',
             });
         }
     }

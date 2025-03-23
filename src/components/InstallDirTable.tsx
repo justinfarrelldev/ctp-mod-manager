@@ -62,14 +62,40 @@ export const InstallDirTable: FC<Props> = ({
     const [runningGames, setRunningGames] = useState<Record<string, boolean>>(
         {}
     );
+    const [executablePaths, setExecutablePaths] = useState<
+        Record<string, string>
+    >({});
+
+    // Get executable paths for each install directory
+    useEffect(() => {
+        const loadExecutablePaths = async (): Promise<void> => {
+            const paths: Record<string, string> = {};
+
+            for (const installDir of installDirs) {
+                const exePath = await (
+                    window as ElectronWindow
+                ).api.getCtp2ExecutablePath(
+                    'file:getCtp2ExecutablePath',
+                    installDir.directory
+                );
+                paths[installDir.directory] = exePath;
+            }
+
+            setExecutablePaths(paths);
+        };
+
+        loadExecutablePaths();
+    }, [installDirs]);
 
     // Check game status periodically
     useEffect(() => {
-        const checkGameStatus = async () => {
+        const checkGameStatus = async (): Promise<void> => {
             const newRunningGames: Record<string, boolean> = {};
 
             for (const installDir of installDirs) {
-                const exePath = `${installDir.directory}\\ctp2_program\\ctp\\ctp2.exe`;
+                if (!executablePaths[installDir.directory]) continue;
+
+                const exePath = executablePaths[installDir.directory];
                 const isRunning = await (
                     window as ElectronWindow
                 ).api.isGameRunning('file:isGameRunning', exePath);
@@ -79,15 +105,18 @@ export const InstallDirTable: FC<Props> = ({
             setRunningGames(newRunningGames);
         };
 
-        // Initial check
-        checkGameStatus();
+        // Only run the check if we have executable paths
+        if (Object.keys(executablePaths).length > 0) {
+            // Initial check
+            checkGameStatus();
 
-        // Set up interval to check every 5 seconds
-        const interval = setInterval(checkGameStatus, 5000);
+            // Set up interval to check every 5 seconds
+            const interval = setInterval(checkGameStatus, 5000);
 
-        // Clean up
-        return () => clearInterval(interval);
-    }, [installDirs]);
+            // Clean up
+            return () => clearInterval(interval);
+        }
+    }, [installDirs, executablePaths]);
 
     const addInstall = async (): Promise<void> => {
         const folder = await (window as ElectronWindow).api.selectFolder(
@@ -112,7 +141,9 @@ export const InstallDirTable: FC<Props> = ({
     };
 
     const runGame = (dir: string): void => {
-        const exePath = `${dir}\\ctp2_program\\ctp\\ctp2.exe`;
+        if (!executablePaths[dir]) return;
+
+        const exePath = executablePaths[dir];
         (window as ElectronWindow).api.runGame('file:runGame', exePath);
 
         // Update running state immediately for better UX
@@ -187,8 +218,11 @@ export const InstallDirTable: FC<Props> = ({
                         </thead>
                         <tbody>
                             {installDirs.map((installDir, idx) => {
-                                const exePath = `${installDir.directory}\\ctp2_program\\ctp\\ctp2.exe`;
-                                const isGameRunning = runningGames[exePath];
+                                const exePath =
+                                    executablePaths[installDir.directory];
+                                const isGameRunning = exePath
+                                    ? runningGames[exePath]
+                                    : false;
 
                                 return (
                                     <tr

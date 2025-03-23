@@ -36,6 +36,12 @@ export type ElectronWindow = typeof globalThis &
                 ipcCommand: 'file:deleteBackup',
                 backupPath: string
             ) => Promise<void>;
+            // Gets the platform-specific path to the CTP2 executable
+            getCtp2ExecutablePath: (
+                ipcCommand: 'file:getCtp2ExecutablePath',
+                installDir: string
+            ) => Promise<string>;
+
             getCtp2InstallDir: () => Promise<
                 [
                     {
@@ -45,6 +51,7 @@ export type ElectronWindow = typeof globalThis &
                     },
                 ]
             >;
+
             getInstallDirs: (
                 ipcCommand: 'file:getInstallDirs'
             ) => Promise<string[]>;

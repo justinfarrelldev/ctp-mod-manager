@@ -7,6 +7,7 @@ import { addToInstallDirs } from './file/addToInstallDirs';
 import { applyModsToInstall } from './file/applyModsToInstall';
 import { copyFileToModDir } from './file/copyFileToModDir';
 import { deleteBackup } from './file/deleteBackup';
+import { getCtp2ExecutablePath } from './file/getGameExecutablePath';
 import { getInstallDirs } from './file/getInstallDirs';
 import { isValidInstall } from './file/isValidInstall';
 import { listBackups } from './file/listBackups';
@@ -112,6 +113,10 @@ app.whenReady().then(() => {
 
     ipcMain.handle('file:deleteBackup', (_, backupPath) =>
         deleteBackup(backupPath)
+    );
+
+    ipcMain.handle('file:getCtp2ExecutablePath', (_, installDir) =>
+        getCtp2ExecutablePath(installDir)
     );
 
     createWindow();

@@ -371,7 +371,7 @@ export const App: FC = (): React.ReactElement => {
 
             <header className="flex justify-between items-center mb-6 border-b pb-4">
                 <h1 className="text-2xl font-bold">
-                    Call to Power II Mod Manager
+                    Call to Power Mod Manager
                 </h1>
                 <button
                     aria-label="Open Settings"

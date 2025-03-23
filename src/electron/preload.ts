@@ -31,6 +31,10 @@ contextBridge.exposeInMainWorld('api', {
     goToRoute: (_: Event, route: string) =>
         ipcRenderer.send('process:goToRoute', route),
 
+    // Checks if a game is currently running
+    isGameRunning: (_: Event, exeDir?: string) =>
+        ipcRenderer.invoke('file:isGameRunning', exeDir),
+
     // Checks if a specified directory is a valid installation
     isValidInstall: (_: Event, fileDir: string) =>
         ipcRenderer.invoke('file:isValidInstall', fileDir),
@@ -70,6 +74,9 @@ contextBridge.exposeInMainWorld('api', {
 
     // Opens a folder selection dialog
     selectFolder: () => ipcRenderer.invoke('file:selectFolder'),
+
+    // Stops the currently running game
+    stopGame: () => ipcRenderer.invoke('file:stopGame'),
 
     // Views the directories inside a specified zip file
     viewFileDirsInZip: (_: Event, zipFilePath: string) =>

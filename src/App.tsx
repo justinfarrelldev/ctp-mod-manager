@@ -48,6 +48,10 @@ export type ElectronWindow = typeof globalThis &
             ) => Promise<string[]>;
             getModsDir: (ipcCommand: string) => Promise<string>;
             goToRoute: (ipcCommand: string, route: string) => void;
+            isGameRunning: (
+                ipcCommand: 'file:isGameRunning',
+                exeDir?: string
+            ) => Promise<boolean>;
             isValidInstall: (
                 ipcCommand: string,
                 dir: string
@@ -81,6 +85,7 @@ export type ElectronWindow = typeof globalThis &
             ) => Promise<void>;
             runGame: (ipcCommand: 'file:runGame', exeDir: string) => void;
             selectFolder: (ipcCommand: string) => Promise<string>;
+            stopGame: (ipcCommand: 'file:stopGame') => Promise<boolean>;
             viewFileDirsInZip: (
                 ipcCommand: string,
                 zipFilePath: string

@@ -2,12 +2,13 @@
     Holds a table which displays the user-specified installation directories
 */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 import { ElectronWindow, InstallDirectory } from '../App';
 import { BackupIcon } from './icons/backup';
 import { FolderIcon } from './icons/folder';
 import { PlayIcon } from './icons/play';
+import { StopIcon } from './icons/stop';
 import { TrashIcon } from './icons/trash';
 import { WrenchIcon } from './icons/wrench';
 import { InstallationPathText } from './InstallationPathText';
@@ -58,6 +59,35 @@ export const InstallDirTable: FC<Props> = ({
     onSelectInstallation,
 }) => {
     const [deletePopupOpen, setDeletePopupOpen] = useState<string>('');
+    const [runningGames, setRunningGames] = useState<Record<string, boolean>>(
+        {}
+    );
+
+    // Check game status periodically
+    useEffect(() => {
+        const checkGameStatus = async () => {
+            const newRunningGames: Record<string, boolean> = {};
+
+            for (const installDir of installDirs) {
+                const exePath = `${installDir.directory}\\ctp2_program\\ctp\\ctp2.exe`;
+                const isRunning = await (
+                    window as ElectronWindow
+                ).api.isGameRunning('file:isGameRunning', exePath);
+                newRunningGames[exePath] = isRunning;
+            }
+
+            setRunningGames(newRunningGames);
+        };
+
+        // Initial check
+        checkGameStatus();
+
+        // Set up interval to check every 5 seconds
+        const interval = setInterval(checkGameStatus, 5000);
+
+        // Clean up
+        return () => clearInterval(interval);
+    }, [installDirs]);
 
     const addInstall = async (): Promise<void> => {
         const folder = await (window as ElectronWindow).api.selectFolder(
@@ -82,10 +112,29 @@ export const InstallDirTable: FC<Props> = ({
     };
 
     const runGame = (dir: string): void => {
-        (window as ElectronWindow).api.runGame(
-            'file:runGame',
-            `${dir}\\ctp2_program\\ctp\\ctp2.exe`
+        const exePath = `${dir}\\ctp2_program\\ctp\\ctp2.exe`;
+        (window as ElectronWindow).api.runGame('file:runGame', exePath);
+
+        // Update running state immediately for better UX
+        setRunningGames((prev) => ({
+            ...prev,
+            [exePath]: true,
+        }));
+    };
+
+    const stopGame = async (): Promise<void> => {
+        const stopped = await (window as ElectronWindow).api.stopGame(
+            'file:stopGame'
         );
+
+        if (stopped) {
+            // Update all game states after stopping
+            const newRunningGames: Record<string, boolean> = {};
+            for (const key in runningGames) {
+                newRunningGames[key] = false;
+            }
+            setRunningGames(newRunningGames);
+        }
     };
 
     return (
@@ -137,150 +186,176 @@ export const InstallDirTable: FC<Props> = ({
                             </tr>
                         </thead>
                         <tbody>
-                            {installDirs.map((installDir, idx) => (
-                                <tr
-                                    className="hover"
-                                    key={installDir.directory}
-                                >
-                                    <th>
-                                        <label className="cursor-pointer">
-                                            <input
-                                                aria-label={`Select installation: ${installDir.directory}`}
-                                                className="checkbox checkbox-primary"
-                                                onChange={(): void => {
-                                                    onSelectInstallation(idx);
-                                                }}
-                                                type="checkbox"
-                                            />
-                                            <span className="sr-only">
-                                                Select {installDir.directory}
-                                            </span>
-                                        </label>
-                                    </th>
-                                    <td className="font-medium break-all">
-                                        {installDir.directory}
-                                    </td>
-                                    <td>
-                                        <span className="badge badge-neutral text-xs">
-                                            {installDir.installationType.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="flex flex-wrap gap-2">
-                                            <button
-                                                aria-label="Run game"
-                                                className="btn btn-sm btn-primary"
-                                                data-tip="Run Game"
-                                                onClick={(): void =>
-                                                    runGame(
-                                                        installDir.directory
-                                                    )
-                                                }
-                                            >
-                                                <PlayIcon />
-                                                <span>Run Game</span>
-                                            </button>
-                                            <button
-                                                aria-label="Open Directory"
-                                                className="btn btn-sm btn-primary"
-                                                data-tip="Open Directory"
-                                                onClick={(): void =>
-                                                    openDirectory(
-                                                        installDir.directory
-                                                    )
-                                                }
-                                            >
-                                                <FolderIcon />
-                                                <span>
-                                                    Open Installation Folder
-                                                </span>
-                                            </button>
-                                            <div className="dropdown dropdown-end">
-                                                <button
-                                                    aria-label="Backup options"
-                                                    className="btn btn-sm btn-primary"
-                                                    tabIndex={0}
-                                                >
-                                                    <BackupIcon />
-                                                    <span>Backup Options</span>
-                                                </button>
-                                                <ul
-                                                    className="dropdown-content z-9999 menu p-2 shadow-sm bg-base-100 rounded-box w-52"
-                                                    style={{
-                                                        maxHeight: '300px',
-                                                        overflowY: 'auto',
-                                                        position: 'relative', // FIXME a very temporary fix until I can figure this out in Tailwind
-                                                    }}
-                                                >
-                                                    <li>
-                                                        <button
-                                                            aria-label="Restore backup"
-                                                            onClick={(): void =>
-                                                                onClickRestoreBackup(
-                                                                    installDir.directory
-                                                                )
-                                                            }
-                                                        >
-                                                            Restore Backup
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button
-                                                            aria-label="Create backup"
-                                                            disabled={
-                                                                creatingBackup ===
-                                                                installDir.directory
-                                                            }
-                                                            onClick={async (): Promise<void> =>
-                                                                onClickCreateBackup(
-                                                                    installDir.directory
-                                                                )
-                                                            }
-                                                        >
-                                                            {creatingBackup ===
-                                                            installDir.directory ? (
-                                                                <>
-                                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                                    Creating...
-                                                                </>
-                                                            ) : (
-                                                                'Create Backup'
-                                                            )}
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button
-                                                            aria-label="Delete backup"
-                                                            className="text-error"
-                                                            onClick={(): void =>
-                                                                onClickDeleteBackup(
-                                                                    installDir.directory
-                                                                )
-                                                            }
-                                                        >
-                                                            Delete Backup
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </div>
+                            {installDirs.map((installDir, idx) => {
+                                const exePath = `${installDir.directory}\\ctp2_program\\ctp\\ctp2.exe`;
+                                const isGameRunning = runningGames[exePath];
 
-                                            <button
-                                                aria-label="Remove installation"
-                                                className="btn btn-sm btn-error"
-                                                data-tip="Remove"
-                                                onClick={(): void =>
-                                                    setDeletePopupOpen(
-                                                        installDir.directory
-                                                    )
-                                                }
-                                            >
-                                                <TrashIcon />
-                                                <span>Remove Installation</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                return (
+                                    <tr
+                                        className="hover"
+                                        key={installDir.directory}
+                                    >
+                                        <th>
+                                            <label className="cursor-pointer">
+                                                <input
+                                                    aria-label={`Select installation: ${installDir.directory}`}
+                                                    className="checkbox checkbox-primary"
+                                                    onChange={(): void => {
+                                                        onSelectInstallation(
+                                                            idx
+                                                        );
+                                                    }}
+                                                    type="checkbox"
+                                                />
+                                                <span className="sr-only">
+                                                    Select{' '}
+                                                    {installDir.directory}
+                                                </span>
+                                            </label>
+                                        </th>
+                                        <td className="font-medium break-all">
+                                            {installDir.directory}
+                                        </td>
+                                        <td>
+                                            <span className="badge badge-neutral text-xs">
+                                                {installDir.installationType.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="flex flex-wrap gap-2">
+                                                {isGameRunning ? (
+                                                    <button
+                                                        aria-label="Stop game"
+                                                        className="btn btn-sm btn-error"
+                                                        data-tip="Stop Game"
+                                                        onClick={stopGame}
+                                                    >
+                                                        <StopIcon />
+                                                        <span>Stop Game</span>
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        aria-label="Run game"
+                                                        className="btn btn-sm btn-primary"
+                                                        data-tip="Run Game"
+                                                        onClick={(): void =>
+                                                            runGame(
+                                                                installDir.directory
+                                                            )
+                                                        }
+                                                    >
+                                                        <PlayIcon />
+                                                        <span>Run Game</span>
+                                                    </button>
+                                                )}
+
+                                                <button
+                                                    aria-label="Open Directory"
+                                                    className="btn btn-sm btn-primary"
+                                                    data-tip="Open Directory"
+                                                    onClick={(): void =>
+                                                        openDirectory(
+                                                            installDir.directory
+                                                        )
+                                                    }
+                                                >
+                                                    <FolderIcon />
+                                                    <span>
+                                                        Open Installation Folder
+                                                    </span>
+                                                </button>
+                                                <div className="dropdown dropdown-end">
+                                                    <button
+                                                        aria-label="Backup options"
+                                                        className="btn btn-sm btn-primary"
+                                                        tabIndex={0}
+                                                    >
+                                                        <BackupIcon />
+                                                        <span>
+                                                            Backup Options
+                                                        </span>
+                                                    </button>
+                                                    <ul
+                                                        className="dropdown-content z-9999 menu p-2 shadow-sm bg-base-100 rounded-box w-52"
+                                                        style={{
+                                                            maxHeight: '300px',
+                                                            overflowY: 'auto',
+                                                            position:
+                                                                'relative', // FIXME a very temporary fix until I can figure this out in Tailwind
+                                                        }}
+                                                    >
+                                                        <li>
+                                                            <button
+                                                                aria-label="Restore backup"
+                                                                onClick={(): void =>
+                                                                    onClickRestoreBackup(
+                                                                        installDir.directory
+                                                                    )
+                                                                }
+                                                            >
+                                                                Restore Backup
+                                                            </button>
+                                                        </li>
+                                                        <li>
+                                                            <button
+                                                                aria-label="Create backup"
+                                                                disabled={
+                                                                    creatingBackup ===
+                                                                    installDir.directory
+                                                                }
+                                                                onClick={async (): Promise<void> =>
+                                                                    onClickCreateBackup(
+                                                                        installDir.directory
+                                                                    )
+                                                                }
+                                                            >
+                                                                {creatingBackup ===
+                                                                installDir.directory ? (
+                                                                    <>
+                                                                        <span className="loading loading-spinner loading-xs"></span>
+                                                                        Creating...
+                                                                    </>
+                                                                ) : (
+                                                                    'Create Backup'
+                                                                )}
+                                                            </button>
+                                                        </li>
+                                                        <li>
+                                                            <button
+                                                                aria-label="Delete backup"
+                                                                className="text-error"
+                                                                onClick={(): void =>
+                                                                    onClickDeleteBackup(
+                                                                        installDir.directory
+                                                                    )
+                                                                }
+                                                            >
+                                                                Delete Backup
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
+                                                <button
+                                                    aria-label="Remove installation"
+                                                    className="btn btn-sm btn-error"
+                                                    data-tip="Remove"
+                                                    onClick={(): void =>
+                                                        setDeletePopupOpen(
+                                                            installDir.directory
+                                                        )
+                                                    }
+                                                >
+                                                    <TrashIcon />
+                                                    <span>
+                                                        Remove Installation
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

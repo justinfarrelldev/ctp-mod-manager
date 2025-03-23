@@ -1,9 +1,49 @@
-import { spawn } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { access, constants } from 'fs';
 import { platform } from 'os';
 import { ReadonlyDeep } from 'type-fest';
 
+// Track the running game process
+let gameProcess: ChildProcess | null = null;
+// Track which installation directory is running
+let runningGameDir: null | string = null;
+
+export const isGameRunning = (exeDir?: string): boolean => {
+    // If exeDir is provided, check if that specific game is running
+    if (exeDir && runningGameDir !== exeDir) {
+        return false;
+    }
+    return gameProcess !== null;
+};
+
+export const stopGame = (): boolean => {
+    if (gameProcess) {
+        console.log('Stopping game process');
+        console.log('game process: ', gameProcess);
+
+        // Try to gracefully kill the process
+        const killed = gameProcess.kill();
+
+        if (killed) {
+            gameProcess = null;
+            runningGameDir = null;
+            console.log('Successfully killed!');
+            return true;
+        } else {
+            console.error('Failed to kill game process');
+            return false;
+        }
+    }
+    return false;
+};
+
 export const runGame = (exeDir: string): void => {
+    // If a game is already running, don't start another
+    if (isGameRunning()) {
+        console.log('A game is already running, please stop it first');
+        return;
+    }
+
     console.log('executing exe: ', exeDir);
 
     const checkPermissions = (
@@ -31,6 +71,10 @@ export const runGame = (exeDir: string): void => {
             shell: platform() === 'win32',
         });
 
+        // Store the process reference
+        gameProcess = game;
+        runningGameDir = exeDir;
+
         game.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
         });
@@ -41,10 +85,14 @@ export const runGame = (exeDir: string): void => {
 
         game.on('close', (code) => {
             console.log(`Game process exited with code ${code}`);
+            gameProcess = null;
+            runningGameDir = null;
         });
 
         game.on('error', (err) => {
             console.error(`Failed to start process: ${err}`);
+            gameProcess = null;
+            runningGameDir = null;
         });
     });
 };

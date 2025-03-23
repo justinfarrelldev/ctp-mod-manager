@@ -15,7 +15,7 @@ import { makeBackup } from './file/makeBackup';
 import { removeFromInstallDirs } from './file/removeFromInstallDirs';
 import { removeModFromMods } from './file/removeModFromMods';
 import { restoreBackup } from './file/restoreBackup';
-import { runGame } from './file/runGame';
+import { isGameRunning, runGame, stopGame } from './file/runGame';
 import { selectFolder } from './file/selectFolder';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
 import { getInstallDirectories } from './getInstallDirectories';
@@ -88,6 +88,10 @@ app.whenReady().then(() => {
     ipcMain.handle('file:getInstallDirs', getInstallDirs);
 
     ipcMain.handle('file:runGame', (_, exeDir) => runGame(exeDir));
+
+    // Add new handlers for game control
+    ipcMain.handle('file:stopGame', () => stopGame());
+    ipcMain.handle('file:isGameRunning', (_, exeDir) => isGameRunning(exeDir));
 
     ipcMain.handle('file:removeFromInstallDirs', (_, dir) =>
         removeFromInstallDirs(dir)

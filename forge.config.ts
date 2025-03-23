@@ -16,7 +16,6 @@ const config: ForgeConfig = {
     packagerConfig: {
         asar: true,
         ignore: [/^\/node_modules$/],
-        tmpdir: 'C:\\tmp',
     },
     plugins: [
         new VitePlugin({

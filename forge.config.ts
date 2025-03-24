@@ -9,7 +9,9 @@ import { VitePlugin } from '@electron-forge/plugin-vite';
 
 const config: ForgeConfig = {
     makers: [
-        new MakerSquirrel({}),
+        new MakerSquirrel({
+            setupExe: 'ctp-mod-manager-${arch}-v${version}-setup.exe',
+        }),
         new MakerZIP({}, ['darwin']),
         new MakerRpm({}),
         new MakerDeb({}),

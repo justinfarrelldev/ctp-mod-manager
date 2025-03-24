@@ -113,7 +113,6 @@ const unzipAllFiles = async (destination: string): Promise<void> => {
 
     while (zipFilesInDirs.length > 0) {
         for (const file of zipFilesInDirs) {
-            const name = path.basename(file);
             const dirname = path.dirname(file);
 
             const zipFile = new AdmZip(file);

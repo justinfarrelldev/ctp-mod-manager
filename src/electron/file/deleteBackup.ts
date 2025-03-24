@@ -1,7 +1,4 @@
 import * as fs from 'fs';
-import * as path from 'path';
-
-import { DEFAULT_BACKUPS_FOLDER } from '../constants';
 
 /**
  * Deletes a backup file from the backups folder.

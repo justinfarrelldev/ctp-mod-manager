@@ -7,7 +7,7 @@ import {
     diffDirectories,
     processFileChange,
 } from './diffDirectories';
-import { BinaryFileChange, FileChange, TextFileChange } from './fileChange';
+import { FileChange, TextFileChange } from './fileChange';
 import { LineChangeGroupReplace } from './lineChangeGroup';
 
 vi.mock('electron', () => ({

@@ -109,11 +109,6 @@ describe('applyModsToInstall', () => {
             isDirectory: () => true,
         } as fs.Stats);
 
-        // spy on cpSync so we can verify it is called
-        const fsCpSyncSpy = vi
-            .spyOn(fs, 'cpSync')
-            .mockImplementationOnce(() => {});
-
         // mock getFileChangesToApplyMod itself
         // this ensures it doesn't actually read from disk or do real diffs
         const getFileChangesToApplyModMock = vi
@@ -150,14 +145,13 @@ vi.mock('electron', () => ({
 }));
 
 describe('applyModsToInstall', () => {
-    afterAll(() => {
-        vi.clearAllMocks();
-    });
-
     beforeEach(() => {
         vi.clearAllMocks();
         vi.spyOn(console, 'log').mockImplementation(() => {});
         vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+    afterAll(() => {
+        vi.clearAllMocks();
     });
 
     it('should log an error if the install directory is invalid', async () => {

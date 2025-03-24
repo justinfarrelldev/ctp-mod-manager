@@ -88,7 +88,7 @@ app.whenReady().then(() => {
     ipcMain.handle('file:runGame', (_, exeDir) => runGame(exeDir));
 
     // Add new handlers for game control
-    ipcMain.handle('file:stopGame', () => stopGame());
+    ipcMain.handle('file:stopGame', stopGame);
     ipcMain.handle('file:isGameRunning', (_, exeDir) => isGameRunning(exeDir));
 
     ipcMain.handle('file:removeFromInstallDirs', (_, dir) =>

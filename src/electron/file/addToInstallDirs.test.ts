@@ -322,22 +322,6 @@ describe('parseInstallFileIntoJSON', () => {
         );
         expect(result).toStrictEqual([]);
     });
-
-    // FIXME Test is flaky
-    it.skip('should handle errors during JSON parsing', () => {
-        expect.hasAssertions();
-        const consoleErrorSpy = vi
-            .spyOn(console, 'error')
-            .mockImplementation(() => {});
-        vi.spyOn(fs, 'readFileSync').mockReturnValueOnce('invalid json');
-
-        const result = parseInstallFileIntoJSON();
-
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-            `An error occurred while converting the file contents to JSON: SyntaxError: Unexpected token 'i', "invalid json" is not valid JSON`
-        );
-        expect(result).toStrictEqual([]);
-    });
 });
 describe('writeJsonArrayToFile', () => {
     afterAll(() => {

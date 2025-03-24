@@ -1,6 +1,6 @@
 {
     "name": "ctp-mod-manager",
-    "productName": "Call to Power Mod Manager",
+    "productName": "ctp-mod-manager",
     "main": ".vite/build/main.js",
     "description": "The Call to Power Mod Manager",
     "author": "Justin Farrell",

@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { ReadonlyDeep } from 'type-fest';
 
 import { Modal } from './Modal';
 
@@ -8,7 +9,9 @@ interface Props {
     open: boolean;
 }
 
-export const ErrorModal: FC<Props> = (props: Props): React.ReactElement => {
+export const ErrorModal: FC<Props> = (
+    props: ReadonlyDeep<Props>
+): React.ReactElement => {
     return (
         <Modal
             buttons={[

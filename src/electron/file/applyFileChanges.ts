@@ -6,7 +6,6 @@ import { ReadonlyDeep } from 'type-fest';
 
 import { FileChange, TextFileChange } from './fileChange';
 import {
-    LineChangeGroup,
     LineChangeGroupAdd,
     LineChangeGroupRemove,
     LineChangeGroupReplace,
@@ -53,7 +52,7 @@ export const textFileChangesAreConflicting = (
         }
     }
 
-    for (const [fileName, diff] of fileDiffMap.entries()) {
+    for (const [, diff] of fileDiffMap.entries()) {
         const sortedPositions = Array.from(diff.keys()).sort((a, b) => a - b);
         let activeIntervals = 0;
         for (const pos of sortedPositions) {
@@ -76,32 +75,32 @@ export const textFileChangesAreConflicting = (
     return false;
 };
 
-/**
- * Gets all conflicting line change groups.
- *
- * A conflict occurs if any two line change groups overlap, meaning that
- * the start line number of one group is within the range of another group.
- * @param lineChangeGroups - An array of line change groups to check for conflicts.
- * @returns An array of arrays, where each inner array contains conflicting line change groups.
- */
-const getAllConflictingLineChanges = (
-    lineChangeGroups: ReadonlyDeep<LineChangeGroup[]>
-): LineChangeGroup[][] => {
-    const conflicts: LineChangeGroup[][] = [];
-    for (let i = 0; i < lineChangeGroups.length; i++) {
-        for (let j = i + 1; j < lineChangeGroups.length; j++) {
-            if (
-                lineChangeGroups[i].startLineNumber <=
-                    lineChangeGroups[j].endLineNumber &&
-                lineChangeGroups[j].startLineNumber <=
-                    lineChangeGroups[i].endLineNumber
-            ) {
-                conflicts.push([lineChangeGroups[i], lineChangeGroups[j]]);
-            }
-        }
-    }
-    return conflicts;
-};
+// /**
+//  * Gets all conflicting line change groups.
+//  *
+//  * A conflict occurs if any two line change groups overlap, meaning that
+//  * the start line number of one group is within the range of another group.
+//  * @param lineChangeGroups - An array of line change groups to check for conflicts.
+//  * @returns An array of arrays, where each inner array contains conflicting line change groups.
+//  */
+// const getAllConflictingLineChanges = (
+//     lineChangeGroups: ReadonlyDeep<LineChangeGroup[]>
+// ): LineChangeGroup[][] => {
+//     const conflicts: LineChangeGroup[][] = [];
+//     for (let i = 0; i < lineChangeGroups.length; i++) {
+//         for (let j = i + 1; j < lineChangeGroups.length; j++) {
+//             if (
+//                 lineChangeGroups[i].startLineNumber <=
+//                     lineChangeGroups[j].endLineNumber &&
+//                 lineChangeGroups[j].startLineNumber <=
+//                     lineChangeGroups[i].endLineNumber
+//             ) {
+//                 conflicts.push([lineChangeGroups[i], lineChangeGroups[j]]);
+//             }
+//         }
+//     }
+//     return conflicts;
+// };
 
 /**
  * Validates whether the provided file changes for all of the provided mods can be applied successfully without conflicts.
@@ -139,17 +138,12 @@ export const areFileChangesValid = ({
             // There is no "fileChanges" field on the modFileChanges object
             return false;
         }
-        const lineChangeGroups: LineChangeGroup[] = fileChanges.flatMap(
-            (fileChange) => (fileChange as TextFileChange).lineChangeGroups
-        );
 
         const textFileChanges: TextFileChange[] = fileChanges.flatMap(
             (fileChange) => fileChange as TextFileChange
         );
 
         if (textFileChangesAreConflicting(textFileChanges)) {
-            const conflictingChanges =
-                getAllConflictingLineChanges(lineChangeGroups);
             throw new ModApplicationError(
                 'The mod could not be applied due to conflicting line changes.'
             );

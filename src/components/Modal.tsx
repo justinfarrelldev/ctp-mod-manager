@@ -12,13 +12,13 @@ export interface ModalProps {
             | 'secondary'
             | 'success'
             | 'warning';
-        onClick: () => any;
+        onClick: () => void;
         text: string;
     }[];
     children?: React.ReactNode;
     height?: string;
     modalName: string;
-    onClose: () => any;
+    onClose: () => void;
     open: boolean;
     text: string;
     width: string;
@@ -29,7 +29,7 @@ export const Modal: FC<ModalProps> = (
 ): React.ReactElement => {
     // Handle escape key press to close modal
     useEffect(() => {
-        const handleEscKey = (event: KeyboardEvent): void => {
+        const handleEscKey = (event: ReadonlyDeep<KeyboardEvent>): void => {
             if (event.key === 'Escape' && props.open) {
                 props.onClose();
             }
@@ -39,7 +39,7 @@ export const Modal: FC<ModalProps> = (
         return () => {
             document.removeEventListener('keydown', handleEscKey);
         };
-    }, [props.open, props.onClose]);
+    }, [props.open, props.onClose, props]);
 
     if (!props.open) return null;
 
@@ -49,7 +49,6 @@ export const Modal: FC<ModalProps> = (
             aria-modal="true"
             className="modal modal-open"
             id={props.modalName.replace(/\s+/g, '-').toLowerCase()}
-            role="dialog"
         >
             <div
                 className="modal-box max-w-3xl"

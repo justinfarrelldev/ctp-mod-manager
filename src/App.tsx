@@ -109,20 +109,6 @@ export type InstallDirectory = {
     os: string;
 };
 
-// Wish there was a way to share this type, but alas... it's also found in electron/file/getFileChangesToApplyMod.tsx
-type FileChange = {
-    fileName: string;
-    lineChangeGroups: LineChangeGroup[];
-};
-
-// Wish there was a way to share this type, but alas... it's also found in electron/file/getFileChangesToApplyMod.tsx
-type LineChangeGroup = {
-    change: string; // The change, including everything between startLineNumber and endLineNumber (including newlines)
-    contentBeforeChange: string; // The content before it was replaced by the mod
-    endLineNumber: number;
-    startLineNumber: number;
-};
-
 export const App: FC = (): React.ReactElement => {
     const [state, dispatch] = useImmerReducer(appReducer, initialState);
 
@@ -256,26 +242,6 @@ export const App: FC = (): React.ReactElement => {
         },
         [dispatch, loadModFileNames]
     );
-
-    const openModsDir = useCallback((): void => {
-        (window as ElectronWindow).api.openModsDir('file:openModsDir');
-    }, []);
-
-    const viewFileDirsInZip = useCallback(
-        async (zipFilePath: string): Promise<string[]> => {
-            return await (window as ElectronWindow).api.viewFileDirsInZip(
-                'file:viewFileDirsInZip',
-                zipFilePath
-            );
-        },
-        []
-    );
-
-    const getModsDir = useCallback(async (): Promise<string> => {
-        return await (window as ElectronWindow).api.getModsDir(
-            'file:getModsDir'
-        );
-    }, []);
 
     useEffect(() => {
         // Check if the user has already acknowledged the alpha warning

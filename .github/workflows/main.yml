@@ -61,6 +61,13 @@ jobs:
               run: npm ci
             - name: Build application
               run: npm run make -- --arch=x64 --appVersion=${{ github.ref_name }}
+            - name: Rename executables to include x64
+              shell: powershell
+              run: |
+                  Get-ChildItem -Path "out/make/squirrel.windows/x64/*.exe" | ForEach-Object {
+                    $newName = $_.Name -replace '\.exe$', '-x64.exe'
+                    Rename-Item $_.FullName -NewName $newName
+                  }
             - name: List build artifacts
               shell: cmd
               run: dir out\make /s
@@ -88,6 +95,13 @@ jobs:
               run: npm ci
             - name: Build application
               run: npm run make -- --arch=ia32 --appVersion=${{ github.ref_name }}
+            - name: Rename executables to include x86
+              shell: powershell
+              run: |
+                  Get-ChildItem -Path "out/make/squirrel.windows/ia32/*.exe" | ForEach-Object {
+                    $newName = $_.Name -replace '\.exe$', '-x86.exe'
+                    Rename-Item $_.FullName -NewName $newName
+                  }
             - name: List build artifacts
               shell: cmd
               run: dir out\make /s

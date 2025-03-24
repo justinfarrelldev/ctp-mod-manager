@@ -10,8 +10,6 @@ import { FolderIcon } from './icons/folder';
 import { PlayIcon } from './icons/play';
 import { StopIcon } from './icons/stop';
 import { TrashIcon } from './icons/trash';
-import { WrenchIcon } from './icons/wrench';
-import { InstallationPathText } from './InstallationPathText';
 import { Modal } from './Modal';
 
 interface Props {
@@ -20,7 +18,6 @@ interface Props {
     onAddedInstallDirectory: () => void;
     onClickCreateBackup: (dir: string) => Promise<void>; // Add new prop
     onClickDeleteBackup: (dir: string) => void;
-    onClickModify: (dirPathBeingModified: string) => void;
     onClickRestoreBackup: (dir: string) => void;
     onSelectInstallation: (index: number) => void;
 }
@@ -54,7 +51,6 @@ export const InstallDirTable: FC<Props> = ({
     onAddedInstallDirectory,
     onClickCreateBackup,
     onClickDeleteBackup,
-    onClickModify,
     onClickRestoreBackup,
     onSelectInstallation,
 }) => {

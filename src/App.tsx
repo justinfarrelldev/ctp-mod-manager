@@ -445,12 +445,6 @@ export const App: FC = (): React.ReactElement => {
                     onAddedInstallDirectory={loadInstallDirs}
                     onClickCreateBackup={handleCreateBackupClick}
                     onClickDeleteBackup={handleDeleteBackupClick}
-                    onClickModify={(dir): void =>
-                        dispatch({
-                            payload: dir,
-                            type: 'SET_DIR_BEING_MODIFIED',
-                        })
-                    }
                     onClickRestoreBackup={handleRestoreBackupClick}
                     onSelectInstallation={(index): void => {
                         dispatch({

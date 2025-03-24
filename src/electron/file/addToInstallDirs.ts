@@ -13,7 +13,7 @@ import { createAppDataFolder } from './copyFileToModDir';
  * @returns A JSON string representation of an array containing the provided directory.
  * @throws Will log an error message if JSON stringification fails.
  */
-const generateJsonArrayFromDir = (dir: string) => {
+const generateJsonArrayFromDir = (dir: string): string => {
     try {
         return JSON.stringify([dir]);
     } catch (err) {

@@ -43,6 +43,26 @@ jobs:
             - name: Run linting
               run: npm run lint -- --max-warnings=0
 
+    prepare-version:
+        name: Prepare Version
+        runs-on: ubuntu-latest
+        if: startsWith(github.ref, 'refs/tags/')
+        outputs:
+            app_version: ${{ steps.set_version.outputs.version }}
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Set version from tag
+              id: set_version
+              run: |
+                  VERSION=${GITHUB_REF#refs/tags/}
+                  # Remove the 'v' prefix if present
+                  VERSION=${VERSION#v}
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+            - name: Update package.json version
+              run: npm version --no-git-tag-version ${{ steps.set_version.outputs.version }}
+
     build-windows-x64:
         name: Build Windows x64
         needs: [test, lint]
@@ -58,7 +78,7 @@ jobs:
             - name: Install dependencies
               run: npm ci
             - name: Build application
-              run: npm run make -- --arch=x64 --appVersion=${{ github.ref_name }}
+              run: npm run make -- --arch=x64 --appVersion=${{ needs.prepare-version.outputs.app_version }}
             - name: List build artifacts
               shell: cmd
               run: dir out\make /s
@@ -85,7 +105,7 @@ jobs:
             - name: Install dependencies
               run: npm ci
             - name: Build application
-              run: npm run make -- --arch=ia32 --appVersion=${{ github.ref_name }}
+              run: npm run make -- --arch=ia32 --appVersion=${{ needs.prepare-version.outputs.app_version }}
             - name: List build artifacts
               shell: cmd
               run: dir out\make /s
@@ -112,7 +132,7 @@ jobs:
             - name: Install dependencies
               run: npm ci
             - name: Build application
-              run: npm run make -- --platform=linux --targets=@electron-forge/maker-deb --appVersion=${{ github.ref_name }}
+              run: npm run make -- --platform=linux --targets=@electron-forge/maker-deb --appVersion=${{ needs.prepare-version.outputs.app_version }}
             - name: List build artifacts
               run: find out/make -type f
             - name: Upload artifacts
@@ -136,7 +156,7 @@ jobs:
             - name: Install dependencies
               run: npm ci
             - name: Build application
-              run: npm run make -- --platform=linux --targets=@electron-forge/maker-zip --appVersion=${{ github.ref_name }}
+              run: npm run make -- --platform=linux --targets=@electron-forge/maker-zip --appVersion=${{ needs.prepare-version.outputs.app_version }}
             - name: List build artifacts
               run: find out/make -type f
             - name: Upload artifacts
@@ -160,7 +180,7 @@ jobs:
             - name: Install dependencies
               run: npm ci
             - name: Build application
-              run: npm run make -- --platform=darwin --targets=@electron-forge/maker-zip,@electron-forge/maker-dmg --appVersion=${{ github.ref_name }}
+              run: npm run make -- --platform=darwin --targets=@electron-forge/maker-zip,@electron-forge/maker-dmg --appVersion=${{ needs.prepare-version.outputs.app_version }}
             - name: List build artifacts
               run: find out/make -type f
             - name: Upload artifacts

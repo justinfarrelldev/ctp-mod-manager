@@ -28,9 +28,24 @@ jobs:
             - name: Run tests
               run: npm test
 
+    lint:
+        name: Run ESLint
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci
+            - name: Run linting
+              run: npm run lint -- --max-warnings=0
+
     build-windows-x64:
         name: Build Windows x64
-        needs: test
+        needs: [test, lint]
         runs-on: windows-latest
         if: startsWith(github.ref, 'refs/tags/')
         steps:
@@ -57,7 +72,7 @@ jobs:
 
     build-windows-ia32:
         name: Build Windows x86
-        needs: test
+        needs: [test, lint]
         runs-on: windows-latest
         if: startsWith(github.ref, 'refs/tags/')
         steps:
@@ -84,7 +99,7 @@ jobs:
 
     build-linux-debian:
         name: Build Linux (Debian)
-        needs: test
+        needs: [test, lint]
         runs-on: ubuntu-latest
         if: startsWith(github.ref, 'refs/tags/')
         steps:
@@ -108,7 +123,7 @@ jobs:
 
     build-linux-arch:
         name: Build Linux (Arch)
-        needs: test
+        needs: [test, lint]
         runs-on: ubuntu-latest
         if: startsWith(github.ref, 'refs/tags/')
         steps:
@@ -132,7 +147,7 @@ jobs:
 
     build-macos:
         name: Build macOS
-        needs: test
+        needs: [test, lint]
         runs-on: macos-latest
         if: startsWith(github.ref, 'refs/tags/')
         steps:

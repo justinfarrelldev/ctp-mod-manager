@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import * as fs from 'fs';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DEFAULT_MOD_DIR } from '../constants';
 import * as applyFileChanges from './applyFileChanges';
 import { applyModsToInstallWithMerge } from './applyModsToInstall';
 import * as getFileChangesToApplyMod from './getFileChangesToApplyMod';
-import * as consolidateLineChangeGroups from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
 // import { DEFAULT_MOD_DIR } from '../constants';
 
@@ -422,7 +421,7 @@ describe('applyModsToInstall', () => {
             .mockResolvedValueOnce(mockChanges2);
 
         vi.mocked(
-            consolidateLineChangeGroups.consolidateLineChangeGroups
+            getFileChangesToApplyMod.consolidateLineChangeGroups
         ).mockImplementation((groups) => groups);
 
         await applyModsToInstallWithMerge('/valid/install', ['mod1', 'mod2']);

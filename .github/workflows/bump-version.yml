@@ -26,3 +26,10 @@ jobs:
 
             - name: Output new tag
               run: echo "Created new tag ${{ steps.tag_version.outputs.new_tag }}"
+
+            - name: Automated Version Bump
+              uses: 'phips28/gh-action-bump-version@master'
+              with:
+                  tag-prefix: ''
+              env:
+                  GITHUB_TOKEN: ${{ secrets.TAG_TOKEN }}

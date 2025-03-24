@@ -6,20 +6,6 @@ import { MakerRpm } from '@electron-forge/maker-rpm';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { VitePlugin } from '@electron-forge/plugin-vite';
-import { execSync } from 'child_process';
-
-// Get current git tag for version
-const getGitTag = (): string => {
-    try {
-        const tag = execSync('git describe --tags --abbrev=0')
-            .toString()
-            .trim();
-        return tag.startsWith('v') ? tag.substring(1) : tag;
-    } catch (error) {
-        console.warn('Could not get git tag, using default version:', error);
-        return '1.0.0';
-    }
-};
 
 const config: ForgeConfig = {
     makers: [
@@ -30,7 +16,6 @@ const config: ForgeConfig = {
         new MakerDMG({}),
     ],
     packagerConfig: {
-        appVersion: getGitTag(),
         asar: true,
         ignore: [/^\/node_modules$/],
     },

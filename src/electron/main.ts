@@ -20,7 +20,6 @@ import { isGameRunning, runGame, stopGame } from './file/runGame';
 import { selectFolder } from './file/selectFolder';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
 import { getInstallDirectories } from './getInstallDirectories';
-import { goToRoute } from './process/goToRoute';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -65,8 +64,6 @@ app.whenReady().then(() => {
     ipcMain.handle('file:viewFileDirsInZip', (_, zipFilePath) =>
         viewFileDirsInZip(zipFilePath)
     );
-
-    ipcMain.on('process:goToRoute', (_, route) => goToRoute(route, win));
 
     ipcMain.handle('file:copyFileToModDir', (_, fileDir) =>
         copyFileToModDir(fileDir)

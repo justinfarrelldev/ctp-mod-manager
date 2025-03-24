@@ -31,10 +31,6 @@ contextBridge.exposeInMainWorld('api', {
     // Retrieves the mods directory
     getModsDir: () => ipcRenderer.invoke('file:getModsDir'),
 
-    // Navigates to a specified route in the application
-    goToRoute: (_: Event, route: string) =>
-        ipcRenderer.send('process:goToRoute', route),
-
     // Checks if a game is currently running
     isGameRunning: (_: Event, exeDir?: string) =>
         ipcRenderer.invoke('file:isGameRunning', exeDir),

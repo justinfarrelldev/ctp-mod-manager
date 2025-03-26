@@ -36,6 +36,53 @@ export const unzipInModDir = async (
 };
 
 /**
+ * Checks if the unzipped content appears to be a scenario mod.
+ * @param dir - The directory to check for scenario structure
+ * @returns True if it has scenario structure, false otherwise
+ */
+const hasScenarioStructure = (dir: string): boolean => {
+    try {
+        // Check basic scenario structure - folder containing scen0000 with scenario.txt
+        if (!fs.existsSync(path.join(dir, 'scen0000'))) {
+            return false;
+        }
+
+        if (!fs.existsSync(path.join(dir, 'scen0000', 'scenario.txt'))) {
+            return false;
+        }
+
+        return true;
+    } catch (err) {
+        console.error(`Error checking for scenario structure: ${err}`);
+        return false;
+    }
+};
+
+/**
+ * Special handling for scenario mod files
+ * @param srcDir - Source directory of the extracted scenario
+ * @param modDir - Target mod directory
+ */
+const handleScenarioMod = (srcDir: string, modDir: string): void => {
+    try {
+        // Get the scenario name from the directory
+        const scenarioName = path.basename(srcDir);
+
+        // Create the target directory if needed
+        if (!fs.existsSync(modDir)) {
+            fs.mkdirSync(modDir, { recursive: true });
+        }
+
+        // Copy the scenario to the mod directory
+        fs.cpSync(srcDir, modDir, { recursive: true });
+
+        console.log(`Processed scenario mod: ${scenarioName}`);
+    } catch (err) {
+        console.error(`Error handling scenario mod: ${err}`);
+    }
+};
+
+/**
  * Finds and returns an array of directory paths that contain the "ctp2_data" folder within the specified directory.
  * @param dir - The root directory to search within.
  * @returns An array of strings representing the paths to the "ctp2_data" folders found within the specified directory.
@@ -44,6 +91,14 @@ export const unzipInModDir = async (
 const findGameRootsWithinDir = (dir: string): string[] => {
     const dirs: string[] = [];
     try {
+        // Check if this is a scenario mod
+        if (hasScenarioStructure(dir)) {
+            // For scenario mods, we want to keep the whole directory structure
+            dirs.push(dir);
+            return dirs;
+        }
+
+        // Original code for non-scenario mods
         const ctp2DataPaths = klawSync(dir)
             .filter((file) => file.path.includes('ctp2_data'))
             .map((dirWithData) => dirWithData.path.split('ctp2_data')[0]);
@@ -54,7 +109,7 @@ const findGameRootsWithinDir = (dir: string): string[] => {
         });
     } catch (err) {
         console.error(
-            `An error occurred while searching for "ctp2_data" folders: ${err}`
+            `An error occurred while searching for game data folders: ${err}`
         );
     }
 
@@ -139,10 +194,24 @@ const copyDataFoldersToModDirs = (
     modDir: string
 ): void => {
     if (dirs.length === 0) return;
+
+    // Process each directory
     dirs.forEach((dir) => {
-        copyDataFolderToModDir(dir);
+        // Check if this is a scenario directory
+        if (hasScenarioStructure(dir)) {
+            const scenarioName = path.basename(dir);
+            const targetDir = path.join(DEFAULT_MOD_DIR, scenarioName);
+
+            // Copy the entire scenario folder
+            fs.cpSync(dir, targetDir, { recursive: true });
+            console.log(`Copied scenario ${scenarioName} to mod directory`);
+        } else {
+            // For regular mods, use the existing logic
+            copyDataFolderToModDir(dir);
+        }
     });
 
+    // Clean up the temporary directory
     fs.rmSync(modDir.replace('.zip', ''), {
         force: true,
         recursive: true,

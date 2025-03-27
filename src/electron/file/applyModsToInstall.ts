@@ -10,6 +10,41 @@ import {
 } from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
 
+/**
+ * Checks if the directory or any of its subdirectories has a scenario structure.
+ * A scenario structure is identified by the presence of a 'scen0000' directory
+ * containing a 'scenario.txt' file.
+ * @param dir - The directory to check
+ * @returns true if the directory or any subdirectory has a scenario structure
+ */
+const hasScenarioStructure = (dir: string): boolean => {
+    try {
+        // Direct check for the current directory
+        if (
+            fs.existsSync(path.join(dir, 'scen0000')) &&
+            fs.existsSync(path.join(dir, 'scen0000', 'scenario.txt'))
+        ) {
+            return true;
+        }
+
+        // Recursive check for subdirectories
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+            if (entry.isDirectory()) {
+                const subDirPath = path.join(dir, entry.name);
+                if (hasScenarioStructure(subDirPath)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    } catch (err) {
+        console.error(`Error checking for scenario structure: ${err}`);
+        return false;
+    }
+};
+
 export const applyModsToInstall = async (
     installDir: Readonly<string>,
     queuedMods: ReadonlyDeep<string[]>
@@ -23,7 +58,20 @@ export const applyModsToInstall = async (
 
     // Loop through mods and copy each one into the install dir, overwriting
     for await (const mod of queuedMods) {
+        // modPath is where the mod was extracted in our mods folder.
         const modPath = path.join(DEFAULT_MOD_DIR, mod);
+        let targetDir = installDir; // default for non-scenario mods
+
+        // If this mod is a scenario mod then:
+        if (hasScenarioStructure(modPath)) {
+            // Set target to be in "Scenarios" folder in the install.
+            targetDir = path.join(
+                installDir,
+                'Scenarios',
+                path.basename(modPath)
+            );
+        }
+
         let statsOfFile: fs.Stats | undefined;
         try {
             statsOfFile = fs.statSync(modPath);
@@ -40,14 +88,13 @@ export const applyModsToInstall = async (
         }
 
         try {
-            // Copy files wholesale, overwriting existing files
-            console.log(`Copying ${modPath} to installation at ${installDir}`);
-            fs.cpSync(modPath, installDir, {
+            console.log(`Copying ${modPath} to installation at ${targetDir}`);
+            fs.cpSync(modPath, targetDir, {
                 force: true,
                 recursive: true,
             });
         } catch (err) {
-            console.error(`Error copying ${modPath} to ${installDir}: ${err}`);
+            console.error(`Error copying ${modPath} to ${targetDir}: ${err}`);
         }
     }
 

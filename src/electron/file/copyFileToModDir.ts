@@ -59,30 +59,6 @@ const hasScenarioStructure = (dir: string): boolean => {
 };
 
 /**
- * Special handling for scenario mod files
- * @param srcDir - Source directory of the extracted scenario
- * @param modDir - Target mod directory
- */
-const handleScenarioMod = (srcDir: string, modDir: string): void => {
-    try {
-        // Get the scenario name from the directory
-        const scenarioName = path.basename(srcDir);
-
-        // Create the target directory if needed
-        if (!fs.existsSync(modDir)) {
-            fs.mkdirSync(modDir, { recursive: true });
-        }
-
-        // Copy the scenario to the mod directory
-        fs.cpSync(srcDir, modDir, { recursive: true });
-
-        console.log(`Processed scenario mod: ${scenarioName}`);
-    } catch (err) {
-        console.error(`Error handling scenario mod: ${err}`);
-    }
-};
-
-/**
  * Finds and returns an array of directory paths that contain the "ctp2_data" folder within the specified directory.
  * @param dir - The root directory to search within.
  * @returns An array of strings representing the paths to the "ctp2_data" folders found within the specified directory.

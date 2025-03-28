@@ -11,18 +11,21 @@ interface Props {
 }
 
 export const BackupNameModal: FC<Props> = ({
-    defaultName = `backup_${new Date().toISOString().replace(/[:.]/g, '-')}`,
+    defaultName,
     installDir,
     onClose,
     onConfirm,
     open,
 }) => {
-    const [backupName, setBackupName] = useState(defaultName);
+    const [backupName, setBackupName] = useState('');
     const [error, setError] = useState<null | string>(null);
 
     useEffect(() => {
         if (open) {
-            setBackupName(defaultName);
+            const initialName =
+                defaultName ||
+                `backup_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+            setBackupName(initialName);
             setError(null);
         }
     }, [open, defaultName]);

@@ -10,6 +10,72 @@ import {
 } from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
 
+// Define interface for the mod tracking data
+interface AppliedMod {
+    appliedDate: string;
+    name: string;
+}
+
+interface ModsTrackingFile {
+    appliedMods: AppliedMod[];
+}
+
+/**
+ * Updates the mods.json tracking file in the installation directory
+ * @param installDir - The installation directory path
+ * @param modsToAdd - Array of mod names to add to the tracking file
+ */
+const updateModsTrackingFile = (
+    installDir: string,
+    modsToAdd: ReadonlyDeep<string[]>
+): void => {
+    const modsFilePath = path.join(installDir, 'mods.json');
+    let modsData: ModsTrackingFile = { appliedMods: [] };
+
+    // Check if mods.json already exists
+    if (fs.existsSync(modsFilePath)) {
+        try {
+            const fileContent = fs.readFileSync(modsFilePath, 'utf-8');
+            modsData = JSON.parse(fileContent) as ModsTrackingFile;
+            if (!modsData.appliedMods) {
+                modsData.appliedMods = [];
+            }
+        } catch (err) {
+            console.error(`Error reading existing mods.json: ${err}`);
+            // If file is corrupted, start with a fresh tracking file
+            modsData = { appliedMods: [] };
+        }
+    }
+
+    // Current timestamp for all newly added mods
+    const currentTimestamp = new Date().toISOString();
+
+    // Add new mods with timestamps
+    const existingModNames = new Set(
+        modsData.appliedMods.map((mod) => mod.name)
+    );
+    for (const mod of modsToAdd) {
+        if (!existingModNames.has(mod)) {
+            modsData.appliedMods.push({
+                appliedDate: currentTimestamp,
+                name: mod,
+            });
+        }
+    }
+
+    // Write updated data back to the file
+    try {
+        fs.writeFileSync(
+            modsFilePath,
+            JSON.stringify(modsData, null, 2),
+            'utf-8'
+        );
+        console.log(`Updated mods tracking file at ${modsFilePath}`);
+    } catch (err) {
+        console.error(`Failed to write mods tracking file: ${err}`);
+    }
+};
+
 /**
  * Checks if the directory or any of its subdirectories has a scenario structure.
  * A scenario structure is identified by the presence of a 'scen0000' directory
@@ -97,6 +163,9 @@ export const applyModsToInstall = async (
             console.error(`Error copying ${modPath} to ${targetDir}: ${err}`);
         }
     }
+
+    // After all mods have been applied, update the tracking file
+    updateModsTrackingFile(installDir, [...queuedMods]);
 
     console.log('All mods copied to the install directory.');
 };
@@ -237,6 +306,9 @@ export const applyModsToInstallWithMerge = async (
     );
 
     applyFileChanges({ installDir, modFileChanges: changesArr });
+
+    // After all mods have been applied, update the tracking file
+    updateModsTrackingFile(installDir, [...queuedMods]);
 
     // console.log(
     //     changesArr

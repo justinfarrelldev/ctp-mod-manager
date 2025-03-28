@@ -17,7 +17,7 @@ import { isValidInstall } from './isValidInstall';
  * @param dir - The directory to check
  * @returns true if the directory or any subdirectory has a scenario structure
  */
-const hasScenarioStructure = (dir: string): boolean => {
+export const hasScenarioStructure = (dir: string): boolean => {
     try {
         // Direct check for the current directory
         if (

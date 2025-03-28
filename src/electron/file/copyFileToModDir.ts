@@ -6,6 +6,7 @@ import path from 'path';
 import { ReadonlyDeep } from 'type-fest';
 
 import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
+import { hasScenarioStructure } from './applyModsToInstall';
 
 export const unzipInModDir = async (
     zipFullPath: string,
@@ -33,29 +34,6 @@ export const unzipInModDir = async (
             resolve();
         }
     });
-};
-
-/**
- * Checks if the unzipped content appears to be a scenario mod.
- * @param dir - The directory to check for scenario structure
- * @returns True if it has scenario structure, false otherwise
- */
-const hasScenarioStructure = (dir: string): boolean => {
-    try {
-        // Check basic scenario structure - folder containing scen0000 with scenario.txt
-        if (!fs.existsSync(path.join(dir, 'scen0000'))) {
-            return false;
-        }
-
-        if (!fs.existsSync(path.join(dir, 'scen0000', 'scenario.txt'))) {
-            return false;
-        }
-
-        return true;
-    } catch (err) {
-        console.error(`Error checking for scenario structure: ${err}`);
-        return false;
-    }
 };
 
 /**
@@ -159,6 +137,48 @@ const unzipAllFiles = async (destination: string): Promise<void> => {
 };
 
 /**
+ * Recursively finds the directory containing both "scen0000" folder and "packlist.txt" file.
+ * @param dir - The root directory to search within.
+ * @returns The path to the directory containing scenario structure, or null if not found.
+ */
+export const findScenarioDir = (dir: string): null | string => {
+    try {
+        // Get all files and directories in the search path
+        const items = klawSync(dir, { nofile: false });
+
+        // Create maps to track which directories have our target elements
+        const dirHasScen0000: Record<string, boolean> = {};
+        const dirHasPacklist: Record<string, boolean> = {};
+
+        // Check each item
+        for (const item of items) {
+            const parentDir = path.dirname(item.path);
+            const basename = path.basename(item.path);
+
+            if (basename === 'scen0000' && item.stats.isDirectory()) {
+                dirHasScen0000[parentDir] = true;
+            } else if (basename === 'packlist.txt' && item.stats.isFile()) {
+                dirHasPacklist[parentDir] = true;
+            }
+        }
+
+        // Find a directory that has both required elements
+        for (const dir in dirHasScen0000) {
+            if (dirHasPacklist[dir]) {
+                return dir;
+            }
+        }
+
+        return null;
+    } catch (err) {
+        console.error(
+            `An error occurred while searching for scenario directory: ${err}`
+        );
+        return null;
+    }
+};
+
+/**
  * Copies multiple data folders to the specified mod directory.
  * @param dirs - An array of directory paths to be copied.
  * @param modDir - The target mod directory where the data folders will be copied.
@@ -178,19 +198,32 @@ const copyDataFoldersToModDirs = (
             const scenarioName = path.basename(dir);
             const targetDir = path.join(DEFAULT_MOD_DIR, scenarioName);
 
-            // Copy the entire scenario folder
-            fs.cpSync(dir, targetDir, { recursive: true });
-            console.log(`Copied scenario ${scenarioName} to mod directory`);
+            try {
+                // Copy the entire scenario folder
+                fs.cpSync(dir, targetDir, { recursive: true });
+                console.log(
+                    `Copied scenario ${scenarioName} (dir: ${dir}) to ${targetDir}`
+                );
+
+                if (dir !== modDir)
+                    fs.rmSync(dir, {
+                        force: true,
+                        recursive: true,
+                    });
+            } catch (err) {
+                console.error(
+                    `Error copying scenario ${scenarioName} to mod directory: ${err}`
+                );
+            }
         } else {
             // For regular mods, use the existing logic
             copyDataFolderToModDir(dir);
+            // Clean up the temporary directory
+            fs.rmSync(modDir.replace('.zip', ''), {
+                force: true,
+                recursive: true,
+            });
         }
-    });
-
-    // Clean up the temporary directory
-    fs.rmSync(modDir.replace('.zip', ''), {
-        force: true,
-        recursive: true,
     });
 };
 
@@ -260,11 +293,25 @@ export const copyFileToModDir = async (fileDir: string): Promise<void> => {
     }
 
     const destination = path.join(DEFAULT_MOD_DIR, fileName);
+
     await unzipInModDir(fileDir, fileName);
 
     await unzipAllFiles(destination);
+    let dataDirs: string[];
 
-    const dataDirs = findGameRootsWithinDir(destination.replace('.zip', ''));
+    if (hasScenarioStructure(destination.replace('.zip', ''))) {
+        const destWithoutZip = destination.replace('.zip', '');
+        if (fs.existsSync(destWithoutZip)) {
+            dataDirs = [findScenarioDir(destWithoutZip)];
+        } else {
+            console.error(
+                `Destination directory does not exist: ${destWithoutZip}`
+            );
+            dataDirs = [];
+        }
+    } else {
+        dataDirs = findGameRootsWithinDir(destination.replace('.zip', ''));
+    }
 
     copyDataFoldersToModDirs(dataDirs, destination.replace('.zip', ''));
 };

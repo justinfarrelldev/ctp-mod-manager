@@ -299,21 +299,22 @@ export const copyFileToModDir = async (fileDir: string): Promise<void> => {
     await unzipAllFiles(destination);
     let dataDirs: string[];
 
-    if (hasScenarioStructure(destination.replace('.zip', ''))) {
-        const destWithoutZip = destination.replace('.zip', '');
-        if (fs.existsSync(destWithoutZip)) {
-            dataDirs = [findScenarioDir(destWithoutZip)];
+    const destFolder = destination.replace('.zip', '');
+
+    if (hasScenarioStructure(destFolder)) {
+        if (fs.existsSync(destFolder)) {
+            dataDirs = [findScenarioDir(destFolder)];
         } else {
             console.error(
-                `Destination directory does not exist: ${destWithoutZip}`
+                `Destination directory does not exist: ${destFolder}`
             );
             dataDirs = [];
         }
     } else {
-        dataDirs = findGameRootsWithinDir(destination.replace('.zip', ''));
+        dataDirs = findGameRootsWithinDir(destFolder);
     }
 
-    copyDataFoldersToModDirs(dataDirs, destination.replace('.zip', ''));
+    copyDataFoldersToModDirs(dataDirs, destFolder);
 };
 
 /**

@@ -5,6 +5,7 @@
 import React, { FC, useEffect, useState } from 'react';
 
 import { ElectronWindow, InstallDirectory } from '../App';
+import { BackupOptionsModal } from './BackupOptionsModal';
 import { BackupIcon } from './icons/backup';
 import { FolderIcon } from './icons/folder';
 import { PlayIcon } from './icons/play';
@@ -61,6 +62,7 @@ export const InstallDirTable: FC<Props> = ({
     const [executablePaths, setExecutablePaths] = useState<
         Record<string, string>
     >({});
+    const [backupOptionsDir, setBackupOptionsDir] = useState<string>('');
 
     // Get executable paths for each install directory
     useEffect(() => {
@@ -195,6 +197,25 @@ export const InstallDirTable: FC<Props> = ({
                 />
             )}
 
+            <BackupOptionsModal
+                creatingBackup={creatingBackup}
+                installDir={backupOptionsDir}
+                onClickCreateBackup={async (dir: string): Promise<void> => {
+                    await onClickCreateBackup(dir);
+                    setBackupOptionsDir('');
+                }}
+                onClickDeleteBackup={(dir: string): void => {
+                    onClickDeleteBackup(dir);
+                    setBackupOptionsDir('');
+                }}
+                onClickRestoreBackup={(dir: string): void => {
+                    onClickRestoreBackup(dir);
+                    setBackupOptionsDir('');
+                }}
+                onClose={(): void => setBackupOptionsDir('')}
+                open={backupOptionsDir !== ''}
+            />
+
             {installDirs.length === 0 ? (
                 <div className="bg-base-200 p-4 rounded-lg text-center">
                     <p className="text-lg mb-4">
@@ -294,77 +315,18 @@ export const InstallDirTable: FC<Props> = ({
                                                         Open Installation Folder
                                                     </span>
                                                 </button>
-                                                <div className="dropdown dropdown-end">
-                                                    <button
-                                                        aria-label="Backup options"
-                                                        className="btn btn-sm btn-primary"
-                                                        tabIndex={0}
-                                                    >
-                                                        <BackupIcon />
-                                                        <span>
-                                                            Backup Options
-                                                        </span>
-                                                    </button>
-                                                    <ul
-                                                        className="dropdown-content z-9999 menu p-2 shadow-sm bg-base-100 rounded-box w-52"
-                                                        style={{
-                                                            maxHeight: '300px',
-                                                            overflowY: 'auto',
-                                                            position:
-                                                                'relative', // FIXME a very temporary fix until I can figure this out in Tailwind
-                                                        }}
-                                                    >
-                                                        <li>
-                                                            <button
-                                                                aria-label="Restore backup"
-                                                                onClick={(): void =>
-                                                                    onClickRestoreBackup(
-                                                                        installDir.directory
-                                                                    )
-                                                                }
-                                                            >
-                                                                Restore Backup
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button
-                                                                aria-label="Create backup"
-                                                                disabled={
-                                                                    creatingBackup ===
-                                                                    installDir.directory
-                                                                }
-                                                                onClick={async (): Promise<void> =>
-                                                                    onClickCreateBackup(
-                                                                        installDir.directory
-                                                                    )
-                                                                }
-                                                            >
-                                                                {creatingBackup ===
-                                                                installDir.directory ? (
-                                                                    <>
-                                                                        <span className="loading loading-spinner loading-xs"></span>
-                                                                        Creating...
-                                                                    </>
-                                                                ) : (
-                                                                    'Create Backup'
-                                                                )}
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button
-                                                                aria-label="Delete backup"
-                                                                className="text-error"
-                                                                onClick={(): void =>
-                                                                    onClickDeleteBackup(
-                                                                        installDir.directory
-                                                                    )
-                                                                }
-                                                            >
-                                                                Delete Backup
-                                                            </button>
-                                                        </li>
-                                                    </ul>
-                                                </div>
+                                                <button
+                                                    aria-label="Backup options"
+                                                    className="btn btn-sm btn-primary"
+                                                    onClick={(): void =>
+                                                        setBackupOptionsDir(
+                                                            installDir.directory
+                                                        )
+                                                    }
+                                                >
+                                                    <BackupIcon />
+                                                    <span>Backup Options</span>
+                                                </button>
 
                                                 <button
                                                     aria-label="Remove installation"

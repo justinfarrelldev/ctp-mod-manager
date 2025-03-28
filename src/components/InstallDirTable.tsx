@@ -227,13 +227,13 @@ export const InstallDirTable: FC<Props> = ({
                     <table className="table w-full">
                         <thead>
                             <tr>
-                                <th>Select</th>
-                                <th>Installation</th>
-                                <th>Type</th>
-                                <th>Actions</th>
+                                <th className="w-[10%]">Select</th>
+                                <th className="w-[35%] px-4">Installation</th>
+                                <th className="w-[15%] px-4">Type</th>
+                                <th className="w-[40%] px-4">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-base-300">
                             {installDirs.map((installDir, idx) => {
                                 const exePath =
                                     executablePaths[installDir.directory];
@@ -243,10 +243,10 @@ export const InstallDirTable: FC<Props> = ({
 
                                 return (
                                     <tr
-                                        className="hover"
+                                        className="hover py-2"
                                         key={installDir.directory}
                                     >
-                                        <th>
+                                        <th className="px-4 py-4">
                                             <label className="cursor-pointer">
                                                 <input
                                                     aria-label={`Select installation: ${installDir.directory}`}
@@ -264,15 +264,15 @@ export const InstallDirTable: FC<Props> = ({
                                                 </span>
                                             </label>
                                         </th>
-                                        <td className="font-medium break-all">
+                                        <td className="font-medium break-all px-4 py-4">
                                             {installDir.directory}
                                         </td>
-                                        <td>
+                                        <td className="px-4 py-4">
                                             <span className="badge badge-neutral text-xs">
                                                 {installDir.installationType.toUpperCase()}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td className="px-4 py-4">
                                             <div className="flex flex-wrap gap-2">
                                                 {isGameRunning ? (
                                                     <button
@@ -287,7 +287,7 @@ export const InstallDirTable: FC<Props> = ({
                                                 ) : (
                                                     <button
                                                         aria-label="Run game"
-                                                        className="btn btn-sm btn-primary"
+                                                        className="btn btn-sm btn-success"
                                                         data-tip="Run Game"
                                                         onClick={(): void =>
                                                             runGame(

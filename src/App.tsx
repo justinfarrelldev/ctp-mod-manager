@@ -510,7 +510,7 @@ export const App: FC = (): React.ReactElement => {
             </section>
 
             <section className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Available Mods</h2>
+                <h2 className="text-xl font-semibold mb-4">Added Mods</h2>
 
                 {state.modNamesAdded !== undefined &&
                     state.modNamesAdded.length === 0 && (

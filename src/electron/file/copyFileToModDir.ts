@@ -218,6 +218,19 @@ const copyDataFoldersToModDirs = (
         } else {
             // For regular mods, use the existing logic
             copyDataFolderToModDir(dir);
+
+            const dirToMove = path.dirname(dir);
+
+            const parentDirName = path.basename(path.dirname(dir));
+
+            const dest = path.join(DEFAULT_MOD_DIR, parentDirName);
+
+            if (dest === dirToMove) {
+                console.log(
+                    'Destination and dirToMove are the same, this mod is a top-level mod. Aborting.'
+                );
+                return;
+            }
             // Clean up the temporary directory
             fs.rmSync(modDir.replace('.zip', ''), {
                 force: true,
@@ -249,8 +262,17 @@ const copyDataFolderToModDir = (dir: string): void => {
     const parentDirName = path.basename(path.dirname(dir));
     const dirToMove = path.dirname(dir);
 
+    const dest = path.join(DEFAULT_MOD_DIR, parentDirName);
+
+    if (dest === dirToMove) {
+        console.log(
+            'Destination and dirToMove are the same, this mod is a top-level mod. Aborting.'
+        );
+        return;
+    }
+
     try {
-        fs.cpSync(dirToMove, path.join(DEFAULT_MOD_DIR, parentDirName), {
+        fs.cpSync(dirToMove, dest, {
             recursive: true,
         });
     } catch (err) {

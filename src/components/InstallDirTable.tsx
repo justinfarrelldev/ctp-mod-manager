@@ -273,76 +273,91 @@ export const InstallDirTable: FC<Props> = ({
                                             </span>
                                         </td>
                                         <td className="px-4 py-4">
-                                            <div className="flex flex-wrap gap-2">
-                                                {isGameRunning ? (
-                                                    <button
-                                                        aria-label="Stop game"
-                                                        className="btn btn-sm btn-error"
-                                                        data-tip="Stop Game"
-                                                        onClick={stopGame}
-                                                    >
-                                                        <StopIcon />
-                                                        <span>Stop Game</span>
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        aria-label="Run game"
-                                                        className="btn btn-sm btn-success"
-                                                        data-tip="Run Game"
-                                                        onClick={(): void =>
-                                                            runGame(
-                                                                installDir.directory
-                                                            )
-                                                        }
-                                                    >
-                                                        <PlayIcon />
-                                                        <span>Run Game</span>
-                                                    </button>
-                                                )}
+                                            <div className="card bg-base-300 shadow-sm">
+                                                <div className="card-body p-3">
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {isGameRunning ? (
+                                                            <button
+                                                                aria-label="Stop game"
+                                                                className="btn btn-sm btn-error"
+                                                                data-tip="Stop Game"
+                                                                onClick={
+                                                                    stopGame
+                                                                }
+                                                            >
+                                                                <StopIcon />
+                                                                <span>
+                                                                    Stop Game
+                                                                </span>
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                aria-label="Run game"
+                                                                className="btn btn-sm btn-success"
+                                                                data-tip="Run Game"
+                                                                onClick={(): void =>
+                                                                    runGame(
+                                                                        installDir.directory
+                                                                    )
+                                                                }
+                                                            >
+                                                                <PlayIcon />
+                                                                <span>
+                                                                    Run Game
+                                                                </span>
+                                                            </button>
+                                                        )}
 
-                                                <button
-                                                    aria-label="Open Directory"
-                                                    className="btn btn-sm btn-primary"
-                                                    data-tip="Open Directory"
-                                                    onClick={(): void =>
-                                                        openDirectory(
-                                                            installDir.directory
-                                                        )
-                                                    }
-                                                >
-                                                    <FolderIcon />
-                                                    <span>
-                                                        Open Installation Folder
-                                                    </span>
-                                                </button>
-                                                <button
-                                                    aria-label="Backup options"
-                                                    className="btn btn-sm btn-primary"
-                                                    onClick={(): void =>
-                                                        setBackupOptionsDir(
-                                                            installDir.directory
-                                                        )
-                                                    }
-                                                >
-                                                    <BackupIcon />
-                                                    <span>Backup Options</span>
-                                                </button>
+                                                        <button
+                                                            aria-label="Open Directory"
+                                                            className="btn btn-sm btn-primary"
+                                                            data-tip="Open Directory"
+                                                            onClick={(): void =>
+                                                                openDirectory(
+                                                                    installDir.directory
+                                                                )
+                                                            }
+                                                        >
+                                                            <FolderIcon />
+                                                            <span>
+                                                                Open
+                                                                Installation
+                                                                Folder
+                                                            </span>
+                                                        </button>
+                                                        <button
+                                                            aria-label="Backup options"
+                                                            className="btn btn-sm btn-primary"
+                                                            onClick={(): void =>
+                                                                setBackupOptionsDir(
+                                                                    installDir.directory
+                                                                )
+                                                            }
+                                                        >
+                                                            <BackupIcon />
+                                                            <span>
+                                                                Backup Options
+                                                            </span>
+                                                        </button>
 
-                                                <button
-                                                    aria-label="Remove installation"
-                                                    className="btn btn-sm btn-error"
-                                                    data-tip="Remove"
-                                                    onClick={(): void =>
-                                                        setDeletePopupOpen(
-                                                            installDir.directory
-                                                        )
-                                                    }
-                                                >
-                                                    <TrashIcon />
-                                                    <span>
-                                                        Remove Installation
-                                                    </span>
-                                                </button>
+                                                        <button
+                                                            aria-label="Remove installation"
+                                                            className="btn btn-sm btn-error"
+                                                            data-tip="Remove"
+                                                            onClick={(): void =>
+                                                                setDeletePopupOpen(
+                                                                    installDir.directory
+                                                                )
+                                                            }
+                                                        >
+                                                            <TrashIcon />
+                                                            <span>
+                                                                Remove
+                                                                Installation
+                                                            </span>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>

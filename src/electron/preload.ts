@@ -18,6 +18,10 @@ contextBridge.exposeInMainWorld('api', {
     deleteBackup: (_: Event, backupPath: string) =>
         ipcRenderer.invoke('file:deleteBackup', backupPath),
 
+    // Gets the list of mods applied to an installation
+    getAppliedMods: (_: Event, installDir: string) =>
+        ipcRenderer.invoke('file:getAppliedMods', installDir),
+
     // Gets the platform-specific path to the CTP2 executable
     getCtp2ExecutablePath: (_: Event, installDir: string) =>
         ipcRenderer.invoke('file:getCtp2ExecutablePath', installDir),

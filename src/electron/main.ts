@@ -7,6 +7,7 @@ import { addToInstallDirs } from './file/addToInstallDirs';
 import { applyModsToInstall } from './file/applyModsToInstall';
 import { copyFileToModDir } from './file/copyFileToModDir';
 import { deleteBackup } from './file/deleteBackup';
+import { getAppliedMods } from './file/getAppliedMods';
 import { getCtp2ExecutablePath } from './file/getGameExecutablePath';
 import { getInstallDirs } from './file/getInstallDirs';
 import { isValidInstall } from './file/isValidInstall';
@@ -116,6 +117,11 @@ app.whenReady().then(() => {
 
     ipcMain.handle('file:getCtp2ExecutablePath', (_, installDir) =>
         getCtp2ExecutablePath(installDir)
+    );
+
+    // Add new handler for getting applied mods
+    ipcMain.handle('file:getAppliedMods', (_, installDir) =>
+        getAppliedMods(installDir)
     );
 
     createWindow();

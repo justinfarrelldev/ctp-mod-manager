@@ -59,11 +59,15 @@ export const InstallDirTable: FC<Props> = ({
         Record<string, string>
     >({});
     const [backupOptionsDir, setBackupOptionsDir] = useState<string>('');
+    const [appliedMods, setAppliedMods] = useState<Record<string, string[]>>(
+        {}
+    );
 
     // Get executable paths for each install directory
     useEffect(() => {
         const loadExecutablePaths = async (): Promise<void> => {
             const paths: Record<string, string> = {};
+            const mods: Record<string, string[]> = {};
 
             for (const installDir of installDirs) {
                 const exePath = await (
@@ -73,9 +77,19 @@ export const InstallDirTable: FC<Props> = ({
                     installDir.directory
                 );
                 paths[installDir.directory] = exePath;
+
+                // Load applied mods for this installation
+                const appliedModsList = await (
+                    window as ElectronWindow
+                ).api.getAppliedMods(
+                    'file:getAppliedMods',
+                    installDir.directory
+                );
+                mods[installDir.directory] = appliedModsList;
             }
 
             setExecutablePaths(paths);
+            setAppliedMods(mods);
         };
 
         loadExecutablePaths();
@@ -224,8 +238,9 @@ export const InstallDirTable: FC<Props> = ({
                         <thead>
                             <tr>
                                 <th className="w-[10%]">Select</th>
-                                <th className="w-[35%] px-4">Installation</th>
-                                <th className="w-[15%] px-4">Type</th>
+                                <th className="w-[25%] px-4">Installation</th>
+                                <th className="w-[10%] px-4">Type</th>
+                                <th className="w-[15%] px-4">Applied Mods</th>
                                 <th className="w-[40%] px-4">Actions</th>
                             </tr>
                         </thead>
@@ -236,6 +251,8 @@ export const InstallDirTable: FC<Props> = ({
                                 const isGameRunning = exePath
                                     ? runningGames[exePath]
                                     : false;
+                                const modsForInstall =
+                                    appliedMods[installDir.directory] || [];
 
                                 return (
                                     <tr
@@ -267,6 +284,26 @@ export const InstallDirTable: FC<Props> = ({
                                             <span className="badge badge-neutral text-xs">
                                                 {installDir.installationType.toUpperCase()}
                                             </span>
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {modsForInstall.length > 0 ? (
+                                                    modsForInstall.map(
+                                                        (mod) => (
+                                                            <span
+                                                                className="badge badge-accent text-xs font-bold"
+                                                                key={mod}
+                                                            >
+                                                                {mod}
+                                                            </span>
+                                                        )
+                                                    )
+                                                ) : (
+                                                    <span className="text-xs text-gray-500">
+                                                        No mods applied
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-4">
                                             <div className="card bg-base-300 shadow-sm">

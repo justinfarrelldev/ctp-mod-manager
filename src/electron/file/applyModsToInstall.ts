@@ -164,6 +164,14 @@ export const applyModsToInstall = async (
         }
     }
 
+    // After applying all mods, write the mod list to mods.json
+    try {
+        const modsJsonPath = path.join(installDir, 'mods.json');
+        fs.writeFileSync(modsJsonPath, JSON.stringify(queuedMods));
+    } catch (err) {
+        console.error(`Error writing mods.json: ${err}`);
+    }
+
     // After all mods have been applied, update the tracking file
     updateModsTrackingFile(installDir, [...queuedMods]);
 

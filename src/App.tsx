@@ -581,7 +581,6 @@ export const App: FC = (): React.ReactElement => {
                                     <tr>
                                         <th className="w-16">Select</th>
                                         <th>Mod Name</th>
-                                        <th>Applied to Installations</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -609,7 +608,6 @@ export const App: FC = (): React.ReactElement => {
                                                 </label>
                                             </th>
                                             <td>{name}</td>
-                                            <td>TODO</td>
                                         </tr>
                                     ))}
                                     <tr>

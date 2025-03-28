@@ -7,6 +7,7 @@ import { InstallDirectory } from './App';
 // Define action types
 export type AppAction =
     | { payload: boolean; type: 'SET_APPLYING_MODS' }
+    | { payload: boolean; type: 'SET_BACKUP_NAME_MODAL_OPEN' }
     | { payload: boolean; type: 'SET_BACKUP_RESTORE_OPEN' }
     | { payload: boolean; type: 'SET_DELETE_BACKUP_OPEN' }
     | { payload: boolean; type: 'SET_INSTALL_DIR_MODAL_OPEN' }
@@ -32,6 +33,7 @@ export type AppAction =
 export interface AppState {
     applyingMods: boolean;
     backupInstallDir: string;
+    backupNameModalOpen: boolean;
     backupRestoreOpen: boolean;
     checkedMods: string[];
     creatingBackup: string;
@@ -54,6 +56,7 @@ export interface AppState {
 export const initialState: AppState = {
     applyingMods: false,
     backupInstallDir: '',
+    backupNameModalOpen: false,
     backupRestoreOpen: false,
     checkedMods: [],
     creatingBackup: '',
@@ -105,6 +108,9 @@ export const appReducer = (
             break;
         case 'SET_BACKUP_INSTALL_DIR':
             draft.backupInstallDir = action.payload;
+            break;
+        case 'SET_BACKUP_NAME_MODAL_OPEN':
+            draft.backupNameModalOpen = action.payload;
             break;
         case 'SET_BACKUP_RESTORE_OPEN':
             draft.backupRestoreOpen = action.payload;

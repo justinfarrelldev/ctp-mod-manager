@@ -4,6 +4,7 @@ import { ReadonlyDeep } from 'type-fest';
 import { useImmerReducer } from 'use-immer';
 
 import { appReducer, initialState } from './app-reducer';
+import { BackupNameModal } from './components/BackupNameModal';
 import { BackupRestoreModal } from './components/BackupRestoreModal';
 import { DeleteBackupModal } from './components/DeleteBackupModal';
 import { ErrorModal } from './components/ErrorModal';
@@ -75,7 +76,8 @@ export type ElectronWindow = typeof globalThis &
             loadModFileNames: () => Promise<string[]>;
             makeBackup: (
                 ipcCommand: 'file:makeBackup',
-                installDir: string
+                installDir: string,
+                backupName?: string
             ) => Promise<void>;
             openDirectory: (ipcCommand: string, dir: string) => void;
             openModsDir: (ipcCommand: string) => void;
@@ -122,11 +124,25 @@ export const App: FC = (): React.ReactElement => {
 
     const handleCreateBackupClick = useCallback(
         async (installDir: string): Promise<void> => {
-            dispatch({ payload: installDir, type: 'SET_CREATING_BACKUP' });
+            dispatch({ payload: installDir, type: 'SET_BACKUP_INSTALL_DIR' });
+            dispatch({ payload: true, type: 'SET_BACKUP_NAME_MODAL_OPEN' });
+        },
+        [dispatch]
+    );
+
+    const createBackupWithName = useCallback(
+        async (backupName: string): Promise<void> => {
+            dispatch({
+                payload: state.backupInstallDir,
+                type: 'SET_CREATING_BACKUP',
+            });
+            dispatch({ payload: false, type: 'SET_BACKUP_NAME_MODAL_OPEN' });
+
             try {
                 await (window as ElectronWindow).api.makeBackup(
                     'file:makeBackup',
-                    installDir
+                    state.backupInstallDir,
+                    backupName
                 );
             } catch (err) {
                 console.error(`Failed to create backup: ${err}`);
@@ -138,7 +154,7 @@ export const App: FC = (): React.ReactElement => {
                 dispatch({ payload: '', type: 'SET_CREATING_BACKUP' });
             }
         },
-        [dispatch]
+        [dispatch, state.backupInstallDir]
     );
 
     const handleDeleteBackupClick = useCallback(
@@ -323,6 +339,20 @@ export const App: FC = (): React.ReactElement => {
                 }
                 open={state.deleteBackupOpen}
             />
+
+            {/* Add BackupNameModal */}
+            <BackupNameModal
+                installDir={state.backupInstallDir}
+                onClose={(): void =>
+                    dispatch({
+                        payload: false,
+                        type: 'SET_BACKUP_NAME_MODAL_OPEN',
+                    })
+                }
+                onConfirm={createBackupWithName}
+                open={state.backupNameModalOpen}
+            />
+
             {/* Existing BackupRestoreModal */}
             <BackupRestoreModal
                 installDir={state.backupInstallDir}

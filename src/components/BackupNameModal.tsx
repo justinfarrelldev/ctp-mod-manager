@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
+import { ReadonlyDeep } from 'type-fest';
 
 import { Modal } from './Modal';
 
@@ -30,7 +31,9 @@ export const BackupNameModal: FC<Props> = ({
         }
     }, [open, defaultName]);
 
-    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNameChange = (
+        e: ReadonlyDeep<React.ChangeEvent<HTMLInputElement>>
+    ): void => {
         const value = e.target.value;
 
         // Prevent spaces by replacing them with underscores
@@ -52,8 +55,7 @@ export const BackupNameModal: FC<Props> = ({
             buttons={[
                 {
                     color: 'primary',
-                    disabled: !backupName.trim(),
-                    onClick: () => {
+                    onClick: (): void => {
                         onConfirm(backupName);
                     },
                     text: 'Create Backup',
@@ -79,11 +81,12 @@ export const BackupNameModal: FC<Props> = ({
                 </p>
 
                 <div className="form-control w-full">
-                    <label className="label">
+                    <label className="label" htmlFor="backup-name">
                         <span className="label-text">Backup Name</span>
                     </label>
                     <input
                         className="input input-bordered w-full"
+                        id="backup-name"
                         onChange={handleNameChange}
                         placeholder="Enter backup name"
                         type="text"

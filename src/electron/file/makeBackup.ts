@@ -30,10 +30,14 @@ export const selectivelyAddBackupsFolder = async (): Promise<void> => {
  * Creates a backup of the specified installation directory by zipping its contents
  * and saving the zip file in the backups folder.
  * @param installDir - The directory to back up.
+ * @param backupName - Optional custom name for the backup.
  * @returns A promise that resolves when the backup is complete.
  * @throws Will log an error message if an error occurs during the zipping process.
  */
-export const makeBackup = async (installDir: string): Promise<void> => {
+export const makeBackup = async (
+    installDir: string,
+    backupName?: string
+): Promise<void> => {
     await selectivelyAddBackupsFolder();
     const zip = new AdmZip();
 
@@ -62,10 +66,12 @@ export const makeBackup = async (installDir: string): Promise<void> => {
             '-' +
             String(now.getSeconds()).padStart(2, '0');
 
-        const backupFilePath = path.join(
-            DEFAULT_BACKUPS_FOLDER,
-            `${installDirAsFileName}_${timestamp}.zip`
-        );
+        // Use the custom backup name if provided
+        const fileName = backupName
+            ? `${backupName.replace(/[\\/:*?"<>|]/g, '_')}.zip`
+            : `${installDirAsFileName}_${timestamp}.zip`;
+
+        const backupFilePath = path.join(DEFAULT_BACKUPS_FOLDER, fileName);
         console.log('writing zip to: ', backupFilePath);
         zip.writeZip(backupFilePath);
         console.log('wrote zip to: ', backupFilePath);

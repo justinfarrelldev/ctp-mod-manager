@@ -101,7 +101,9 @@ app.whenReady().then(() => {
         restoreBackup(backupPath, installDir)
     );
 
-    ipcMain.handle('file:makeBackup', (_, dir) => makeBackup(dir));
+    ipcMain.handle('file:makeBackup', (_, dir, backupName) =>
+        makeBackup(dir, backupName)
+    );
 
     ipcMain.handle(
         'file:applyModsToInstall',

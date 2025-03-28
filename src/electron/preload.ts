@@ -46,8 +46,8 @@ contextBridge.exposeInMainWorld('api', {
     loadModFileNames: () => ipcRenderer.invoke('file:loadModFileNames'),
 
     // Creates a backup of a specified installation directory
-    makeBackup: (_: Event, dir: string) =>
-        ipcRenderer.invoke('file:makeBackup', dir),
+    makeBackup: (_: Event, dir: string, backupName?: string) =>
+        ipcRenderer.invoke('file:makeBackup', dir, backupName),
 
     // Opens a specified installation directory
     openDirectory: (_: Event, dir: string) =>

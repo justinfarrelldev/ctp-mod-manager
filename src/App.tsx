@@ -17,6 +17,10 @@ import { Modal } from './components/Modal';
 import { Settings as SettingsMenu } from './components/Settings';
 import { AUTO_DETECT_INSTALL_TEXT } from './constants';
 
+const openModsDir = (): void => {
+    (window as ElectronWindow).api.openModsDir('file:openModsDir');
+};
+
 export type ElectronWindow = typeof globalThis &
     Window & {
         api: {
@@ -677,7 +681,7 @@ export const App: FC = (): React.ReactElement => {
                         </div>
                     )}
 
-                <div className="mt-4">
+                <div className="flex flex-wrap gap-3 mt-4">
                     <input
                         accept=".zip"
                         hidden
@@ -685,6 +689,7 @@ export const App: FC = (): React.ReactElement => {
                         onChange={handleFileSelected}
                         type="file"
                     />
+
                     <button
                         aria-label="Add a new mod"
                         className="btn btn-primary"
@@ -693,6 +698,13 @@ export const App: FC = (): React.ReactElement => {
                         }}
                     >
                         Add Mod
+                    </button>
+                    <button
+                        aria-label="Open mods directory"
+                        className="btn btn-primary"
+                        onClick={openModsDir}
+                    >
+                        Open Mods Directory
                     </button>
                 </div>
             </section>

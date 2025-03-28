@@ -28,10 +28,6 @@ const openDirectory = (dir: string): void => {
     (window as ElectronWindow).api.openDirectory('file:openInstallDir', dir);
 };
 
-const openModsDir = (): void => {
-    (window as ElectronWindow).api.openModsDir('file:openModsDir');
-};
-
 const addToInstallDirs = async (dir: string): Promise<void> => {
     await (window as ElectronWindow).api.addToInstallDirs(
         'file:addToInstallDirs',
@@ -375,13 +371,6 @@ export const InstallDirTable: FC<Props> = ({
                     onClick={addInstall}
                 >
                     Add Installation
-                </button>
-                <button
-                    aria-label="Open mods directory"
-                    className="btn btn-primary"
-                    onClick={openModsDir}
-                >
-                    Open Mods Directory
                 </button>
             </div>
         </div>

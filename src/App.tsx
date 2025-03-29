@@ -579,7 +579,7 @@ export const App: FC = (): React.ReactElement => {
                             <table className="table w-full">
                                 <thead>
                                     <tr>
-                                        <th className="w-16">Select</th>
+                                        <th className="w-[10%]">Select</th>
                                         <th>Mod Name</th>
                                     </tr>
                                 </thead>

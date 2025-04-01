@@ -123,12 +123,36 @@ export type InstallDirectory = {
 export const App: FC = (): React.ReactElement => {
     const [state, dispatch] = useImmerReducer(appReducer, initialState);
 
+    const loadInstallDirs = useCallback(async (): Promise<void> => {
+        dispatch({ payload: true, type: 'SET_LOADING_DIRS' });
+        try {
+            const dirsFromFile = await (
+                window as ElectronWindow
+            ).api.getInstallDirs('file:getInstallDirs');
+
+            const dirs = dirsFromFile.map((dir) => ({
+                directory: dir,
+                installationType: 'steam' as const,
+                os: 'win32' as const,
+            }));
+
+            dispatch({ payload: dirs, type: 'SET_INSTALL_DIRS' });
+
+            if (dirsFromFile.length === 0) {
+                dispatch({ payload: true, type: 'SET_INSTALL_DIR_MODAL_OPEN' });
+            }
+        } finally {
+            dispatch({ payload: false, type: 'SET_LOADING_DIRS' });
+        }
+    }, [dispatch]);
+
     const handleRestoreBackupClick = useCallback(
-        (installDir: string): void => {
+        async (installDir: string): Promise<void> => {
             dispatch({ payload: installDir, type: 'SET_BACKUP_INSTALL_DIR' });
             dispatch({ payload: true, type: 'SET_BACKUP_RESTORE_OPEN' });
+            await loadInstallDirs();
         },
-        [dispatch]
+        [dispatch, loadInstallDirs]
     );
 
     const handleCreateBackupClick = useCallback(
@@ -153,6 +177,9 @@ export const App: FC = (): React.ReactElement => {
                     state.backupInstallDir,
                     backupName
                 );
+
+                // Refresh installation directories to update applied mods
+                await loadInstallDirs();
             } catch (err) {
                 console.error(`Failed to create backup: ${err}`);
                 dispatch({
@@ -163,7 +190,7 @@ export const App: FC = (): React.ReactElement => {
                 dispatch({ payload: '', type: 'SET_CREATING_BACKUP' });
             }
         },
-        [dispatch, state.backupInstallDir]
+        [dispatch, loadInstallDirs, state.backupInstallDir]
     );
 
     const handleDeleteBackupClick = useCallback(
@@ -196,29 +223,6 @@ export const App: FC = (): React.ReactElement => {
             });
         } finally {
             dispatch({ payload: false, type: 'SET_LOADING_MODS' });
-        }
-    }, [dispatch]);
-
-    const loadInstallDirs = useCallback(async (): Promise<void> => {
-        dispatch({ payload: true, type: 'SET_LOADING_DIRS' });
-        try {
-            const dirsFromFile = await (
-                window as ElectronWindow
-            ).api.getInstallDirs('file:getInstallDirs');
-
-            const dirs = dirsFromFile.map((dir) => ({
-                directory: dir,
-                installationType: 'steam' as const,
-                os: 'win32' as const,
-            }));
-
-            dispatch({ payload: dirs, type: 'SET_INSTALL_DIRS' });
-
-            if (dirsFromFile.length === 0) {
-                dispatch({ payload: true, type: 'SET_INSTALL_DIR_MODAL_OPEN' });
-            }
-        } finally {
-            dispatch({ payload: false, type: 'SET_LOADING_DIRS' });
         }
     }, [dispatch]);
 
@@ -365,12 +369,13 @@ export const App: FC = (): React.ReactElement => {
             {/* Existing BackupRestoreModal */}
             <BackupRestoreModal
                 installDir={state.backupInstallDir}
-                onClose={(): void =>
+                onClose={async (): Promise<void> => {
                     dispatch({
                         payload: false,
                         type: 'SET_BACKUP_RESTORE_OPEN',
-                    })
-                }
+                    });
+                    await loadInstallDirs();
+                }}
                 open={state.backupRestoreOpen}
             />
 
@@ -664,6 +669,9 @@ export const App: FC = (): React.ReactElement => {
                                                                     ].directory,
                                                                     state.checkedMods
                                                                 );
+
+                                                                // Refresh installation directories to update applied mods
+                                                                await loadInstallDirs();
                                                             }
                                                         } finally {
                                                             dispatch({

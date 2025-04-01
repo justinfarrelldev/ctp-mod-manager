@@ -21,17 +21,47 @@ export const stopGame = (): boolean => {
         console.log('Stopping game process');
         console.log('game process: ', gameProcess);
 
-        // Try to gracefully kill the process
-        const killed = gameProcess.kill();
+        if (platform() === 'win32') {
+            const taskkill = spawn('taskkill', ['/f', '/im', 'ctp2.exe'], {
+                shell: true,
+            });
 
-        if (killed) {
-            gameProcess = null;
-            runningGameDir = null;
-            console.log('Successfully killed!');
+            taskkill.stdout.on('data', (data) => {
+                console.log(`taskkill stdout: ${data}`);
+            });
+
+            taskkill.stderr.on('data', (data) => {
+                console.error(`taskkill stderr: ${data}`);
+            });
+
+            taskkill.on('close', (code) => {
+                if (code === 0) {
+                    console.log('Successfully killed process using taskkill');
+                    gameProcess = null;
+                    runningGameDir = null;
+                } else {
+                    console.error(`taskkill exited with code ${code}`);
+                }
+            });
+
+            taskkill.on('error', (err) => {
+                console.error(`Failed to execute taskkill: ${err}`);
+            });
+
             return true;
         } else {
-            console.error('Failed to kill game process');
-            return false;
+            // Try to gracefully kill the process on non-Windows systems
+            const killed = gameProcess.kill();
+
+            if (killed) {
+                gameProcess = null;
+                runningGameDir = null;
+                console.log('Successfully killed!');
+                return true;
+            } else {
+                console.error('Failed to kill game process');
+                return false;
+            }
         }
     }
     return false;

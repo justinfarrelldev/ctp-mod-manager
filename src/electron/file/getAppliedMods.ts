@@ -14,13 +14,8 @@ export const getAppliedMods = (installDir: string): string[] => {
             const modsData = fs.readFileSync(modsJsonPath, 'utf-8');
             try {
                 const modsJson = JSON.parse(modsData);
-                console.log('data: ', modsJson);
-                if (Array.isArray(modsJson.appliedMods)) {
-                    console.log('return mods json: ', modsJson);
-                    return modsJson.appliedMods.map(
-                        // eslint-disable-next-line functional/prefer-immutable-types
-                        (mod: { appliedDate: string; name: string }) => mod.name
-                    );
+                if (Array.isArray(modsJson)) {
+                    return modsJson;
                 }
                 return [];
             } catch (err) {

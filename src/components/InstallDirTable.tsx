@@ -289,14 +289,19 @@ export const InstallDirTable: FC<Props> = ({
                                             <div className="flex flex-wrap gap-1">
                                                 {modsForInstall.length > 0 ? (
                                                     modsForInstall.map(
-                                                        (mod) => (
-                                                            <span
-                                                                className="badge badge-accent text-xs font-bold"
-                                                                key={mod}
-                                                            >
-                                                                {mod}
-                                                            </span>
-                                                        )
+                                                        (mod, index) => {
+                                                            return (
+                                                                <span
+                                                                    className="badge badge-accent text-xs font-bold"
+                                                                    key={
+                                                                        mod +
+                                                                        index
+                                                                    }
+                                                                >
+                                                                    {mod}
+                                                                </span>
+                                                            );
+                                                        }
                                                     )
                                                 ) : (
                                                     <span className="text-xs text-gray-500">

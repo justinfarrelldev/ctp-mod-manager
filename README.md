@@ -7,6 +7,10 @@ This is a mod manager intended for use with the Call to Power series of games (h
 
 **Back up all installations that you care about before applying mods over them - applying mods to games that have already been saved will often cause the save to be corrupted!**
 
+# Installing CTP Mod Manager
+
+To get CTP Mod Manager, you can find the latest release on the [releases](https://github.com/justinfarrelldev/ctp-mod-manager/releases) page. Download the right file for your system and run it.
+
 # Features
 
 ## Finds Your Game Install

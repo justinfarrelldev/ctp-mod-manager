@@ -17,17 +17,38 @@ It will automatically find your installed Call to Power game (so you can add mod
 
 There are options to create, restore and delete backups that you name yourself. The backups also include your save files!
 
+![image](https://github.com/user-attachments/assets/d6e6d470-242a-4714-9534-89aed4fb841e)
+
+![image](https://github.com/user-attachments/assets/c9010f88-c977-41c7-a92e-8f78d2c24bef)
+
 ## Applies Mods in One Click
 
 Most mods can just be applied in a single click, including scenario mods. Incompatible mods can be found in the "Incompatible Mods" section of the latest release.
+
+![image](https://github.com/user-attachments/assets/dfe0ecf7-fd5d-48a5-aa7a-739cfc19fc50)
+
 
 ## Change Your Theme
 
 You can change your themes with a click of a button to any of DaisyUI's wonderful themes. These include light modes, dark modes and most modes in-between!
 
+### Light:
+![image](https://github.com/user-attachments/assets/438322aa-7ed9-4efd-bd12-6aaf365d9ebb)
+
+### Dark:
+![image](https://github.com/user-attachments/assets/64e5ad90-541a-46ef-beae-2830bd1a568d)
+
+### Halloween: 
+![image](https://github.com/user-attachments/assets/8befd4a6-c3ad-44a3-a752-4afcb2717006)
+
+... and many more!
+
 ## Apply Multiple Mods At Once
 
 You can apply multiple mods together at once. The order you select the mods is the order they will be applied in.
+
+![image](https://github.com/user-attachments/assets/5b5b680d-8efd-4aea-8c66-2e4cd254dbb9)
+
 
 # Contributing
 

@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import isDev from 'electron-is-dev';
 import path from 'path';
+import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 
 import { DEFAULT_MOD_DIR } from './constants';
 import { addToInstallDirs } from './file/addToInstallDirs';
@@ -21,6 +22,13 @@ import { isGameRunning, runGame, stopGame } from './file/runGame';
 import { selectFolder } from './file/selectFolder';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
 import { getInstallDirectories } from './getInstallDirectories';
+
+updateElectronApp({
+    updateSource: {
+        repo: 'justinfarrelldev/ctp-mod-manager',
+        type: UpdateSourceType.ElectronPublicUpdateService,
+    },
+});
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;

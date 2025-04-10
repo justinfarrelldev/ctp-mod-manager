@@ -53,6 +53,9 @@ You can apply multiple mods together at once. The order you select the mods is t
 
 ![image](https://github.com/user-attachments/assets/5b5b680d-8efd-4aea-8c66-2e4cd254dbb9)
 
+## Keeps itself up-to-date
+
+The mod manager will automatically update itself with new releases.
 
 # Contributing
 

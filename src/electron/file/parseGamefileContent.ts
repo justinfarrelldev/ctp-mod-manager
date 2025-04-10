@@ -21,10 +21,10 @@ export const parseGamefileContent = (
     const lines = content.split('\n');
 
     return {
-        greatLibraryName: lines.length >= 68 ? lines[67].trim() : null,
-        ldlStrName: lines.length >= 70 ? lines[69].trim() : null,
-        modName: lines.length >= 66 ? lines[65].trim() : null,
-        newspriteName: lines.length >= 67 ? lines[66].trim() : null,
-        tipsStrName: lines.length >= 69 ? lines[68].trim() : null,
+        greatLibraryName: lines.length >= 68 ? lines[67].trim() : null, // corresponds to GreatLibrary.txt
+        ldlStrName: lines.length >= 70 ? lines[69].trim() : null, // corresponds to ldl_str.txt
+        modName: lines.length >= 66 ? lines[65].trim() : null, // name of the mod, shows up in ModSwap like this
+        newspriteName: lines.length >= 67 ? lines[66].trim() : null, // corresponds to newsprite.txt
+        tipsStrName: lines.length >= 69 ? lines[68].trim() : null, // corresponds to tips_str.txt
     };
 };

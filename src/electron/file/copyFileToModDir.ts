@@ -7,6 +7,7 @@ import { ReadonlyDeep } from 'type-fest';
 
 import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
 import { hasScenarioStructure } from './applyModsToInstall';
+import { processGamefileMods } from './processGamefileMods';
 
 export const unzipInModDir = async (
     zipFullPath: string,
@@ -283,7 +284,7 @@ const copyDataFolderToModDir = (dir: string): void => {
 };
 
 /**
- * Copies a file to the mod directory, unzips it, and processes its contents.
+ * Copies a file to the mod directory, unzips it, processes gamefile mods, and handles its contents.
  * @param fileDir - The directory of the file to be copied.
  *
  * This function performs the following steps:
@@ -292,8 +293,9 @@ const copyDataFolderToModDir = (dir: string): void => {
  * 3. Constructs the destination path for the file in the mod directory.
  * 4. Unzips the file in the mod directory.
  * 5. Unzips all files within the destination directory.
- * 6. Finds game root directories within the unzipped contents.
- * 7. Copies the data folders to the mod directories.
+ * 6. Processes any gamefile mods found in the unzipped contents.
+ * 7. Finds game root directories within the unzipped contents.
+ * 8. Copies the data folders to the mod directories.
  * @throws Will log an error if there is an issue getting the stats for the directory.
  */
 export const copyFileToModDir = async (fileDir: string): Promise<void> => {
@@ -319,9 +321,32 @@ export const copyFileToModDir = async (fileDir: string): Promise<void> => {
     await unzipInModDir(fileDir, fileName);
 
     await unzipAllFiles(destination);
-    let dataDirs: string[];
 
     const destFolder = destination.replace('.zip', '');
+
+    // Process gamefile mods if they exist
+    const createdModFolders = processGamefileMods(destFolder);
+    if (createdModFolders.length > 0) {
+        console.log(
+            `Created ${createdModFolders.length} mod folders from gamefiles:`,
+            createdModFolders
+        );
+
+        // Only process the original mod directory if no gamefile mods were created
+        if (createdModFolders.length > 0) {
+            // We still want to clean up the original extracted directory
+            if (fs.existsSync(destFolder)) {
+                fs.rmSync(destFolder, {
+                    force: true,
+                    recursive: true,
+                });
+            }
+            return;
+        }
+    }
+
+    // Continue with regular mod processing if no gamefile mods were found
+    let dataDirs: string[];
 
     if (hasScenarioStructure(destFolder)) {
         if (fs.existsSync(destFolder)) {

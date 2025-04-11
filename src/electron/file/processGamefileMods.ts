@@ -27,6 +27,10 @@ const createFileMappings = (
         { destination: 'ldl_str.txt', source: gamefileInfo.ldlStrName },
         { destination: 'newsprite.txt', source: gamefileInfo.newspriteName },
         { destination: 'tips_str.txt', source: gamefileInfo.tipsStrName },
+        {
+            destination: 'gamefile.txt',
+            source: path.basename(gamefileInfo.gamefilePath),
+        },
     ].filter((mapping) => mapping.source !== null) as GamefileMapping[];
 };
 

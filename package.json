@@ -2,7 +2,7 @@
     "name": "ctp-mod-manager",
     "productName": "ctp-mod-manager",
     "main": ".vite/build/main.js",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "description": "The Call to Power Mod Manager",
     "author": "Justin Farrell",
     "scripts": {

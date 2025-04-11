@@ -49,7 +49,7 @@ const findFileInMod = (
     // Use a stack to traverse directories without recursion
     const directories: string[] = [modDir];
     while (directories.length > 0) {
-        const currentDir = directories.pop()!;
+        const currentDir = directories.pop();
 
         try {
             const items = fs.readdirSync(currentDir);

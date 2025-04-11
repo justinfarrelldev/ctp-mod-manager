@@ -27,7 +27,8 @@ export type AppAction =
     | { payload: string; type: 'TOGGLE_CHECKED_MOD' }
     | { payload: string[]; type: 'SET_MOD_NAMES_QUEUED' }
     | { payload: string[] | undefined; type: 'SET_MOD_NAMES_ADDED' }
-    | { payload: string | undefined; type: 'SET_ERROR' };
+    | { payload: string | undefined; type: 'SET_ERROR' }
+    | { type: 'CLEAR_CHECKED_MODS' }; // Add new action type without payload
 
 // Define state interface
 export interface AppState {
@@ -86,6 +87,9 @@ export const appReducer = (
     switch (action.type) {
         case 'ADD_TO_INSTALL_DIRS':
             draft.installDirs.push(...action.payload);
+            break;
+        case 'CLEAR_CHECKED_MODS':
+            draft.checkedMods = [];
             break;
         case 'DEQUEUE_MOD':
             if (draft.modNamesAdded) {

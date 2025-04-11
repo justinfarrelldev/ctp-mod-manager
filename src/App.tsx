@@ -634,7 +634,11 @@ export const App: FC = (): React.ReactElement => {
                                                                 mod
                                                             );
                                                         }
-                                                        loadModFileNames();
+                                                        await loadModFileNames();
+                                                        // Clear checked mods after deletion
+                                                        dispatch({
+                                                            type: 'CLEAR_CHECKED_MODS',
+                                                        });
                                                     }}
                                                 >
                                                     <TrashIcon />

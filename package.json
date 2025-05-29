@@ -12,7 +12,7 @@
         "lint-fix": "eslint . --fix",
         "package": "electron-forge package",
         "make": "electron-forge make",
-        "format": "npx prettier --write ."
+        "format": "npx prettier --config .prettierrc --write ."
     },
     "keywords": [],
     "license": "LGPL-2.1-or-later",

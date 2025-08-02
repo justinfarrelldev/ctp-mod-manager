@@ -1,23 +1,25 @@
+import fs from 'fs';
 import os from 'os';
-import path from 'path';
+
+import { getGameExecutablePath } from './ctpVariants';
 
 /**
- * Gets the platform-specific path to the CTP2 executable
+ * Gets the platform-specific path to the CTP executable (CTP1 or CTP2)
  * @param installDir The installation directory path
- * @returns The full path to the game executable
+ * @returns The first found full path to the game executable, or empty string if not found
  */
 export const getCtp2ExecutablePath = (installDir: string): string => {
     const platform = os.platform();
-
-    // Build the relative path based on platform
-    if (platform === 'win32') {
-        // Windows uses backslashes and .exe extension
-        return path.join(installDir, 'ctp2_program', 'ctp', 'ctp2.exe');
-    } else if (platform === 'darwin') {
-        // macOS
-        return path.join(installDir, 'ctp2_program', 'ctp', 'ctp2');
-    } else {
-        // Linux and other Unix-like systems
-        return path.join(installDir, 'ctp2_program', 'ctp', 'ctp2');
+    const possiblePaths = getGameExecutablePath(installDir, platform);
+    for (const exePath of possiblePaths) {
+        try {
+            if (fs.existsSync(exePath)) {
+                return exePath;
+            }
+        } catch (e) {
+            // ignore
+        }
     }
+    // fallback to first possible path (for legacy behavior)
+    return possiblePaths[0] || '';
 };

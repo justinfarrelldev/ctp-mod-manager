@@ -210,7 +210,7 @@ describe('consolidateLineChangeGroups', () => {
                 ],
             },
             {
-                fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                fileName: 'ctp_data/default/gamedata/Colors00.txt', // CTP1 variant
                 isBinary: false,
                 lineChangeGroups: [
                     {
@@ -236,7 +236,7 @@ describe('consolidateLineChangeGroups', () => {
                 ],
             },
             {
-                fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                fileName: 'ctp_data/default/gamedata/Colors00.txt', // CTP1 variant
                 isBinary: false,
                 lineChangeGroups: [
                     {
@@ -262,7 +262,7 @@ describe('consolidateLineChangeGroups', () => {
                 ],
             },
             {
-                fileName: 'ctp2_data/default/gamedata/Colors00.txt',
+                fileName: 'ctp_data/default/gamedata/Colors00.txt', // CTP1 variant
                 isBinary: false,
                 lineChangeGroups: [
                     {

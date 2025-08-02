@@ -5,54 +5,69 @@ import { isValidInstall } from './isValidInstall';
 
 vi.mock('fs');
 
+const mockedFs = vi.mocked(fs);
+
 describe('isValidInstall', () => {
     it('should return true if ctp2_data directory exists', async () => {
         expect.hasAssertions();
-
-        // Mock for this test case
-        // @ts-expect-error This is a mock
-        vi.spyOn(fs, 'readdirSync').mockReturnValueOnce(['ctp2_data']); // Return the mock value
-
+        mockedFs.readdirSync.mockReturnValueOnce(['ctp2_data'] as never);
         const result = await isValidInstall('/game');
         expect(result).toBeTruthy();
     });
-
+    it('should return true if ctp_data directory exists (CTP1)', async () => {
+        expect.hasAssertions();
+        mockedFs.readdirSync.mockReturnValueOnce(['ctp_data'] as never);
+        const result = await isValidInstall('/game');
+        expect(result).toBeTruthy();
+    });
     it('should return false if directory is empty', async () => {
         expect.hasAssertions();
-
-        // Mock for this test case
-        vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]); // Simulate empty directory
-
+        mockedFs.readdirSync.mockReturnValueOnce([] as never);
         const result = await isValidInstall('/game');
         expect(result).toBeFalsy();
     });
-
     it('should handle multiple directories and return true if ctp2_data exists', async () => {
         expect.hasAssertions();
-
-        // Mock for this test case
-        vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([
-            // @ts-expect-error This is a mock
+        mockedFs.readdirSync.mockReturnValueOnce([
             'ctp2_data',
-            // @ts-expect-error This is a mock
             'ctp2_program',
-        ]); // Return the mock value
-
+        ] as never);
         const result = await isValidInstall('/game');
         expect(result).toBeTruthy();
     });
-
-    it('should handle multiple directories and return false if ctp2_data does not exist', async () => {
+    it('should handle multiple directories and return true if ctp_data exists (CTP1)', async () => {
         expect.hasAssertions();
-
-        // Mock for this test case
-        vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([
-            // @ts-expect-error This is a mock
+        mockedFs.readdirSync.mockReturnValueOnce([
+            'ctp_data',
+            'ctp_program',
+        ] as never);
+        const result = await isValidInstall('/game');
+        expect(result).toBeTruthy();
+    });
+    it('should handle multiple directories and return true if ctp2_program exists', async () => {
+        expect.hasAssertions();
+        mockedFs.readdirSync.mockReturnValueOnce([
+            'ctp2_data',
             'ctp2_program',
-            // @ts-expect-error This is a mock
+        ] as never);
+        const result = await isValidInstall('/game');
+        expect(result).toBeTruthy();
+    });
+    it('should handle multiple directories and return true if ctp_program exists (CTP1)', async () => {
+        expect.hasAssertions();
+        mockedFs.readdirSync.mockReturnValueOnce([
+            'ctp_data',
+            'ctp_program',
+        ] as never);
+        const result = await isValidInstall('/game');
+        expect(result).toBeTruthy();
+    });
+    it('should handle multiple directories and return false if ctp2_data and ctp_data do not exist', async () => {
+        expect.hasAssertions();
+        mockedFs.readdirSync.mockReturnValueOnce([
+            'ctp2_program',
             'data',
-        ]); // Simulate non-existing directory
-
+        ] as never);
         const result = await isValidInstall('/game');
         expect(result).toBeFalsy();
     });

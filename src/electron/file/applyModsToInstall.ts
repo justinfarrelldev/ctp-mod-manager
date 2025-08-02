@@ -73,6 +73,19 @@ const updateModsTrackingFile = (
         console.log(`Updated mods tracking file at ${modsFilePath}`);
     } catch (err) {
         console.error(`Failed to write mods tracking file: ${err}`);
+
+        // Check if this is a permission error
+        if (err instanceof Error && err.message.includes('EPERM')) {
+            const isWindowsProgramFiles = installDir
+                .toLowerCase()
+                .includes('program files');
+            const errorMessage = isWindowsProgramFiles
+                ? `Permission denied: Cannot write mods tracking file to "${installDir}". This appears to be a Windows Program Files directory which requires administrator privileges. The mod files may have been copied, but tracking information couldn't be saved.`
+                : `Permission denied: Cannot write mods tracking file to "${installDir}". Please check that you have write permissions to this location.`;
+
+            // TODO: Show this error message to the user in the UI
+            console.error(`PERMISSION ERROR (tracking file): ${errorMessage}`);
+        }
     }
 };
 
@@ -115,32 +128,44 @@ export const applyModsToInstall = async (
     installDir: Readonly<string>,
     queuedMods: ReadonlyDeep<string[]>
 ): Promise<void> => {
-    if (!isValidInstall(installDir)) {
+    console.log(
+        `Starting applyModsToInstall with installDir: ${installDir}, queuedMods: ${JSON.stringify(queuedMods)}`
+    );
+
+    if (!(await isValidInstall(installDir))) {
         console.error(
             `Invalid install passed to applyModsToInstall! Install passed: ${installDir}`
         );
         return;
     }
 
+    console.log(`Install directory is valid: ${installDir}`);
+
     // Loop through mods and copy each one into the install dir, overwriting
     for await (const mod of queuedMods) {
+        console.log(`Processing mod: ${mod}`);
         // modPath is where the mod was extracted in our mods folder.
         const modPath = path.join(DEFAULT_MOD_DIR, mod);
+        console.log(`Mod path: ${modPath}`);
         let targetDir = installDir; // default for non-scenario mods
 
         // If this mod is a scenario mod then:
         if (hasScenarioStructure(modPath)) {
+            console.log(`Detected scenario structure for mod: ${mod}`);
             // Set target to be in "Scenarios" folder in the install.
             targetDir = path.join(
                 installDir,
                 'Scenarios',
                 path.basename(modPath)
             );
+        } else {
+            console.log(`No scenario structure detected for mod: ${mod}`);
         }
 
         let statsOfFile: fs.Stats | undefined;
         try {
             statsOfFile = fs.statSync(modPath);
+            console.log(`Successfully got stats for mod path: ${modPath}`);
         } catch (err) {
             console.error(
                 `An error occurred while getting the stats for ${modPath}: ${err}`
@@ -153,14 +178,36 @@ export const applyModsToInstall = async (
             return;
         }
 
+        console.log(`Mod path is a valid directory: ${modPath}`);
+
         try {
             console.log(`Copying ${modPath} to installation at ${targetDir}`);
             fs.cpSync(modPath, targetDir, {
                 force: true,
                 recursive: true,
             });
+            console.log(`Successfully copied ${modPath} to ${targetDir}`);
         } catch (err) {
             console.error(`Error copying ${modPath} to ${targetDir}: ${err}`);
+
+            // Check if this is a permission error
+            if (err instanceof Error && err.message.includes('EPERM')) {
+                const isWindowsProgramFiles = targetDir
+                    .toLowerCase()
+                    .includes('program files');
+                const errorMessage = isWindowsProgramFiles
+                    ? `Permission denied: Cannot write to "${targetDir}". This appears to be a Windows Program Files directory which requires administrator privileges. Please either:\n\n1. Run the CTP Mod Manager as Administrator, or\n2. Install Call to Power to a different location (like C:\\Games\\CallToPower) that doesn't require admin rights\n\nAlternatively, you can manually copy the mod files from:\n"${modPath}"\nto:\n"${targetDir}"`
+                    : `Permission denied: Cannot write to "${targetDir}". Please check that:\n\n1. The directory is not read-only\n2. No files in the directory are currently in use\n3. You have write permissions to this location\n\nYou may need to run the application as Administrator if the installation is in a protected system directory.`;
+
+                // TODO: Show this error message to the user in the UI
+                console.error(`PERMISSION ERROR: ${errorMessage}`);
+
+                // For now, continue with other mods instead of stopping completely
+                continue;
+            }
+
+            // For non-permission errors, continue but log the error
+            continue;
         }
     }
 
@@ -170,6 +217,19 @@ export const applyModsToInstall = async (
         fs.writeFileSync(modsJsonPath, JSON.stringify(queuedMods));
     } catch (err) {
         console.error(`Error writing mods.json: ${err}`);
+
+        // Check if this is a permission error
+        if (err instanceof Error && err.message.includes('EPERM')) {
+            const isWindowsProgramFiles = installDir
+                .toLowerCase()
+                .includes('program files');
+            const errorMessage = isWindowsProgramFiles
+                ? `Permission denied: Cannot write mods.json tracking file to "${installDir}". This appears to be a Windows Program Files directory which requires administrator privileges. The mod files may have been partially copied, but tracking information couldn't be saved.`
+                : `Permission denied: Cannot write mods.json tracking file to "${installDir}". Please check that you have write permissions to this location.`;
+
+            // TODO: Show this error message to the user in the UI
+            console.error(`PERMISSION ERROR (mods.json): ${errorMessage}`);
+        }
     }
 
     // After all mods have been applied, update the tracking file
@@ -194,7 +254,7 @@ export const applyModsToInstallWithMerge = async (
     installDir: Readonly<string>,
     queuedMods: ReadonlyDeep<string[]>
 ): Promise<void> => {
-    if (!isValidInstall(installDir)) {
+    if (!(await isValidInstall(installDir))) {
         console.error(
             `Invalid install passed to applyModsToInstall! Install passed: ${installDir}`
         );
@@ -253,17 +313,20 @@ export const applyModsToInstallWithMerge = async (
 
     // First consolidate line change groups within each file change object
     changesArr = changesArr.map((modFileChange) => {
-        const consolidatedFileChanges = modFileChange.fileChanges.map(
-            (fileChange) => {
-                if ('lineChangeGroups' in fileChange) {
-                    fileChange.lineChangeGroups = consolidateLineChangeGroups(
-                        fileChange.lineChangeGroups
-                    );
-                }
-                return fileChange;
-            }
-        );
-
+        const consolidatedFileChanges = Array.isArray(modFileChange.fileChanges)
+            ? modFileChange.fileChanges.map((fileChange) => {
+                  if (
+                      fileChange &&
+                      'lineChangeGroups' in fileChange &&
+                      Array.isArray(fileChange.lineChangeGroups)
+                  ) {
+                      fileChange.lineChangeGroups = consolidateLineChangeGroups(
+                          fileChange.lineChangeGroups
+                      );
+                  }
+                  return fileChange;
+              })
+            : [];
         return {
             ...modFileChange,
             fileChanges: consolidatedFileChanges,

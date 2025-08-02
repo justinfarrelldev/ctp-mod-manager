@@ -6,6 +6,7 @@ import * as applyFileChanges from './applyFileChanges';
 import { applyModsToInstallWithMerge } from './applyModsToInstall';
 import * as getFileChangesToApplyMod from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
+import { LineChangeGroup } from './lineChangeGroup';
 // import { DEFAULT_MOD_DIR } from '../constants';
 
 vi.mock('fs');
@@ -25,7 +26,7 @@ describe('applyModsToInstall', () => {
         vi.clearAllMocks();
     });
 
-    it('should log an error if the install directory is invalid', () => {
+    it('should log an error if the install directory is invalid', async () => {
         expect.assertions(1);
         const consoleErrorSpy = vi
             .spyOn(console, 'error')
@@ -33,7 +34,7 @@ describe('applyModsToInstall', () => {
 
         vi.spyOn(fs, 'readdirSync').mockReturnValueOnce([]);
 
-        applyModsToInstallWithMerge('/invalid/install', ['mod1']);
+        await applyModsToInstallWithMerge('/invalid/install', ['mod1']);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'Invalid install passed to applyModsToInstall! Install passed: /invalid/install'
@@ -156,7 +157,7 @@ describe('applyModsToInstall', () => {
 
     it('should log an error if the install directory is invalid', async () => {
         expect.assertions(2);
-        vi.mocked(isValidInstall).mockReturnValue(false);
+        vi.mocked(isValidInstall).mockResolvedValue(false);
 
         await applyModsToInstallWithMerge('/invalid/install', ['mod1']);
 
@@ -170,7 +171,7 @@ describe('applyModsToInstall', () => {
 
     it('should log an error if a mod is not a directory', async () => {
         expect.assertions(1);
-        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.mocked(isValidInstall).mockResolvedValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValueOnce({
             isDirectory: () => false,
         } as fs.Stats);
@@ -184,7 +185,7 @@ describe('applyModsToInstall', () => {
 
     it('should log an error if there is an issue getting the stats for a mod directory', async () => {
         expect.assertions(1);
-        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.mocked(isValidInstall).mockResolvedValue(true);
         vi.spyOn(fs, 'statSync').mockImplementationOnce(() => {
             throw new Error('stat error');
         });
@@ -198,7 +199,7 @@ describe('applyModsToInstall', () => {
 
     it('should apply changes for a single mod (Case 1: property replacement)', async () => {
         expect.assertions(2);
-        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.mocked(isValidInstall).mockResolvedValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
         } as fs.Stats);
@@ -208,9 +209,11 @@ describe('applyModsToInstall', () => {
                 fileName: 'test.ts',
                 lineChangeGroups: [
                     {
-                        endLine: 6,
-                        replacementLines: ['            magicka: number;'],
-                        startLine: 4,
+                        changeType: 'replace' as const,
+                        endLineNumber: 6,
+                        newContent: '            magicka: number;',
+                        oldContent: '',
+                        startLineNumber: 4,
                     },
                 ],
             },
@@ -238,7 +241,7 @@ describe('applyModsToInstall', () => {
 
     it('should apply changes for a single mod (Case 2: property reordering)', async () => {
         expect.assertions(1);
-        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.mocked(isValidInstall).mockResolvedValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
         } as fs.Stats);
@@ -248,13 +251,12 @@ describe('applyModsToInstall', () => {
                 fileName: 'test.ts',
                 lineChangeGroups: [
                     {
-                        endLine: 5,
-                        replacementLines: [
-                            '            happiness: number;',
-                            '            health: number;',
-                            '            stamina: number;',
-                        ],
-                        startLine: 2,
+                        changeType: 'replace' as const,
+                        endLineNumber: 5,
+                        newContent:
+                            '            happiness: number;\n            health: number;\n            stamina: number;',
+                        oldContent: '',
+                        startLineNumber: 2,
                     },
                 ],
             },
@@ -279,7 +281,7 @@ describe('applyModsToInstall', () => {
 
     it('should apply changes for a single mod (Case 3: property replacement with similar name)', async () => {
         expect.assertions(1);
-        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.mocked(isValidInstall).mockResolvedValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
         } as fs.Stats);
@@ -289,9 +291,11 @@ describe('applyModsToInstall', () => {
                 fileName: 'test.ts',
                 lineChangeGroups: [
                     {
-                        endLine: 4,
-                        replacementLines: ['            happiness: number;'],
-                        startLine: 4,
+                        changeType: 'replace' as const,
+                        endLineNumber: 4,
+                        newContent: '            happiness: number;',
+                        oldContent: '',
+                        startLineNumber: 4,
                     },
                 ],
             },
@@ -316,7 +320,7 @@ describe('applyModsToInstall', () => {
 
     it('should apply changes for a single mod (Case 4: multiple changes with reordering)', async () => {
         expect.assertions(1);
-        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.mocked(isValidInstall).mockResolvedValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
         } as fs.Stats);
@@ -326,22 +330,12 @@ describe('applyModsToInstall', () => {
                 fileName: 'test.ts',
                 lineChangeGroups: [
                     {
-                        endLine: 13,
-                        replacementLines: [
-                            'interface TestInterface {',
-                            '            health: number;',
-                            '            isInvulnerable: true;',
-                            '            stamina: number;',
-                            "            customChar: 'Dave';",
-                            '            happiness: number;',
-                            '',
-                            '        }',
-                            '',
-                            '        function IsCool() {',
-                            '            return true;',
-                            '        }',
-                        ],
-                        startLine: 1,
+                        changeType: 'replace' as const,
+                        endLineNumber: 13,
+                        newContent:
+                            "interface TestInterface {\n            health: number;\n            isInvulnerable: true;\n            stamina: number;\n            customChar: 'Dave';\n            happiness: number;\n\n        }\n\n        function IsCool() {\n            return true;\n        }",
+                        oldContent: '',
+                        startLineNumber: 1,
                     },
                 ],
             },
@@ -366,7 +360,7 @@ describe('applyModsToInstall', () => {
 
     it('should apply changes for multiple mods sequentially (Case 5)', async () => {
         expect.assertions(4);
-        vi.mocked(isValidInstall).mockReturnValue(true);
+        vi.mocked(isValidInstall).mockResolvedValue(true);
         vi.spyOn(fs, 'statSync').mockReturnValue({
             isDirectory: () => true,
         } as fs.Stats);
@@ -376,22 +370,12 @@ describe('applyModsToInstall', () => {
                 fileName: 'test.ts',
                 lineChangeGroups: [
                     {
-                        endLine: 15,
-                        replacementLines: [
-                            'interface TestInterface {',
-                            '            health: number;',
-                            '            isInvulnerable: true;',
-                            '            stamina: number;',
-                            "            customChar: 'Dave';",
-                            '            happiness: number;',
-                            '',
-                            '        }',
-                            '',
-                            '        function IsCool() {',
-                            '            return true;',
-                            '        }',
-                        ],
-                        startLine: 1,
+                        changeType: 'replace' as const,
+                        endLineNumber: 15,
+                        newContent:
+                            "interface TestInterface {\n            health: number;\n            isInvulnerable: true;\n            stamina: number;\n            customChar: 'Dave';\n            happiness: number;\n\n        }\n\n        function IsCool() {\n            return true;\n        }",
+                        oldContent: '',
+                        startLineNumber: 1,
                     },
                 ],
             },
@@ -402,9 +386,11 @@ describe('applyModsToInstall', () => {
                 fileName: 'test.ts',
                 lineChangeGroups: [
                     {
-                        endLine: 5,
-                        replacementLines: ['            IsReallyCool: true;'],
-                        startLine: 5,
+                        changeType: 'replace' as const,
+                        endLineNumber: 5,
+                        newContent: '            IsReallyCool: true;',
+                        oldContent: '',
+                        startLineNumber: 5,
                     },
                 ],
             },
@@ -416,7 +402,9 @@ describe('applyModsToInstall', () => {
 
         vi.mocked(
             getFileChangesToApplyMod.consolidateLineChangeGroups
-        ).mockImplementation((groups) => groups);
+        ).mockImplementation((groups) => {
+            return groups as unknown as LineChangeGroup[];
+        });
 
         await applyModsToInstallWithMerge('/valid/install', ['mod1', 'mod2']);
 

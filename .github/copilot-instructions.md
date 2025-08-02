@@ -23,3 +23,5 @@ Use eslint for linting. You can use the ESLint MCP server to check the current E
 You can add packages (especially if they make the job significantly easier). Make sure that if you want to add a package, you tell me the reasoning first.
 
 ALWAYS run tests without watch mode so I don't have to cancel / quit the runs for you.
+
+The "diffing" portion of the repository (applyModsToInstallWithMerge, etc.) are legacy and must be kept intact, but should not be considered for refactoring or actual use.

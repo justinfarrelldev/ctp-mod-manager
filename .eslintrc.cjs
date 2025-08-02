@@ -178,9 +178,11 @@ module.exports = {
                 'functional/no-return-void': 'off',
                 'functional/no-throw-statements': 'off',
 
+                'jsdoc/check-tag-names': 'off',
                 'no-undef': 'off',
                 'no-unused-vars': 'off',
                 'vitest/max-expects': 'off',
+
                 'vitest/no-hooks': 'off',
             },
         },

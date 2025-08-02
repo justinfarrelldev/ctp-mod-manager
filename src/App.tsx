@@ -14,6 +14,7 @@ import { TrashIcon } from './components/icons/trash';
 import { InstallationPathText } from './components/InstallationPathText';
 import { InstallDirTable } from './components/InstallDirTable';
 import { Modal } from './components/Modal';
+import { ReleaseNotesModal } from './components/ReleaseNotesModal';
 import { Settings as SettingsMenu } from './components/Settings';
 import { AUTO_DETECT_INSTALL_TEXT } from './constants';
 
@@ -206,6 +207,20 @@ export const App: FC = (): React.ReactElement => {
         dispatch({ payload: false, type: 'SET_SHOW_ALPHA_WARNING' });
     }, [dispatch]);
 
+    const handleReleaseNotesClose = useCallback(
+        (dontShowAgain: boolean): void => {
+            if (dontShowAgain) {
+                localStorage.setItem('releaseNotesAcknowledged-0.7.0', 'true');
+                dispatch({
+                    payload: true,
+                    type: 'SET_DONT_SHOW_RELEASE_NOTES_AGAIN',
+                });
+            }
+            dispatch({ payload: false, type: 'SET_SHOW_RELEASE_NOTES' });
+        },
+        [dispatch]
+    );
+
     const loadModFileNames = useCallback(async (): Promise<void> => {
         dispatch({ payload: true, type: 'SET_LOADING_MODS' });
         try {
@@ -281,6 +296,18 @@ export const App: FC = (): React.ReactElement => {
             dispatch({ payload: false, type: 'SET_SHOW_ALPHA_WARNING' });
         }
 
+        // Check if the user has already acknowledged the release notes for this version
+        const releaseNotesAcknowledged = localStorage.getItem(
+            'releaseNotesAcknowledged-0.7.0'
+        );
+        if (releaseNotesAcknowledged) {
+            dispatch({ payload: false, type: 'SET_SHOW_RELEASE_NOTES' });
+            dispatch({
+                payload: true,
+                type: 'SET_DONT_SHOW_RELEASE_NOTES_AGAIN',
+            });
+        }
+
         loadModFileNames();
         loadInstallDirs();
         themeChange(false);
@@ -298,7 +325,7 @@ export const App: FC = (): React.ReactElement => {
                         text: 'I Understand and Accept',
                     },
                 ]}
-                modalName="Alpha Software Warning"
+                modalName="Beta Software Warning"
                 onClose={(): void => {
                     // Don't allow closing without explicit acceptance
                 }}
@@ -321,9 +348,9 @@ export const App: FC = (): React.ReactElement => {
                         />
                     </svg>
                     <div>
-                        <h3 className="font-bold">Alpha Software Warning</h3>
+                        <h3 className="font-bold">Beta Software Warning</h3>
                         <div>
-                            This is alpha software and is still under active
+                            This is beta software and is still under active
                             development. You may encounter bugs, crashes, or
                             data loss while using this application.
                         </div>
@@ -343,6 +370,14 @@ export const App: FC = (): React.ReactElement => {
                     the application.
                 </p>
             </Modal>
+
+            {/* Release Notes Modal */}
+            <ReleaseNotesModal
+                onClose={handleReleaseNotesClose}
+                open={
+                    state.showReleaseNotes && !state.dontShowReleaseNotesAgain
+                }
+            />
 
             {/* Add the DeleteBackupModal */}
             <DeleteBackupModal

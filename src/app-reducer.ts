@@ -10,11 +10,13 @@ export type AppAction =
     | { payload: boolean; type: 'SET_BACKUP_NAME_MODAL_OPEN' }
     | { payload: boolean; type: 'SET_BACKUP_RESTORE_OPEN' }
     | { payload: boolean; type: 'SET_DELETE_BACKUP_OPEN' }
+    | { payload: boolean; type: 'SET_DONT_SHOW_RELEASE_NOTES_AGAIN' }
     | { payload: boolean; type: 'SET_INSTALL_DIR_MODAL_OPEN' }
     | { payload: boolean; type: 'SET_LOADING_DIRS' }
     | { payload: boolean; type: 'SET_LOADING_MODS' }
     | { payload: boolean; type: 'SET_SETTINGS_OPEN' }
     | { payload: boolean; type: 'SET_SHOW_ALPHA_WARNING' }
+    | { payload: boolean; type: 'SET_SHOW_RELEASE_NOTES' }
     | { payload: InstallDirectory[]; type: 'ADD_TO_INSTALL_DIRS' }
     | { payload: InstallDirectory[]; type: 'SET_INSTALL_DIRS' }
     | { payload: number; type: 'TOGGLE_SELECTED_INSTALLATION' }
@@ -41,6 +43,7 @@ export interface AppState {
     deleteBackupOpen: boolean;
     deletingBackupDir: string;
     dirBeingModified: string;
+    dontShowReleaseNotesAgain: boolean;
     error: string | undefined;
     installDirModalOpen: boolean;
     installDirs: InstallDirectory[];
@@ -51,6 +54,7 @@ export interface AppState {
     selectedInstallations: number[];
     settingsOpen: boolean;
     showAlphaWarning: boolean;
+    showReleaseNotes: boolean;
 }
 
 // Define initial state
@@ -64,6 +68,7 @@ export const initialState: AppState = {
     deleteBackupOpen: false,
     deletingBackupDir: '',
     dirBeingModified: '',
+    dontShowReleaseNotesAgain: false,
     error: undefined,
     installDirModalOpen: false,
     installDirs: [],
@@ -74,6 +79,7 @@ export const initialState: AppState = {
     selectedInstallations: [],
     settingsOpen: false,
     showAlphaWarning: true,
+    showReleaseNotes: true,
 };
 
 // Create the reducer function
@@ -131,6 +137,9 @@ export const appReducer = (
         case 'SET_DIR_BEING_MODIFIED':
             draft.dirBeingModified = action.payload;
             break;
+        case 'SET_DONT_SHOW_RELEASE_NOTES_AGAIN':
+            draft.dontShowReleaseNotesAgain = action.payload;
+            break;
         case 'SET_ERROR':
             draft.error = action.payload;
             break;
@@ -157,6 +166,9 @@ export const appReducer = (
             break;
         case 'SET_SHOW_ALPHA_WARNING':
             draft.showAlphaWarning = action.payload;
+            break;
+        case 'SET_SHOW_RELEASE_NOTES':
+            draft.showReleaseNotes = action.payload;
             break;
         case 'TOGGLE_CHECKED_MOD':
             const modIndex = draft.checkedMods.indexOf(action.payload);

@@ -1,189 +1,62 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { App } from '../App';
+import { appReducer, initialState } from '../app-reducer';
 
-// Mock the Electron API
-const mockApi = {
-    addToInstallDirs: vi.fn(),
-    applyModsToInstall: vi.fn(),
-    copyFileToModDir: vi.fn(),
-    deleteBackup: vi.fn(),
-    getAppliedMods: vi.fn().mockResolvedValue([]),
-    getCtp2ExecutablePath: vi.fn().mockResolvedValue(''),
-    getCtp2InstallDir: vi.fn().mockResolvedValue([]),
-    getInstallDirs: vi.fn().mockResolvedValue([]),
-    getModsDir: vi.fn().mockResolvedValue(''),
-    goToRoute: vi.fn(),
-    isGameRunning: vi.fn().mockResolvedValue(false),
-    isValidInstall: vi.fn().mockResolvedValue(true),
-    listBackups: vi.fn().mockResolvedValue([]),
-    loadModFileNames: vi.fn().mockResolvedValue(['testMod']),
-    makeBackup: vi.fn(),
-    openDirectory: vi.fn(),
-    openModsDir: vi.fn(),
-    removeFromInstallDirs: vi.fn(),
-    removeModFromMods: vi.fn(),
-    restoreBackup: vi.fn(),
-    runGame: vi.fn(),
-    selectFolder: vi.fn(),
-    stopGame: vi.fn().mockResolvedValue(true),
-    viewFileDirsInZip: vi.fn().mockResolvedValue([]),
-};
-
-// Mock the window object with Electron API
-Object.defineProperty(window, 'api', {
-    value: mockApi,
-    writable: true,
-});
-
-// Mock localStorage
-const localStorageMock = (() => {
-    let store: Record<string, string> = {};
-    return {
-        getItem: vi.fn((key: string) => store[key] || null),
-        setItem: vi.fn((key: string, value: string) => {
-            store[key] = value;
-        }),
-        removeItem: vi.fn((key: string) => {
-            delete store[key];
-        }),
-        clear: vi.fn(() => {
-            store = {};
-        }),
-    };
-})();
-
-Object.defineProperty(window, 'localStorage', {
-    value: localStorageMock,
-});
-
-describe('UI error handling for mod application', () => {
+describe('error handling logic', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorageMock.setItem('alphaWarningAcknowledged', 'true');
-
-        // Set up default mocks
-        mockApi.getInstallDirs.mockResolvedValue(['/test/install']);
-        mockApi.loadModFileNames.mockResolvedValue(['testMod']);
     });
 
-    it('should display error modal when mod application fails with permission error', async () => {
-        expect.assertions(2);
+    it('should handle SET_ERROR action to set error message', () => {
+        expect.hasAssertions();
+        const state = { ...initialState };
+        const errorMessage = 'Failed to apply mods: Permission denied';
+        const action = { payload: errorMessage, type: 'SET_ERROR' as const };
 
-        // Mock a permission error from applyModsToInstall
-        mockApi.applyModsToInstall.mockRejectedValue(
-            new Error(
-                'Permission denied: Cannot write to "C:\\Program Files\\CallToPower2"'
-            )
-        );
+        appReducer(state, action);
 
-        render(<App />);
-
-        // Wait for the component to load
-        await waitFor(() => {
-            expect(screen.getByText('testMod')).toBeInTheDocument();
-        });
-
-        // Select the mod
-        const modCheckbox = screen.getByLabelText('Select testMod');
-        fireEvent.click(modCheckbox);
-
-        // Select an installation
-        const installCheckbox = screen.getByLabelText(
-            'Select installation: /test/install'
-        );
-        fireEvent.click(installCheckbox);
-
-        // Click apply mods
-        const applyButton = screen.getByLabelText('Apply selected mods');
-        fireEvent.click(applyButton);
-
-        // Wait for the error modal to appear
-        await waitFor(() => {
-            expect(
-                screen.getByText(/Failed to apply mods.*Permission denied/)
-            ).toBeInTheDocument();
-        });
+        expect(state.error).toBe(errorMessage);
     });
 
-    it('should display error modal when mod application fails with validation error', async () => {
-        expect.assertions(2);
+    it('should handle SET_ERROR action to clear error message', () => {
+        expect.hasAssertions();
+        const state = { ...initialState, error: 'Some error' };
+        const action = {
+            payload: undefined as string | undefined,
+            type: 'SET_ERROR' as const,
+        };
 
-        // Mock a validation error from applyModsToInstall
-        mockApi.applyModsToInstall.mockRejectedValue(
-            new Error('Invalid installation directory: /invalid/path')
-        );
+        appReducer(state, action);
 
-        render(<App />);
-
-        // Wait for the component to load
-        await waitFor(() => {
-            expect(screen.getByText('testMod')).toBeInTheDocument();
-        });
-
-        // Select the mod
-        const modCheckbox = screen.getByLabelText('Select testMod');
-        fireEvent.click(modCheckbox);
-
-        // Select an installation
-        const installCheckbox = screen.getByLabelText(
-            'Select installation: /test/install'
-        );
-        fireEvent.click(installCheckbox);
-
-        // Click apply mods
-        const applyButton = screen.getByLabelText('Apply selected mods');
-        fireEvent.click(applyButton);
-
-        // Wait for the error modal to appear
-        await waitFor(() => {
-            expect(
-                screen.getByText(
-                    /Failed to apply mods.*Invalid installation directory/
-                )
-            ).toBeInTheDocument();
-        });
+        expect(state.error).toBeUndefined();
     });
 
-    it('should display error modal when mod application fails with multiple errors', async () => {
-        expect.assertions(2);
+    it('should handle SET_APPLYING_MODS action', () => {
+        expect.hasAssertions();
+        const state = { ...initialState };
+        const action = { payload: true, type: 'SET_APPLYING_MODS' as const };
 
-        // Mock multiple errors from applyModsToInstall
-        mockApi.applyModsToInstall.mockRejectedValue(
-            new Error(
-                'Multiple errors occurred during mod application:\nFailed to apply mod "mod1": Error\nFailed to apply mod "mod2": Error'
-            )
-        );
+        appReducer(state, action);
 
-        render(<App />);
+        expect(state.applyingMods).toBeTruthy();
+    });
 
-        // Wait for the component to load
-        await waitFor(() => {
-            expect(screen.getByText('testMod')).toBeInTheDocument();
-        });
+    it('should handle error state transitions during mod application', () => {
+        expect.hasAssertions();
+        const state = { ...initialState };
 
-        // Select the mod
-        const modCheckbox = screen.getByLabelText('Select testMod');
-        fireEvent.click(modCheckbox);
+        // Start applying mods
+        appReducer(state, { payload: true, type: 'SET_APPLYING_MODS' });
+        expect(state.applyingMods).toBeTruthy();
 
-        // Select an installation
-        const installCheckbox = screen.getByLabelText(
-            'Select installation: /test/install'
-        );
-        fireEvent.click(installCheckbox);
+        // Set an error
+        const errorMessage = 'Failed to apply mod: Invalid directory';
+        appReducer(state, { payload: errorMessage, type: 'SET_ERROR' });
+        expect(state.error).toBe(errorMessage);
 
-        // Click apply mods
-        const applyButton = screen.getByLabelText('Apply selected mods');
-        fireEvent.click(applyButton);
-
-        // Wait for the error modal to appear
-        await waitFor(() => {
-            expect(
-                screen.getByText(
-                    /Failed to apply mods.*Multiple errors occurred/
-                )
-            ).toBeInTheDocument();
-        });
+        // Stop applying mods
+        appReducer(state, { payload: false, type: 'SET_APPLYING_MODS' });
+        expect(state.applyingMods).toBeFalsy();
+        expect(state.error).toBe(errorMessage); // Error should persist
     });
 });

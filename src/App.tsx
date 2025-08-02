@@ -677,6 +677,18 @@ export const App: FC = (): React.ReactElement => {
                                                                 // Refresh installation directories to update applied mods
                                                                 await loadInstallDirs();
                                                             }
+                                                        } catch (err) {
+                                                            // Handle mod application errors and show them to the user
+                                                            const errorMessage =
+                                                                err instanceof
+                                                                Error
+                                                                    ? err.message
+                                                                    : 'An unknown error occurred while applying mods';
+
+                                                            dispatch({
+                                                                payload: `Failed to apply mods: ${errorMessage}`,
+                                                                type: 'SET_ERROR',
+                                                            });
                                                         } finally {
                                                             dispatch({
                                                                 payload: false,

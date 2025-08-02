@@ -36,9 +36,43 @@ const updateModsTrackingFile = (
     if (fs.existsSync(modsFilePath)) {
         try {
             const fileContent = fs.readFileSync(modsFilePath, 'utf-8');
-            modsData = JSON.parse(fileContent) as ModsTrackingFile;
-            if (!modsData.appliedMods) {
-                modsData.appliedMods = [];
+            const parsedData = JSON.parse(fileContent);
+
+            // Handle legacy format (array of strings) - convert to new format
+            if (Array.isArray(parsedData)) {
+                console.log('Converting legacy mods.json format to new format');
+                // Preserve legacy mods by converting them to new format
+                modsData = {
+                    appliedMods: parsedData
+                        .filter(
+                            (modName) =>
+                                typeof modName === 'string' &&
+                                modName.trim() !== ''
+                        )
+                        .map((modName) => ({
+                            appliedDate: new Date().toISOString(),
+                            name: modName,
+                        })),
+                };
+            } else if (
+                parsedData &&
+                typeof parsedData === 'object' &&
+                'appliedMods' in parsedData
+            ) {
+                // Handle new format
+                modsData = parsedData as ModsTrackingFile;
+                if (
+                    !modsData.appliedMods ||
+                    !Array.isArray(modsData.appliedMods)
+                ) {
+                    modsData.appliedMods = [];
+                }
+            } else {
+                // Unknown format, start fresh
+                console.log(
+                    'Unknown mods.json format, starting with fresh tracking file'
+                );
+                modsData = { appliedMods: [] };
             }
         } catch (err) {
             console.error(`Error reading existing mods.json: ${err}`);
@@ -208,27 +242,6 @@ export const applyModsToInstall = async (
 
             // For non-permission errors, continue but log the error
             continue;
-        }
-    }
-
-    // After applying all mods, write the mod list to mods.json
-    try {
-        const modsJsonPath = path.join(installDir, 'mods.json');
-        fs.writeFileSync(modsJsonPath, JSON.stringify(queuedMods));
-    } catch (err) {
-        console.error(`Error writing mods.json: ${err}`);
-
-        // Check if this is a permission error
-        if (err instanceof Error && err.message.includes('EPERM')) {
-            const isWindowsProgramFiles = installDir
-                .toLowerCase()
-                .includes('program files');
-            const errorMessage = isWindowsProgramFiles
-                ? `Permission denied: Cannot write mods.json tracking file to "${installDir}". This appears to be a Windows Program Files directory which requires administrator privileges. The mod files may have been partially copied, but tracking information couldn't be saved.`
-                : `Permission denied: Cannot write mods.json tracking file to "${installDir}". Please check that you have write permissions to this location.`;
-
-            // TODO: Show this error message to the user in the UI
-            console.error(`PERMISSION ERROR (mods.json): ${errorMessage}`);
         }
     }
 

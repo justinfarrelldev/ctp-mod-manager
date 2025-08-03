@@ -42,6 +42,10 @@ export type ElectronWindow = typeof globalThis &
                 ipcCommand: 'file:deleteBackup',
                 backupPath: string
             ) => Promise<void>;
+            enrichInstallDirsWithCtpVersion: (
+                ipcCommand: 'file:enrichInstallDirsWithCtpVersion',
+                installDirs: ReadonlyDeep<InstallDirectory[]>
+            ) => Promise<InstallDirectory[]>;
             getAppliedMods: (
                 ipcCommand: 'file:getAppliedMods',
                 installDir: string
@@ -115,6 +119,7 @@ export type ElectronWindow = typeof globalThis &
     };
 
 export type InstallDirectory = {
+    ctpVersion?: 'CTP1' | 'CTP2' | 'Unknown';
     directory: string;
     installationType: 'gog' | 'steam';
     isWSL?: boolean;
@@ -137,7 +142,15 @@ export const App: FC = (): React.ReactElement => {
                 os: 'win32' as const,
             }));
 
-            dispatch({ payload: dirs, type: 'SET_INSTALL_DIRS' });
+            // Enrich directories with CTP version information
+            const enrichedDirs = await (
+                window as ElectronWindow
+            ).api.enrichInstallDirsWithCtpVersion(
+                'file:enrichInstallDirsWithCtpVersion',
+                dirs
+            );
+
+            dispatch({ payload: enrichedDirs, type: 'SET_INSTALL_DIRS' });
 
             if (dirsFromFile.length === 0) {
                 dispatch({ payload: true, type: 'SET_INSTALL_DIR_MODAL_OPEN' });

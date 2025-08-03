@@ -18,6 +18,10 @@ contextBridge.exposeInMainWorld('api', {
     deleteBackup: (_: Event, backupPath: string) =>
         ipcRenderer.invoke('file:deleteBackup', backupPath),
 
+    // Enriches installation directories with CTP version information
+    enrichInstallDirsWithCtpVersion: (_: Event, installDirs: unknown[]) =>
+        ipcRenderer.invoke('file:enrichInstallDirsWithCtpVersion', installDirs),
+
     // Gets the list of mods applied to an installation
     getAppliedMods: (_: Event, installDir: string) =>
         ipcRenderer.invoke('file:getAppliedMods', installDir),

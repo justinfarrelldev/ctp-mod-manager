@@ -42,6 +42,18 @@ const config: ForgeConfig = {
             ],
         }),
     ],
+    publishers: [
+        {
+            config: {
+                prerelease: false,
+                repository: {
+                    name: 'ctp-mod-manager',
+                    owner: 'justinfarrelldev',
+                },
+            },
+            name: '@electron-forge/publisher-github',
+        },
+    ],
     rebuildConfig: {},
 };
 

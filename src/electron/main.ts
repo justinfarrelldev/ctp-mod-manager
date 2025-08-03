@@ -24,12 +24,14 @@ import { selectFolder } from './file/selectFolder';
 import { viewFileDirsInZip } from './file/viewFilesInZip';
 import { getInstallDirectories } from './getInstallDirectories';
 
-updateElectronApp({
-    updateSource: {
-        repo: 'justinfarrelldev/ctp-mod-manager',
-        type: UpdateSourceType.ElectronPublicUpdateService,
-    },
-});
+if (!isDev) {
+    updateElectronApp({
+        updateSource: {
+            repo: 'justinfarrelldev/ctp-mod-manager',
+            type: UpdateSourceType.ElectronPublicUpdateService,
+        },
+    });
+}
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;

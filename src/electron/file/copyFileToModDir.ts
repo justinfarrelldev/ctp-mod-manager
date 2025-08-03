@@ -7,6 +7,7 @@ import { ReadonlyDeep } from 'type-fest';
 
 import { DEFAULT_MOD_DIR, DEFAULT_MOD_FOLDER_NAME } from '../constants';
 import { hasScenarioStructure } from './applyModsToInstall';
+import { GAME_DATA_DIRS } from './ctpVariants';
 import { processGamefileMods } from './processGamefileMods';
 
 export const unzipInModDir = async (
@@ -38,9 +39,9 @@ export const unzipInModDir = async (
 };
 
 /**
- * Finds and returns an array of directory paths that contain the "ctp2_data" folder within the specified directory.
+ * Finds and returns an array of directory paths that contain a CTP data folder (ctp2_data or ctp_data) within the specified directory.
  * @param dir - The root directory to search within.
- * @returns An array of strings representing the paths to the "ctp2_data" folders found within the specified directory.
+ * @returns An array of strings representing the paths to the data folders found within the specified directory.
  * @throws Will log an error message if an error occurs during the search process.
  */
 const findGameRootsWithinDir = (dir: string): string[] => {
@@ -53,21 +54,28 @@ const findGameRootsWithinDir = (dir: string): string[] => {
             return dirs;
         }
 
-        // Original code for non-scenario mods
-        const ctp2DataPaths = klawSync(dir)
-            .filter((file) => file.path.includes('ctp2_data'))
-            .map((dirWithData) => dirWithData.path.split('ctp2_data')[0]);
-
-        ctp2DataPaths.forEach((path) => {
-            if (!dirs.includes(path + 'ctp2_data'))
-                dirs.push(path + 'ctp2_data');
+        // Support both ctp2_data and ctp_data
+        const dataPaths = klawSync(dir)
+            .filter((file) => GAME_DATA_DIRS.some((d) => file.path.includes(d)))
+            .map((dirWithData) => {
+                for (const d of GAME_DATA_DIRS) {
+                    if (dirWithData.path.includes(d)) {
+                        // Return the full path to the data directory, not just the parent
+                        const dataIndex = dirWithData.path.indexOf(d);
+                        return dirWithData.path.substring(
+                            0,
+                            dataIndex + d.length
+                        );
+                    }
+                }
+                return dirWithData.path;
+            });
+        dataPaths.forEach((path) => {
+            if (!dirs.includes(path)) dirs.push(path);
         });
     } catch (err) {
-        console.error(
-            `An error occurred while searching for game data folders: ${err}`
-        );
+        console.error(`Error finding game roots: ${err}`);
     }
-
     return dirs;
 };
 
@@ -242,20 +250,23 @@ const copyDataFoldersToModDirs = (
 };
 
 /**
- * Copies the contents of a directory ending with 'ctp2_data' to a mod directory.
- * @param dir - The directory path that ends with 'ctp2_data'.
- * @throws Will throw an error if the directory does not end with 'ctp2_data'.
+ * Copies the contents of a directory ending with 'ctp2_data' or 'ctp_data' to a mod directory.
+ * @param dir - The directory path that ends with 'ctp2_data' or 'ctp_data'.
+ * @throws Will throw an error if the directory does not end with a valid CTP data directory name.
  *
  * The function extracts the parent directory name of the provided directory,
- * removes the 'ctp2_data' suffix, and then copies the contents of the resulting
+ * removes the data directory suffix, and then copies the contents of the resulting
  * directory to a predefined mod directory.
  *
  * If an error occurs during the copy operation, it logs the error to the console.
  */
 const copyDataFolderToModDir = (dir: string): void => {
-    if (!dir.endsWith('ctp2_data')) {
+    const hasValidDataDir = GAME_DATA_DIRS.some((dataDir) =>
+        dir.endsWith(dataDir)
+    );
+    if (!hasValidDataDir) {
         throw new Error(
-            `Dir passed to copyDataFolderToModDir that does not end with ctp2_data: ${dir}. Aborting.`
+            `Dir passed to copyDataFolderToModDir that does not end with a valid CTP data directory (${GAME_DATA_DIRS.join(', ')}): ${dir}. Aborting.`
         );
     }
 

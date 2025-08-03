@@ -9,6 +9,7 @@ import {
     getFileChangesToApplyMod,
 } from './getFileChangesToApplyMod';
 import { isValidInstall } from './isValidInstall';
+import { ModApplicationError } from './modApplicationError';
 
 // Define interface for the mod tracking data
 interface AppliedMod {
@@ -36,9 +37,43 @@ const updateModsTrackingFile = (
     if (fs.existsSync(modsFilePath)) {
         try {
             const fileContent = fs.readFileSync(modsFilePath, 'utf-8');
-            modsData = JSON.parse(fileContent) as ModsTrackingFile;
-            if (!modsData.appliedMods) {
-                modsData.appliedMods = [];
+            const parsedData = JSON.parse(fileContent);
+
+            // Handle legacy format (array of strings) - convert to new format
+            if (Array.isArray(parsedData)) {
+                console.log('Converting legacy mods.json format to new format');
+                // Preserve legacy mods by converting them to new format
+                modsData = {
+                    appliedMods: parsedData
+                        .filter(
+                            (modName) =>
+                                typeof modName === 'string' &&
+                                modName.trim() !== ''
+                        )
+                        .map((modName) => ({
+                            appliedDate: new Date().toISOString(),
+                            name: modName,
+                        })),
+                };
+            } else if (
+                parsedData &&
+                typeof parsedData === 'object' &&
+                'appliedMods' in parsedData
+            ) {
+                // Handle new format
+                modsData = parsedData as ModsTrackingFile;
+                if (
+                    !modsData.appliedMods ||
+                    !Array.isArray(modsData.appliedMods)
+                ) {
+                    modsData.appliedMods = [];
+                }
+            } else {
+                // Unknown format, start fresh
+                console.log(
+                    'Unknown mods.json format, starting with fresh tracking file'
+                );
+                modsData = { appliedMods: [] };
             }
         } catch (err) {
             console.error(`Error reading existing mods.json: ${err}`);
@@ -73,6 +108,9 @@ const updateModsTrackingFile = (
         console.log(`Updated mods tracking file at ${modsFilePath}`);
     } catch (err) {
         console.error(`Failed to write mods tracking file: ${err}`);
+
+        // Re-throw the error so it can be handled by the calling function
+        throw err;
     }
 };
 
@@ -115,67 +153,129 @@ export const applyModsToInstall = async (
     installDir: Readonly<string>,
     queuedMods: ReadonlyDeep<string[]>
 ): Promise<void> => {
-    if (!isValidInstall(installDir)) {
-        console.error(
-            `Invalid install passed to applyModsToInstall! Install passed: ${installDir}`
-        );
-        return;
+    console.log(
+        `Starting applyModsToInstall with installDir: ${installDir}, queuedMods: ${JSON.stringify(queuedMods)}`
+    );
+
+    // Bug #6 Fix: Throw error instead of just logging and returning
+    if (!(await isValidInstall(installDir))) {
+        const errorMessage = `Invalid installation directory: ${installDir}`;
+        console.error(errorMessage);
+        throw new ModApplicationError(errorMessage);
     }
 
-    // Loop through mods and copy each one into the install dir, overwriting
-    for await (const mod of queuedMods) {
-        // modPath is where the mod was extracted in our mods folder.
-        const modPath = path.join(DEFAULT_MOD_DIR, mod);
-        let targetDir = installDir; // default for non-scenario mods
+    console.log(`Install directory is valid: ${installDir}`);
 
-        // If this mod is a scenario mod then:
-        if (hasScenarioStructure(modPath)) {
-            // Set target to be in "Scenarios" folder in the install.
-            targetDir = path.join(
-                installDir,
-                'Scenarios',
-                path.basename(modPath)
-            );
-        }
+    const errors: string[] = [];
 
-        let statsOfFile: fs.Stats | undefined;
-        try {
-            statsOfFile = fs.statSync(modPath);
-        } catch (err) {
-            console.error(
-                `An error occurred while getting the stats for ${modPath}: ${err}`
-            );
-            return;
-        }
-
-        if (statsOfFile && !statsOfFile.isDirectory()) {
-            console.error(`Error: ${modPath} is not a directory.`);
-            return;
-        }
+    // Bug #3 Fix: Process mods sequentially to prevent race conditions
+    for (const mod of queuedMods) {
+        console.log(`Processing mod: ${mod}`);
 
         try {
-            console.log(`Copying ${modPath} to installation at ${targetDir}`);
-            fs.cpSync(modPath, targetDir, {
-                force: true,
-                recursive: true,
-            });
+            await processSingleMod(mod, installDir);
         } catch (err) {
-            console.error(`Error copying ${modPath} to ${targetDir}: ${err}`);
+            const errorMessage =
+                err instanceof Error ? err.message : String(err);
+            errors.push(`Failed to apply mod "${mod}": ${errorMessage}`);
+            console.error(`Error applying mod ${mod}: ${errorMessage}`);
         }
     }
 
-    // After applying all mods, write the mod list to mods.json
+    // Bug #6 Fix: Aggregate and propagate errors
+    if (errors.length > 0) {
+        if (errors.length === 1) {
+            throw new ModApplicationError(errors[0]);
+        } else {
+            throw new ModApplicationError(
+                `Multiple errors occurred during mod application:\n${errors.join('\n')}`
+            );
+        }
+    }
+
+    // Update tracking file only if all mods were successfully applied
     try {
-        const modsJsonPath = path.join(installDir, 'mods.json');
-        fs.writeFileSync(modsJsonPath, JSON.stringify(queuedMods));
+        updateModsTrackingFile(installDir, [...queuedMods]);
+        console.log('All mods copied to the install directory.');
     } catch (err) {
-        console.error(`Error writing mods.json: ${err}`);
+        // Bug #2 & #6 Fix: Propagate tracking file errors to UI
+        if (err instanceof Error && err.message.includes('EPERM')) {
+            const isWindowsProgramFiles = installDir
+                .toLowerCase()
+                .includes('program files');
+            const errorMessage = isWindowsProgramFiles
+                ? `Permission denied: Cannot write mods tracking file to "${installDir}". This appears to be a Windows Program Files directory which requires administrator privileges. The mod files may have been copied, but tracking information couldn't be saved.`
+                : `Permission denied: Cannot write mods tracking file to "${installDir}". Please check that you have write permissions to this location.`;
+
+            throw new ModApplicationError(errorMessage);
+        }
+        throw new ModApplicationError(
+            `Failed to update mods tracking file: ${err}`
+        );
+    }
+};
+
+/**
+ * Processes a single mod application
+ * @param mod - The mod name to process
+ * @param installDir - The installation directory
+ */
+const processSingleMod = async (
+    mod: string,
+    installDir: string
+): Promise<void> => {
+    const modPath = path.join(DEFAULT_MOD_DIR, mod);
+    console.log(`Mod path: ${modPath}`);
+    let targetDir = installDir; // default for non-scenario mods
+
+    // If this mod is a scenario mod then:
+    if (hasScenarioStructure(modPath)) {
+        console.log(`Detected scenario structure for mod: ${mod}`);
+        // Set target to be in "Scenarios" folder in the install.
+        targetDir = path.join(installDir, 'Scenarios', path.basename(modPath));
+    } else {
+        console.log(`No scenario structure detected for mod: ${mod}`);
     }
 
-    // After all mods have been applied, update the tracking file
-    updateModsTrackingFile(installDir, [...queuedMods]);
+    let statsOfFile: fs.Stats | undefined;
+    try {
+        statsOfFile = fs.statSync(modPath);
+        console.log(`Successfully got stats for mod path: ${modPath}`);
+    } catch (err) {
+        throw new Error(`Cannot access mod directory "${modPath}": ${err}`);
+    }
 
-    console.log('All mods copied to the install directory.');
+    if (statsOfFile && !statsOfFile.isDirectory()) {
+        throw new Error(`Mod path "${modPath}" is not a directory`);
+    }
+
+    console.log(`Mod path is a valid directory: ${modPath}`);
+
+    try {
+        console.log(`Copying ${modPath} to installation at ${targetDir}`);
+        fs.cpSync(modPath, targetDir, {
+            force: true,
+            recursive: true,
+        });
+        console.log(`Successfully copied ${modPath} to ${targetDir}`);
+    } catch (err) {
+        console.error(`Error copying ${modPath} to ${targetDir}: ${err}`);
+
+        // Bug #2 Fix: Throw proper errors for permission issues
+        if (err instanceof Error && err.message.includes('EPERM')) {
+            const isWindowsProgramFiles = targetDir
+                .toLowerCase()
+                .includes('program files');
+            const errorMessage = isWindowsProgramFiles
+                ? `Permission denied: Cannot write to "${targetDir}". This appears to be a Windows Program Files directory which requires administrator privileges. Please either:\n\n1. Run the CTP Mod Manager as Administrator, or\n2. Install Call to Power to a different location (like C:\\Games\\CallToPower) that doesn't require admin rights\n\nAlternatively, you can manually copy the mod files from:\n"${modPath}"\nto:\n"${targetDir}"`
+                : `Permission denied: Cannot write to "${targetDir}". Please check that:\n\n1. The directory is not read-only\n2. No files in the directory are currently in use\n3. You have write permissions to this location\n\nYou may need to run the application as Administrator if the installation is in a protected system directory.`;
+
+            throw new ModApplicationError(errorMessage);
+        }
+
+        // For other errors, throw a generic error
+        throw new Error(`Error copying mod files: ${err}`);
+    }
 };
 
 /**
@@ -194,7 +294,7 @@ export const applyModsToInstallWithMerge = async (
     installDir: Readonly<string>,
     queuedMods: ReadonlyDeep<string[]>
 ): Promise<void> => {
-    if (!isValidInstall(installDir)) {
+    if (!(await isValidInstall(installDir))) {
         console.error(
             `Invalid install passed to applyModsToInstall! Install passed: ${installDir}`
         );
@@ -253,17 +353,20 @@ export const applyModsToInstallWithMerge = async (
 
     // First consolidate line change groups within each file change object
     changesArr = changesArr.map((modFileChange) => {
-        const consolidatedFileChanges = modFileChange.fileChanges.map(
-            (fileChange) => {
-                if ('lineChangeGroups' in fileChange) {
-                    fileChange.lineChangeGroups = consolidateLineChangeGroups(
-                        fileChange.lineChangeGroups
-                    );
-                }
-                return fileChange;
-            }
-        );
-
+        const consolidatedFileChanges = Array.isArray(modFileChange.fileChanges)
+            ? modFileChange.fileChanges.map((fileChange) => {
+                  if (
+                      fileChange &&
+                      'lineChangeGroups' in fileChange &&
+                      Array.isArray(fileChange.lineChangeGroups)
+                  ) {
+                      fileChange.lineChangeGroups = consolidateLineChangeGroups(
+                          fileChange.lineChangeGroups
+                      );
+                  }
+                  return fileChange;
+              })
+            : [];
         return {
             ...modFileChange,
             fileChanges: consolidatedFileChanges,

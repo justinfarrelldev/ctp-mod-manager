@@ -237,10 +237,11 @@ export const InstallDirTable: FC<Props> = ({
                     <table className="table w-full">
                         <thead>
                             <tr>
-                                <th className="w-[10%]">Select</th>
-                                <th className="w-[25%] px-4">Installation</th>
-                                <th className="w-[10%] px-4">Type</th>
-                                <th className="w-[15%] px-4">Applied Mods</th>
+                                <th className="w-[8%]">Select</th>
+                                <th className="w-[22%] px-4">Installation</th>
+                                <th className="w-[8%] px-4">Type</th>
+                                <th className="w-[8%] px-4">CTP Version</th>
+                                <th className="w-[14%] px-4">Applied Mods</th>
                                 <th className="w-[40%] px-4">Actions</th>
                             </tr>
                         </thead>
@@ -283,6 +284,22 @@ export const InstallDirTable: FC<Props> = ({
                                         <td className="px-4 py-4">
                                             <span className="badge badge-neutral text-xs">
                                                 {installDir.installationType.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            <span
+                                                className={`badge text-xs ${
+                                                    installDir.ctpVersion ===
+                                                    'CTP1'
+                                                        ? 'badge-primary'
+                                                        : installDir.ctpVersion ===
+                                                            'CTP2'
+                                                          ? 'badge-secondary'
+                                                          : 'badge-ghost'
+                                                }`}
+                                            >
+                                                {installDir.ctpVersion ||
+                                                    'Unknown'}
                                             </span>
                                         </td>
                                         <td className="px-4 py-4">

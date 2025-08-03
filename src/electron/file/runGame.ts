@@ -3,6 +3,8 @@ import { access, constants } from 'fs';
 import { platform } from 'os';
 import { ReadonlyDeep } from 'type-fest';
 
+import { GAME_EXECUTABLES } from './ctpVariants';
+
 // Track the running game process
 let gameProcess: ChildProcess | null = null;
 // Track which installation directory is running
@@ -22,32 +24,30 @@ export const stopGame = (): boolean => {
         console.log('game process: ', gameProcess);
 
         if (platform() === 'win32') {
-            const taskkill = spawn('taskkill', ['/f', '/im', 'ctp2.exe'], {
-                shell: true,
-            });
+            // Support both ctp2.exe and civctp.exe
+            for (const exe of GAME_EXECUTABLES) {
+                const taskkill = spawn('taskkill', ['/f', '/im', exe], {
+                    shell: true,
+                });
 
-            taskkill.stdout.on('data', (data) => {
-                console.log(`taskkill stdout: ${data}`);
-            });
+                taskkill.stdout.on('data', (data) => {
+                    console.log(`taskkill stdout: ${data}`);
+                });
 
-            taskkill.stderr.on('data', (data) => {
-                console.error(`taskkill stderr: ${data}`);
-            });
+                taskkill.stderr.on('data', (data) => {
+                    console.error(`taskkill stderr: ${data}`);
+                });
 
-            taskkill.on('close', (code) => {
-                if (code === 0) {
-                    console.log('Successfully killed process using taskkill');
-                    gameProcess = null;
-                    runningGameDir = null;
-                } else {
-                    console.error(`taskkill exited with code ${code}`);
-                }
-            });
-
-            taskkill.on('error', (err) => {
-                console.error(`Failed to execute taskkill: ${err}`);
-            });
-
+                taskkill.on('close', (code) => {
+                    if (code === 0) {
+                        console.log(
+                            `Successfully killed process ${exe} using taskkill`
+                        );
+                        gameProcess = null;
+                        runningGameDir = null;
+                    }
+                });
+            }
             return true;
         } else {
             // Try to gracefully kill the process on non-Windows systems

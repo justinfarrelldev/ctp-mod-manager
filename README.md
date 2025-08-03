@@ -31,18 +31,20 @@ Most mods can just be applied in a single click, including scenario mods. Incomp
 
 ![image](https://github.com/user-attachments/assets/dfe0ecf7-fd5d-48a5-aa7a-739cfc19fc50)
 
-
 ## Change Your Theme
 
 You can change your themes with a click of a button to any of DaisyUI's wonderful themes. These include light modes, dark modes and most modes in-between!
 
 ### Light:
+
 ![image](https://github.com/user-attachments/assets/438322aa-7ed9-4efd-bd12-6aaf365d9ebb)
 
 ### Dark:
+
 ![image](https://github.com/user-attachments/assets/64e5ad90-541a-46ef-beae-2830bd1a568d)
 
-### Halloween: 
+### Halloween:
+
 ![image](https://github.com/user-attachments/assets/8befd4a6-c3ad-44a3-a752-4afcb2717006)
 
 ... and many more!

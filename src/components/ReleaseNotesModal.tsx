@@ -18,7 +18,8 @@ export const ReleaseNotesModal: FC<ReleaseNotesModalProps> = ({
     }, [dontShowAgain, onClose]);
 
     const releaseNotes = [
-        '🎯 **CTP1 Support**: Added comprehensive support for Call to Power 1 alongside CTP2',
+        '🎯 **CTP1 Support**: Added support for Call to Power 1 alongside CTP2 (consider this support **unstable**, and see next bullet point)',
+        '❌ **IMPORTANT**: Many CTP1 mods are still incompatible - Forever Future was successfully installed, however, and some mods will simply need repacked to work',
         '🛡️ **Enhanced Error Handling**: Improved error reporting and handling throughout the mod application process',
         '📋 **Mods.json Management**: Better handling of mod tracking files with legacy format support',
         '🚀 **Permission Handling**: Enhanced mod installation process with better permission error handling',
